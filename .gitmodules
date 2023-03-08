@@ -1,0 +1,6 @@
+[submodule "external/inipp"]
+	path = external/inipp
+	url = https://github.com/mcmtroffaes/inipp.git
+[submodule "external/length-disassembler"]
+	path = external/length-disassembler
+	url = https://github.com/Nomade040/length-disassembler.git

@@ -1,0 +1,102 @@
+name: MSBuild
+
+on:
+  push:
+    paths-ignore:
+      - "**/*.md"
+      - '**/*.txt'
+  pull_request:
+    paths-ignore:
+      - "**/*.md"
+      - '**/*.txt'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref && github.event_name  }}
+  cancel-in-progress: true
+
+env:
+  SOLUTION_FILE_PATH: .\Windows-Game-Patches.sln
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@main
+
+    - name: Setup environment variables
+      run: |
+        $cmdOutput = Split-Path -Path $pwd -Leaf
+        echo "project_name=$cmdOutput" >> $Env:GITHUB_ENV
+        echo "commit_ver=1.0.$(git rev-list HEAD --count)" >> $Env:GITHUB_ENV
+
+    - name: Build
+      run: |
+        msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 ${{ env.SOLUTION_FILE_PATH }}
+        echo "zip_name=${{ env.project_name }}-${{ env.commit_ver }}" >> $Env:GITHUB_ENV
+
+    - name: Generate Filehash
+      run: |
+        $AlgorithmType = "SHA512"
+        $folderPath = ".\${{ env.BUILD_CONFIGURATION }}\"
+        $files = Get-ChildItem "$folderPath" -Filter "*.asi"
+        foreach ($file in $files) {
+            $hash = Get-FileHash -Algorithm $AlgorithmType -Path $file.FullName | Format-List
+            $hash | Out-File -Encoding utf8 -FilePath "$folderPath\$($file.BaseName).$AlgorithmType"
+            $hash | Out-File -Append -Encoding utf8 -FilePath "$folderPath\AllHash.$AlgorithmType"
+            echo $hash
+        }
+
+        curl -fLOS https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/x64-latest/version.zip
+        Expand-Archive -Path version.zip -DestinationPath ".\${{ env.BUILD_CONFIGURATION }}\"
+        $hash = Get-FileHash -Algorithm $AlgorithmType -Path ".\${{ env.BUILD_CONFIGURATION }}\version.dll" | Format-List
+        $hash | Out-File -Encoding utf8 -FilePath ".\${{ env.BUILD_CONFIGURATION }}\version.$AlgorithmType"
+        $hash | Out-File -Append -Encoding utf8 -FilePath ".\${{ env.BUILD_CONFIGURATION }}\AllHash.$AlgorithmType"
+        echo $hash
+        $compress = @{
+            Path             = ".\${{ env.BUILD_CONFIGURATION }}\*.asi", ".\${{ env.BUILD_CONFIGURATION }}\*.dll", ".\${{ env.BUILD_CONFIGURATION }}\*.$AlgorithmType"
+            CompressionLevel = "NoCompression"
+            DestinationPath  = ".\${{ env.zip_name }}.zip"
+        }
+        Compress-Archive @compress
+
+        $hashMarkdown = @'
+        <details>
+        <summary>Plugin Hashes (Click to Expand)</summary>
+
+        ```yaml
+        {0}
+        ```
+
+        </details>
+        '@ -f (Get-Content "$folderPath\AllHash.$AlgorithmType" | Out-String)
+        $hashMarkdown | Out-File -Encoding utf8 -FilePath hash.md
+        Get-Content hash.md
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.zip_name }}
+        path: |
+          ${{ env.BUILD_CONFIGURATION }}/*.asi
+          ${{ env.BUILD_CONFIGURATION }}/*.SHA512
+
+    - name: Create Release
+      if: |
+        github.event_name == 'workflow_dispatch' &&
+        github.repository == 'illusion0001/Windows-Game-Patches'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md
