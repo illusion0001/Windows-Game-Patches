@@ -5,7 +5,8 @@ using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
-#define GAME_NAME "BrightMemoryInfinite"
+#define PROJECT_NAME "BrightMemoryInfinite.NoTAA"
+#define _PROJECT_NAME  L"BrightMemoryInfinite.NoTAA"
 #define xstr(s) str(s)
 #define str(s) #s
 
@@ -25,16 +26,17 @@ bool bDisableSharpness;
 
 void LoggingInit(void)
 {
-    const char* log_path = GAME_NAME ".log";
+    const char* log_path = PROJECT_NAME ".log";
     time(&sec);
     fp_log = fopen(log_path, "w");
     if (fp_log != NULL)
     {
         LOG("Log file opened at %s", log_path);
+        LOG(PROJECT_NAME " Built: " __TIME__ " @ " __DATE__);
     }
     else
     {
-        MessageBox(0, L"Failed to open log file.", (wchar_t*)GAME_NAME, MB_ICONWARNING);
+        MessageBox(0, L"Failed to open log file.", _PROJECT_NAME, MB_ICONWARNING);
     }
 }
 
@@ -57,7 +59,7 @@ void ReadConfig(void)
 
     // Initialize config
     // UE4 games use launchers so config path is relative to launcher
-    std::string config_path = GAME_NAME ".ini";
+    std::string config_path = PROJECT_NAME ".ini";
     std::ifstream iniFile(config_path);
     if (!iniFile)
     {
