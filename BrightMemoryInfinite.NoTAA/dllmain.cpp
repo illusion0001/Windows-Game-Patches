@@ -5,93 +5,107 @@ using namespace std;
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
-#define PROJECT_NAME "BrightMemoryInfinite.NoTAA"
-#define _PROJECT_NAME  L"BrightMemoryInfinite.NoTAA"
-#define xstr(s) str(s)
 #define str(s) #s
+#define xstr(s) str(s)
+#define wstr(s) L#s
+#define wxstr(s) wstr(s)
+#define PROJECT_NAME "BrightMemoryInfinite.NoTAA"
+#define _PROJECT_NAME L"BrightMemoryInfinite.NoTAA"
+#define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
-inipp::Ini<char> ini;
 FILE* fp_log;
-time_t sec;
-
-#define LOG(fmt,...)                                                                \
-{                                                                                   \
-    time(&sec);                                                                     \
-    fprintf(fp_log, "%s: %.24s " fmt "\n", __FUNCTION__, ctime(&sec), __VA_ARGS__); \
-}
 
 // INI Variables
+bool bLoggingEnabled;
 bool bDisableTAA;
 bool bDisableSharpness;
 
+void log_time(void)
+{
+    std::locale::global(std::locale("en_US.utf8"));
+    std::time_t t = std::time(nullptr);
+    wchar_t wtime[256];
+    if (std::wcsftime(wtime, sizeof(wtime), L"%A %c", std::localtime(&t)))
+        fwprintf(fp_log, L"%s ", wtime);
+}
+
+void file_log(const wchar_t* fmt, ...)
+{
+    if (bLoggingEnabled)
+    {
+        log_time();
+        va_list args;
+        va_start(args, fmt);
+        vfwprintf(fp_log, fmt, args);
+        va_end(args);
+    }
+}
+
+#define LOG(fmt, ...) file_log(L"%s:%u " fmt "\n", __FUNCTIONW__, __LINE__, __VA_ARGS__);
+
 void LoggingInit(void)
 {
-    const char* log_path = PROJECT_NAME ".log";
-    time(&sec);
-    fp_log = fopen(log_path, "w");
+    fp_log = _wfopen(_PROJECT_LOG_PATH, L"w");
     if (fp_log != NULL)
     {
-        LOG("Log file opened at %s", log_path);
-        LOG(PROJECT_NAME " Built: " __TIME__ " @ " __DATE__);
+        LOG(L"Log file opened at " _PROJECT_LOG_PATH);
+        bLoggingEnabled = true;
     }
     else
     {
-        MessageBox(0, L"Failed to open log file.", _PROJECT_NAME, MB_ICONWARNING);
+        MessageBox(0, L"Failed to open log ( " _PROJECT_LOG_PATH " ) file.", _PROJECT_NAME, MB_ICONWARNING);
+        bLoggingEnabled = false;
     }
 }
 
 void ReadConfig(void)
 {
-    string sExePath;
-    string sExeName;
-    string sGameName;
+    inipp::Ini<wchar_t> ini;
     // Get game name and exe path
     LPWSTR exePath = new WCHAR[_MAX_PATH];
     GetModuleFileNameW(baseModule, exePath, _MAX_PATH);
     wstring exePathWString(exePath);
-    sExePath = string(exePathWString.begin(), exePathWString.end());
     wstring wsGameName = Memory::GetVersionProductName();
-    sExeName = sExePath.substr(sExePath.find_last_of("/\\") + 1);
-    sGameName = string(wsGameName.begin(), wsGameName.end());
 
-    LOG("Game Name: %s", sGameName.c_str());
-    LOG("Game Path: %s", sExePath.c_str());
+    LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__);
+    LOG(L"Game Name: %s", wsGameName.c_str());
+    LOG(L"Game Path: %s", exePathWString.c_str());
 
     // Initialize config
     // UE4 games use launchers so config path is relative to launcher
-    std::string config_path = PROJECT_NAME ".ini";
-    std::ifstream iniFile(config_path);
+    std::wstring config_path = _PROJECT_NAME L".ini";
+    std::wifstream iniFile(config_path);
     if (!iniFile)
     {
         // no ini, lets generate one.
-        LOG("Failed to load config file.");
-        string ini_defaults = "[Settings]\n"
-                              str(bDisableTAA)" = true\n"
-                              str(bDisableSharpness)" = true\n";
-        std::ofstream iniFile(config_path);
+        LOG(L"Failed to load config file.");
+        wstring ini_defaults = L"[Settings]\n"
+                              wstr(bDisableTAA)" = true\n"
+                              wstr(bDisableSharpness)" = true\n";
+        std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
         bDisableTAA = true;
         bDisableSharpness = true;
-        LOG("Created default config file.");
+        LOG(L"Created default config file.");
     }
     else
     {
         ini.parse(iniFile);
-        inipp::get_value(ini.sections["Settings"], str(bDisableTAA), bDisableTAA);
-        inipp::get_value(ini.sections["Settings"], str(bDisableSharpness), bDisableSharpness);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableTAA), bDisableTAA);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableSharpness), bDisableSharpness);
     }
 
     // Log config parse
-    LOG("%s: %s (%i)", str(bDisableTAA), bDisableTAA ? "true" : "false", bDisableTAA);
-    LOG("%s: %s (%i)", str(bDisableSharpness), bDisableSharpness ? "true" : "false", bDisableSharpness);
+    LOG(L"%s: %s (%i)", wstr(bDisableTAA), bDisableTAA ? L"true" : L"false", bDisableTAA);
+    LOG(L"%s: %s (%i)", wstr(bDisableSharpness), bDisableSharpness ? L"true" : L"false", bDisableSharpness);
 }
 
-void ShowPatchInfo(uint32_t Patch_Length, size_t Patch_Size, uint64_t Patch_Addr, const char* Patch_Name)
+void ShowPatchInfo(size_t Hook_Length, size_t Patch_Size, uint64_t Patch_Addr, const wchar_t* Patch_Name)
 {
-    LOG("Patch Name: %s", Patch_Name);
-    LOG("Hook length: %u bytes", Patch_Length);
-    LOG("Patch length: %llu bytes", Patch_Size);
-    LOG("Hook address: 0x%016llx", Patch_Addr);
+    LOG(L"Patch Name: %s", Patch_Name);
+    LOG(L"Hook length: %u bytes", Hook_Length);
+    LOG(L"Patch length: %llu bytes", Patch_Size);
+    LOG(L"Hook address: 0x%016llx", Patch_Addr);
 }
 
 void DisableTAA(void)
@@ -99,15 +113,14 @@ void DisableTAA(void)
     uint8_t* DisableTAAResult = Memory::PatternScan(baseModule, "8B 04 8E 83 F8 ?? 77 ?? 89 83 ?? ?? ?? ??");
     if (DisableTAAResult)
     {
-        const char xor_eax_eax[] = { '\x31', '\xc0', '\x90' };
+        const unsigned char xor_eax_eax[] = { 0x31, 0xc0, 0x90 };
         uint64_t DisableTAAAddress = ((uintptr_t)DisableTAAResult);
-        uint32_t DisableTAALength = Memory::GetHookLength((char*)DisableTAAAddress, 14);
         Memory::PatchBytes((uintptr_t)DisableTAAAddress, xor_eax_eax, sizeof(xor_eax_eax));
-        ShowPatchInfo(DisableTAALength, sizeof(xor_eax_eax), (uintptr_t)DisableTAAAddress, str(bDisableTAA));
+        ShowPatchInfo(0, sizeof(xor_eax_eax), (uintptr_t)DisableTAAAddress, wstr(bDisableTAA));
     }
     else
     {
-        LOG("Pattern scan failed.");
+        LOG(L"Pattern scan failed.");
     }
 }
 
@@ -116,15 +129,14 @@ void DisableSharpness(void)
     uint8_t* DisableSharpnessResult = Memory::PatternScan(baseModule, "F3 44 0F 10 40 04 44 0F 2F C6 73 ?? 45 0F 57 C0 EB ??");
     if (DisableSharpnessResult)
     {
-        const char xor_xmm8[] = { '\x45', '\x0F', '\x57', '\xC0', '\x90', '\x90' };
+        const unsigned char xor_xmm8[] = { 0x45, 0x0f, 0x57, 0xc0, 0x90, 0x90 };
         uint64_t DisableSharpnessAddress = ((uintptr_t)DisableSharpnessResult);
-        uint32_t DisableSharpnessLength = Memory::GetHookLength((char*)DisableSharpnessAddress, 18);
         Memory::PatchBytes((uintptr_t)DisableSharpnessAddress, xor_xmm8, sizeof(xor_xmm8));
-        ShowPatchInfo(DisableSharpnessLength, sizeof(xor_xmm8), (uintptr_t)DisableSharpnessAddress, str(bDisableSharpness));
+        ShowPatchInfo(0, sizeof(xor_xmm8), (uintptr_t)DisableSharpnessAddress, wstr(bDisableSharpness));
     }
     else
     {
-        LOG("Pattern scan failed.");
+        LOG(L"Pattern scan failed.");
     }
 }
 
@@ -132,13 +144,14 @@ DWORD __stdcall Main(void*)
 {
     bDisableTAA = false;
     bDisableSharpness = false;
+    bLoggingEnabled = false;
     LoggingInit();
     ReadConfig();
     if (bDisableTAA)
         DisableTAA();
     if (bDisableSharpness)
         DisableSharpness();
-    LOG("Shutting down " str(fp_log) " file handle.");
+    LOG(L"Shutting down " wstr(fp_log) " file handle.");
     fclose(fp_log);
     return true;
 }

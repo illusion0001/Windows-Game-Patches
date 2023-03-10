@@ -15,7 +15,7 @@ namespace Memory
         VirtualProtect((LPVOID)(writeAddress), sizeof(T), oldProtect, &oldProtect);
     }
 
-    void PatchBytes(uintptr_t address, const char* pattern, unsigned int numBytes)
+    void PatchBytes(uintptr_t address, const unsigned char* pattern, unsigned int numBytes)
     {
         DWORD oldProtect;
         VirtualProtect((LPVOID)address, numBytes, PAGE_EXECUTE_READWRITE, &oldProtect);
@@ -42,9 +42,9 @@ namespace Memory
         return base;
     }
 
-    int GetHookLength(char* src, int minLen)
+    size_t GetHookLength(char* src, size_t minLen)
     {
-        int lengthHook = 0;
+        size_t lengthHook = 0;
         const int size = 15;
         char buffer[size];
 
@@ -77,7 +77,7 @@ namespace Memory
         return true;
     }
 
-    void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
+    void* DetourFunction64(void* pSource, void* pDestination, DWORD dwLen)
     {
         DWORD MinLen = 14;
 
@@ -104,7 +104,7 @@ namespace Memory
         memcpy(stub + 6, &pDestination, 8);
         memcpy(pSource, stub, sizeof(stub));
 
-        for (int i = MinLen; i < dwLen; i++)
+        for (DWORD i = MinLen; i < dwLen; i++)
         {
             *(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
         }
