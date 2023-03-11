@@ -189,7 +189,7 @@ namespace Memory
             return "(unknown)";
 
         char buf[25];
-        int len = sprintf(buf, "%hu.%hu.%hu.%hu",
+        int len = _snprintf_s(buf, sizeof(buf), _TRUNCATE, "%hu.%hu.%hu.%hu",
             HIWORD(pvFileInfo->dwFileVersionMS),
             LOWORD(pvFileInfo->dwFileVersionMS),
             HIWORD(pvFileInfo->dwFileVersionLS),
@@ -209,7 +209,6 @@ namespace Memory
         return tokens;
     }
 
-
     std::wstring GetVersionProductName()
     {
         struct LANGCODEPAGE {
@@ -218,9 +217,7 @@ namespace Memory
         } *lpTranslate;
 
         UINT cbTranslate;
-
         HMODULE baseModule = GetModuleHandle(NULL);
-
         auto exePath = new WCHAR[_MAX_PATH];
         GetModuleFileName(baseModule, exePath, _MAX_PATH);
         auto size = GetFileVersionInfoSize(exePath, NULL);
@@ -228,12 +225,13 @@ namespace Memory
         GetFileVersionInfo(exePath, NULL, size, buffer.data());
         VerQueryValue(buffer.data(), L"VarFileInfo\\Translation", (LPVOID*)&lpTranslate, &cbTranslate);
 
-        if (cbTranslate < sizeof(LANGCODEPAGE)) {
+        if (cbTranslate < sizeof(LANGCODEPAGE))
             return L"";
-        }
 
-        wchar_t query[512];
-        _snwprintf(query, sizeof(query), L"\\StringFileInfo\\%04x%04x\\ProductName", lpTranslate[0].wLang, lpTranslate[0].wCode);
+        wchar_t query[512] = { 0 };
+        _snwprintf_s(query, _countof(query), _TRUNCATE, L"\\StringFileInfo\\%04x%04x\\ProductName",
+                                                        lpTranslate[0].wLang,
+                                                        lpTranslate[0].wCode);
         wchar_t const* p;
         UINT n_chars;
         VerQueryValue(buffer.data(), query, (LPVOID*)&p, &n_chars);
