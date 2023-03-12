@@ -75,7 +75,7 @@ jobs:
         github.repository == 'illusion0001/Windows-Game-Patches'
       run: |
         $AlgorithmType = "${{ env.hash_type }}"
-        $hook_alias="winmm"
+        $hook_alias="dinput8"
         curl -fLOS https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/x64-latest/$hook_alias.zip
         Expand-Archive -Path ".\$hook_alias.zip" -DestinationPath ".\${{ env.BUILD_CONFIGURATION }}\"
         $hash = Get-FileHash -Algorithm $AlgorithmType -Path ".\${{ env.BUILD_CONFIGURATION }}\$hook_alias.dll" | Format-List
@@ -92,7 +92,7 @@ jobs:
       run: |
         $hashMarkdown = @'
         <details>
-        <summary>Plugin Hashes (Click to Expand)</summary>
+        <summary>ASI Plugin Hashes (Click to Expand)</summary>
         
         ```yaml
         {0}
