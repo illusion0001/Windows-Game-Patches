@@ -41,7 +41,6 @@ jobs:
         echo "commit_ver=$_ver" >> $Env:GITHUB_ENV
         echo "zip_name=$cmdOutput-$_ver" >> $Env:GITHUB_ENV
         echo "hash_type=SHA512" >> $Env:GITHUB_ENV
-        mkdir ".\${{ env.BUILD_CONFIGURATION }}\file_hash\"
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@main
@@ -49,39 +48,41 @@ jobs:
     - name: Build
       run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 ${{ env.SOLUTION_FILE_PATH }}
 
-    - name: Generate Filehash
+    - name: Add ASI Loader to archive
+      working-directory: ${{ env.BUILD_CONFIGURATION }}
       run: |
-        $AlgorithmType = "${{ env.hash_type }}"
-        $folderPath = ".\${{ env.BUILD_CONFIGURATION }}\"
-        $files = Get-ChildItem "$folderPath" -Filter "*.asi"
-        foreach ($file in $files) {
-            $hash = Get-FileHash -Algorithm $AlgorithmType -Path $file.FullName | Format-List
-            $hash | Out-File -Encoding utf8 -FilePath "$folderPath\file_hash\$($file.BaseName).$AlgorithmType"
-            $hash | Out-File -Append -Encoding utf8 -FilePath "$folderPath\file_hash\AllHash.$AlgorithmType"
+        $hook_alias="dinput8"
+        curl -fLOS https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/x64-latest/$hook_alias.zip
+        Expand-Archive -Path ".\$hook_alias.zip" -DestinationPath ".\"
+        $rootPath = "."
+        $asiFiles = Get-ChildItem "$rootPath" -Filter "*.asi" -File
+        foreach ($file in $asiFiles) {
+            $folderName = Join-Path $rootPath ($file.BaseName)
+            if (-not (Test-Path $folderName)) {
+                mkdir ".\dist\$folderName"
+            }
+
+            $destFile = Join-Path ".\dist\$folderName" $file.Name
+            Move-Item $file.FullName "$destFile" -Force
+            $hash = Get-FileHash -Path "$destFile" -Algorithm "${{ env.hash_type }}" | Format-List
+            $hash | Out-File -Append -Encoding utf8 -FilePath ".\dist\hashes.txt"
+            # Add-Content -Path $hashFilePath -Value $hashString
         }
-        Get-Content "$folderPath\file_hash\AllHash.$AlgorithmType"
+
+        # Copy the dinput8.dll file to each subfolder
+        $sourceFile = ".\dinput8.dll"
+        $subFolders = Get-ChildItem $rootPath -Directory
+
+        foreach ($folder in $subFolders) {
+            $destFile = Join-Path $folder.FullName "dinput8.dll"
+            Copy-Item $sourceFile $destFile -Force
+        }
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.zip_name }}
-        path: |
-          ${{ env.BUILD_CONFIGURATION }}/*.asi
-          ${{ env.BUILD_CONFIGURATION }}/file_hash/*.${{ env.hash_type }}
-
-    - name: Add ASI Loader to Release
-      if: |
-        github.event_name == 'workflow_dispatch' &&
-        github.repository == 'illusion0001/Windows-Game-Patches'
-      run: |
-        $AlgorithmType = "${{ env.hash_type }}"
-        $hook_alias="dinput8"
-        curl -fLOS https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/x64-latest/$hook_alias.zip
-        Expand-Archive -Path ".\$hook_alias.zip" -DestinationPath ".\${{ env.BUILD_CONFIGURATION }}\"
-        $hash = Get-FileHash -Algorithm $AlgorithmType -Path ".\${{ env.BUILD_CONFIGURATION }}\$hook_alias.dll" | Format-List
-        $hash | Out-File -Encoding utf8 -FilePath ".\${{ env.BUILD_CONFIGURATION }}\file_hash\$hook_alias.$AlgorithmType"
-        $hash | Out-File -Append -Encoding utf8 -FilePath ".\${{ env.BUILD_CONFIGURATION }}\file_hash\AllHash.$AlgorithmType"
-        echo $hash
+        path: ${{ env.BUILD_CONFIGURATION }}/dist/
 
     - name: Create Release
       if: |
@@ -99,12 +100,12 @@ jobs:
         ```
         
         </details>
-        '@ -f (Get-Content "${{ env.BUILD_CONFIGURATION }}\file_hash\AllHash.${{ env.hash_type }}" | Out-String)
+        '@ -f (Get-Content ".\${{ env.BUILD_CONFIGURATION }}\dist\hashes.txt" | Out-String)
         $hashMarkdown | Out-File -Encoding utf8 -FilePath hash.md
         Get-Content hash.md
         
         $compress = @{
-            Path             = ".\${{ env.BUILD_CONFIGURATION }}\*.asi", ".\${{ env.BUILD_CONFIGURATION }}\*.dll", ".\${{ env.BUILD_CONFIGURATION }}\file_hash"
+            Path             = ".\${{ env.BUILD_CONFIGURATION }}\dist\*"
             CompressionLevel = "NoCompression"
             DestinationPath  = ".\${{ env.zip_name }}.zip"
         }
