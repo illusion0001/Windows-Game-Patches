@@ -6,9 +6,12 @@
 
 # Patches
 
-- **Bright Memory: Infinite**
+### **Bright Memory: Infinite**
   - Disable TAA
   - Disable Sharpness
+
+### **Wo Long: Fallen Dynasty**
+  - Remove 30FPS Limit for Cutscenes
 
 # Credits
 - [Lyall](https://github.com/Lyall) for Project Template.
