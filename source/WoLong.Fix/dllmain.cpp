@@ -15,6 +15,7 @@ struct tm timeinfo;
 // INI Variables
 bool bLoggingEnabled;
 bool bRemove30FPSCutscenes;
+bool bDisableTAA;
 
 void log_time(void)
 {
@@ -85,20 +86,25 @@ void ReadConfig(void)
         // no ini, lets generate one.
         LOG(L"Failed to load config file.");
         std::wstring ini_defaults = L"[Settings]\n"
-                                    wstr(bRemove30FPSCutscenes)" = true\n";
+                                    "; " wstr(bRemove30FPSCutscenes) " causes double speed, needs more research.\n"
+                                    wstr(bRemove30FPSCutscenes)" = false\n"
+                                    wstr(bDisableTAA)" = true\n";
         std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
-        bRemove30FPSCutscenes = true;
+        bRemove30FPSCutscenes = false;
+        bDisableTAA = true;
         LOG(L"Created default config file.");
     }
     else
     {
         ini.parse(iniFile);
         inipp::get_value(ini.sections[L"Settings"], wstr(bRemove30FPSCutscenes), bRemove30FPSCutscenes);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableTAA), bDisableTAA);
     }
 
     // Log config parse
     LOG(L"%s: %s (%i)", wstr(bRemove30FPSCutscenes), GetBoolStr(bRemove30FPSCutscenes) , bRemove30FPSCutscenes);
+    LOG(L"%s: %s (%i)", wstr(bDisableTAA), GetBoolStr(bDisableTAA), bDisableTAA);
 }
 
 void ShowPatchInfo(size_t Hook_Length, size_t Patch_Size, uint64_t Patch_Addr, const wchar_t* Patch_Name)
@@ -130,14 +136,34 @@ void Remove30FPSCutscenes(void)
     }
 }
 
+void DisableTAA(void)
+{
+    // Still has sharpening filter
+    uint8_t* TAABoolResult = Memory::PatternScan(baseModule, "44 8B 00 45 85 C0 0F 9F C0 88 41 10 45 85 C0 0F 8E ?? ?? ?? ?? 4C 8B 81 00 01 00 00");
+    if (TAABoolResult)
+    {
+        const unsigned char xor_r8d[] = { 0x45, 0x31, 0xc0 };
+        uint64_t TAABoolAddress = ((uintptr_t)TAABoolResult);
+        Memory::PatchBytes((uintptr_t)TAABoolAddress, xor_r8d, sizeof(xor_r8d));
+        ShowPatchInfo(0, sizeof(xor_r8d), (uintptr_t)TAABoolAddress, wstr(bDisableTAA));
+    }
+    else
+    {
+        LOG(L"Pattern scan failed.");
+    }
+}
+
 DWORD __stdcall Main(void*)
 {
     bLoggingEnabled = false;
     bRemove30FPSCutscenes = false;
+    bDisableTAA = false;
     LoggingInit();
     ReadConfig();
     if (bRemove30FPSCutscenes)
         Remove30FPSCutscenes();
+    if (bDisableTAA)
+        DisableTAA();
     LOG(L"Shutting down " wstr(fp_log) " file handle.");
     fclose(fp_log);
     return true;
