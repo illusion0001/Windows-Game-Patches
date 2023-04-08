@@ -16,6 +16,27 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/5c0da857-a4a2-4b7e-9914-4f2b0994c0ed/w_dpcpp-cpp-compiler_p_2023.1.0.46350_offline.exe
+  WINDOWS_HPCKIT_URL: https:/registrationcenter-download.intel.com/akdlm/IRC_NAS/2a13d966-fcc5-4a66-9fcc-50603820e0c9/w_HPCKit_p_2023.1.0.46357_offline.exe
+  LINUX_BASEKIT_URL: https:/registrationcenter-download.intel.com/akdlm/IRC_NAS/7deeaac4-f605-4bcf-a81b-ea7531577c61/l_BaseKit_p_2023.1.0.46401_offline.sh
+  LINUX_HPCKIT_URL: https:/registrationcenter-download.intel.com/akdlm/IRC_NAS/1ff1b38a-8218-4c53-9956-f0b264de35a4/l_HPCKit_p_2023.1.0.46346_offline.sh
+  MACOS_HPCKIT_URL: https:/registrationcenter-download.intel.com/akdlm/IRC_NAS/a99cb1c5-5af6-4824-9811-ae172d24e594/m_HPCKit_p_2023.1.0.44543_offline.dmg
+  WINDOWS_CPP_COMPONENTS: intel.oneapi.win.cpp-compiler
+  WINDOWS_FORTRAN_COMPONENTS: intel.oneapi.win.ifort-compiler
+  WINDOWS_DPCPP_COMPONENTS: intel.oneapi.win.dpcpp-compiler
+  LINUX_CPP_COMPONENTS: intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+  LINUX_FORTRAN_COMPONENTS: intel-oneapi-compiler-fortran
+  LINUX_DPCPP_COMPONENTS: intel-oneapi-compiler-dpcpp-cpp
+  LINUX_CPP_COMPONENTS_WEB: intel.oneapi.lin.dpcpp-cpp-compiler-pro
+  LINUX_FORTRAN_COMPONENTS_WEB: intel.oneapi.lin.ifort-compiler
+  LINUX_DPCPP_COMPONENTS_WEB: intel.oneapi.lin.dpcpp-cpp-compiler
+  MACOS_CPP_COMPONENTS: intel.oneapi.mac.cpp-compiler
+  MACOS_FORTRAN_COMPONENTS: intel.oneapi.mac.ifort-compiler
+  CACHE_NUMBER: 6
+  SAMPLES_TAG: 2023.1.0
+  COMPILER_VERSION: 2023.1.0
+  TBB_VERSION: 2021.9.0
+  VS_VER: vs2022
   SOLUTION_FILE_PATH: .\Windows-Game-Patches.sln
   BUILD_CONFIGURATION: Release
 
@@ -25,9 +46,45 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout
+
+    - name: Checkout oneAPI install repository
+      uses: actions/checkout@v3
+      with:
+        repository: illusion0001/oneapi-ci
+        ref: patch-1
+
+    - name: oneAPI Cache install
+      id: cache-install
+      uses: actions/cache@v3
+      with:
+        path: |
+          C:\Program Files (x86)\Intel\oneAPI\setvars-vcvarsall.bat
+          C:\Program Files (x86)\Intel\oneAPI\compiler
+          C:\Program Files (x86)\Intel\oneAPI\tbb
+          C:\Windows\System32\OpenCL.dll
+        key: install-${{ env.CACHE_NUMBER }}-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_DPCPP_COMPONENTS }}-compiler-tbb-opencl-${{ hashFiles('**/scripts/cache_exclude_windows.sh') }}
+
+    - name: oneAPI install
+      shell: bash
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      run: scripts/install_windows.bat $WINDOWS_BASEKIT_URL
+
+    - name: oneAPI restore registry on cache hit
+      shell: bash
+      if: steps.cache-install.outputs.cache-hit == 'true'
+      run: scripts/restore_registry.bat $COMPILER_VERSION $TBB_VERSION
+
+    - name: oneAPI build
+      shell: bash
+      run: scripts/build_windows.bat dpc++ $VS_VER $SAMPLES_TAG
+
+    - name: oneAPI exclude unused files from cache
+      if: steps.cache-install.outputs.cache-hit != 'true'
+      shell: bash
+      run: scripts/cache_exclude_windows.sh
+
+    - name: Checkout main repository
       uses: actions/checkout@v3
       with:
         submodules: recursive
