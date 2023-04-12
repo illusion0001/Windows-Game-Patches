@@ -7,62 +7,11 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define _PROJECT_NAME L"T1X.DebugFeatures"
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
-FILE* fp_log;
-std::time_t current_time;
-struct tm timeinfo;
-
 // INI Variables
-bool bLoggingEnabled;
 bool bDebugMenu;
 bool bShowDebugConsole;
 float fDebugMenuSize;
 bool bExtendedDebugMenu;
-
-void log_time(void)
-{
-    wchar_t wtime[256];
-    if (localtime_s(&timeinfo, &current_time) == 0 && std::wcsftime(wtime, _countof(wtime), L"%A %c", &timeinfo))
-        fwprintf_s(fp_log, L"%-32s ", wtime);
-}
-
-void file_log(const wchar_t* fmt, ...)
-{
-    if (!bLoggingEnabled)
-        return;
-    log_time();
-    va_list args;
-    va_start(args, fmt);
-    vfwprintf_s(fp_log, fmt, args);
-    va_end(args);
-}
-
-const wchar_t* GetBoolStr(bool input_bool)
-{
-    return input_bool ? L"true" : L"false";
-}
-
-#define LOG(fmt, ...) file_log(L"%-24s:%u " fmt, __FUNCTIONW__, __LINE__, __VA_ARGS__);
-
-void LoggingInit(void)
-{
-    errno_t file_stat = _wfopen_s(&fp_log, _PROJECT_LOG_PATH, L"w+, ccs=UTF-8");
-    if (file_stat == 0)
-    {
-        bLoggingEnabled = true;
-        std::locale::global(std::locale("en_US.utf8"));
-        current_time = std::time(nullptr);
-        LOG(L"Log file opened at " _PROJECT_LOG_PATH "\n");
-    }
-    else
-    {
-        bLoggingEnabled = false;
-        wchar_t errorText[256] = { 0 };
-        wchar_t errorMsg[512] = { 0 };
-        _wcserror_s(errorText, _countof(errorText), file_stat);
-        _snwprintf_s(errorMsg, _countof(errorMsg), _TRUNCATE, L"Failed to open log file. (%s)\nError code: %i (0x%x) %s", _PROJECT_LOG_PATH, file_stat, file_stat, errorText);
-        MessageBox(0, errorMsg, _PROJECT_NAME, MB_ICONWARNING);
-    }
-}
 
 void ReadConfig(void)
 {
@@ -114,15 +63,6 @@ void ReadConfig(void)
     LOG(L"%s: %s (%i)\n", wstr(bExtendedDebugMenu), GetBoolStr(bExtendedDebugMenu), bExtendedDebugMenu);
 }
 
-void ShowPatchInfo(size_t Patch_Size, uint64_t Patch_Addr, const wchar_t* Patch_Name, uint64_t Patch_Function_Target)
-{
-    LOG(L"Patch Name: %s\n", Patch_Name);
-    LOG(L"Patch length: %llu bytes\n", Patch_Size);
-    LOG(L"Patch address: 0x%016llx\n", Patch_Addr);
-    if (Patch_Function_Target)
-        LOG(L"Patch Function Target: 0x%016llx\n", Patch_Function_Target);
-}
-
 #define MEM_TYPE 0x25 // TODO: Check this heap type
 
 uint64_t Memory_PushAllocatorReturnAddr = 0;
@@ -170,49 +110,8 @@ const wchar_t* Assert_UpdateSelectRegionByNameMenu = L"cc 48 85 db 74 ?? 33 c9 f
 const wchar_t* Assert_UpdateSelectIgcByNameMenu = L"cc 48 85 db 74 ?? 33 c9 ff d3 48 8d 05 ?? ?? ?? ?? bb 10 00 00 00 41 b9 84 03 00 00";
 const wchar_t* Assert_UpdateSelectSpawnerByNameMenu = L"cc 48 85 db 74 ?? 33 c9 ff d3 48 8d 05 ?? ?? ?? ?? c7 44 24 ?? 10 00 00 00 41 b9 a3 00 00 00";
 
-void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern)
-{
-    LOG(L"%s Pattern Scan Failed. Please adjust your scan patterns and try again\n", Patch_Name);
-    LOG(L"Pattern %s\n", Patch_Pattern);
-}
-
-void WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
-{
-    uint8_t* Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
-    uint64_t Patch_Address = 0;
-    if (Address_Result)
-    {
-        Patch_Address = (uintptr_t)Address_Result + Patch_Offset;
-        Memory::PatchBytes(Patch_Address, Patch_Bytes, Patch_Size);
-        ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, 0);
-    }
-    else
-    {
-        LogPatchFailed(Patch_Name, Patch_Pattern);
-    }
-}
-
-void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset, uint64_t Hook_Size, void* Function_Target, uint64_t* Return_Address)
-{
-    uint8_t* Address_Result = nullptr;
-    Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
-    uint64_t Patch_Address = 0;
-    if (Address_Result)
-    {
-        Patch_Address = (uintptr_t)Address_Result + Patch_Offset;
-        *Return_Address = Patch_Address + Hook_Size;
-        Memory::DetourFunction64((void*)(Patch_Address), Function_Target, Hook_Size);
-        ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, uintptr_t(Function_Target));
-    }
-    else
-    {
-        LogPatchFailed(Patch_Name, Patch_Pattern);
-    }
-}
-
 void ApplyDebugPatches(void)
 {
-    uint64_t base_addr = (uintptr_t)(baseModule);
     if (bDebugMenu)
     {
         if (fDebugMenuSize > 1)
@@ -265,7 +164,7 @@ void __stdcall Main()
     bShowDebugConsole = false;
     bExtendedDebugMenu = false;
     fDebugMenuSize = 0.6;
-    LoggingInit();
+    LoggingInit(_PROJECT_NAME, _PROJECT_LOG_PATH);
     ReadConfig();
     ApplyDebugPatches();
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");

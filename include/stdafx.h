@@ -11,6 +11,5 @@
 #include <vector>
 #include <inttypes.h>
 #include "inipp/inipp/inipp.h"
-#include "length-disassembler/headerOnly/ldisasm.h"
 #include <SDKDDKVer.h>
 #include <Windows.h>
