@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
+#include "memory.hpp"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
@@ -140,7 +141,7 @@ void ApplyDebugPatches(void)
         const unsigned char menu_mem_size[] = { 0x84 };
         const unsigned char script_mem_size[] = { 0x80 };
         const unsigned char cpu_mem_size[] = { 0x40 };
-        WritePatchPattern_Hook(Memory_PushAllocatorJMPAddr, 15, wstr(Memory_PushAllocatorJMPAddr), 0, 15, &Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
+        WritePatchPattern_Hook(Memory_PushAllocatorJMPAddr, 15, wstr(Memory_PushAllocatorJMPAddr), 0, &Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
         WritePatchPattern(Memory_isDebugMemoryAval, ret_1_al, sizeof(ret_1_al), wstr(Memory_isDebugMemoryAval), 0);
         WritePatchPattern(DebugDrawStaticContext, nop5x, sizeof(nop5x), wstr(DebugDrawStaticContext), 0);
         WritePatchPattern(MaterialDebug_Heap, heap_type, sizeof(heap_type), wstr(MaterialDebug_Heap), 4);

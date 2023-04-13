@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
+#include "memory.hpp"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 

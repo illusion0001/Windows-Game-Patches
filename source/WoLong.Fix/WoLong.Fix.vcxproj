@@ -170,11 +170,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\helper.cpp" />
+    <ClCompile Include="..\Shared\memory.cpp" />
     <ClCompile Include="..\Shared\stdafx.cpp" />
     <ClCompile Include="dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\helper.hpp" />
+    <ClInclude Include="..\..\include\memory.hpp" />
     <ClInclude Include="..\..\include\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
