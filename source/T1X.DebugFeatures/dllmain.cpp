@@ -93,6 +93,11 @@ void __attribute__((naked)) Memory_PushAllocator_CC()
 const wchar_t* DevMenu_MenuSize = L"c7 41 ?? 9a 99 19 3f 49 8b d1 c6 41 ?? 00 44 89 51 ??";
 const wchar_t* ConsoleOutput = L"0f 45 ce 88 0d ?? ?? ?? ?? 48 8d ?? ?? ?? ?? ?? e8 ?? ?? ?? ??";
 const wchar_t* m_onDisc_DevMenu = L"8a 8f ?? ?? ?? ?? 84 c9 0f 94 c2 84 c9 0f 95 c1";
+// Give Player Weapons
+const wchar_t* GivePlayerWeapon_Main = L"49 8b 4f 08 48 8d 54 24 30 41 b0 01 c7 44 24 30 ?? ?? ?? ?? 48 8b 0c 0e e8 ?? ?? ?? ??";
+const wchar_t* GivePlayerWeapon_SubSection = L"49 8b 4d 08 48 8d 54 24 40 41 b0 01 49 8b 0c 0c e8 ?? ?? ?? ??";
+const wchar_t* GivePlayerWeapon_Entry = L"49 8b 4e 08 48 8d 54 24 30 41 b0 01 49 8b 0c 0f e8 ?? ?? ?? ??";
+const wchar_t* Assert_LevelDef_LevelManifst = L"c7 44 24 20 f3 04 00 00 4c 8d 05";
 // thanks to infogram for offsets
 const wchar_t* Memory_isDebugMemoryAval = L"32 c0 c3 cc 48 8b 41 08 c3";
 const wchar_t* Memory_PushAllocatorJMPAddr = L"48 8d 4c 24 30 89 44 24 30 4d 8b f9 45 8b f0 48 8b ea e8 ?? ?? ?? ??";
@@ -111,6 +116,322 @@ const wchar_t* Assert_UpdateSelectRegionByNameMenu = L"cc 48 85 db 74 ?? 33 c9 f
 const wchar_t* Assert_UpdateSelectIgcByNameMenu = L"cc 48 85 db 74 ?? 33 c9 ff d3 48 8d 05 ?? ?? ?? ?? bb 10 00 00 00 41 b9 84 03 00 00";
 const wchar_t* Assert_UpdateSelectSpawnerByNameMenu = L"cc 48 85 db 74 ?? 33 c9 ff d3 48 8d 05 ?? ?? ?? ?? c7 44 24 ?? 10 00 00 00 41 b9 a3 00 00 00";
 
+const char* weapon_list_main[] = {
+                                    "invisible-cube",
+                                    "pistol-shotgun-military",
+                                    "bloater-pustule",
+                                    "pistol-colt-1911-dark",
+                                    "bow-joel",
+                                    "shiv-d",
+                                    "invisible-cube",
+                                    "bandage-autofeed",
+                                    "rifle-vepr",
+                                    "pistol-uber-hunter",
+                                    "invisible-cube",
+                                    "rifle-m14-sniper",
+                                    "bow-ellie",
+                                    "invisible-cube",
+                                    "invisible-cube",
+                                    "bow-ellie",
+                                    "pistol-revolver-taurus",
+                                    "rifle-m14-sniper",
+                                    "bow-scar",
+                                    "rifle-mpx5",
+                                    "two-hand-axe",
+                                    "molotov",
+                                    "digital-recorder-carry-t1x",
+                                    "club-2h-scar",
+                                    "rifle-remington-81",
+                                    "hammer-modern",
+                                    "pipe-bomb",
+                                    "pistol-9mm-firefly",
+                                    "gas-mask-lev",
+                                    "mp-spotting-scope",
+                                    "pistol-revolver-taurus",
+                                    "rifle-m14-sniper",
+                                    "shotgun-pump-stock",
+                                    "pipe-wrench",
+                                    "shotgun-remington-pump",
+                                    "t1x-shotgun-remington-pump",
+                                    "hammer-scar",
+                                    "rifle-mini-14-manny",
+                                    "flamethrower",
+                                    "invisible-cube",
+                                    "club-1h-police",
+                                    "baseball-bat",
+                                    "invisible-cube",
+                                    "shiv-b",
+                                    "invisible-cube",
+                                    "shotgun-pump-firefly",
+                                    "pistol-browning",
+                                    "rifle-mini-14",
+                                    "shotgun-pump-stock",
+                                    "baseball-bat-metal",
+                                    "bow-lev",
+                                    "pistol-shotgun-firefly",
+                                    "pistol-uber-firefly",
+                                    "m4-rifle-military",
+                                    "pickaxe-scar-player",
+                                    "ski-aquarium-dog-toy",
+                                    "knife-bill-game",
+                                    "hatchet-tomahawk",
+                                    "short-pipe",
+                                    "pistol-revolver-taurus-owen",
+                                    "pistol-revolver-scar",
+                                    "stun-bomb",
+                                    "pistol-ruger",
+                                    "rifle-galil",
+                                    "rifle-m14-sniper",
+                                    "invisible-cube",
+                                    "m4-rifle-firefly",
+                                    "torch-game",
+                                    "invisible-cube",
+                                    "bow-ellie",
+                                    "molotov",
+                                    "machete-wood-joel",
+                                    "pistol-xcaliber",
+                                    "invisible-cube",
+                                    "shiv-f",
+                                    "t1x-leather-toolkit",
+                                    "pistol-colt-defender",
+                                    "shotgun-remington-pump-sawedoff",
+                                    "two-hand-axe-scar",
+                                    "shotgun-dbl-barrel-scar",
+                                    "rifle-vepr",
+                                    "rifle-m14-dark",
+                                    "rifle-mini-14-wood",
+                                    "club-1h-scar",
+                                    "bandage-autofeed",
+                                    "bow-scar",
+                                    "rifle-bolt-firefly",
+                                    "pistol-cz75",
+                                    "shiv-a",
+                                    "pistol-revolver-taurus-owen",
+                                    "pistol-9mm-military",
+                                    "pistol-beretta",
+                                    "invisible-cube",
+                                    "invisible-cube",
+                                    "invisible-cube",
+                                    "fob-basketball",
+                                    "rifle-bolt-m24",
+                                    "pistol-ruger",
+                                    "throw-brick",
+                                    "NO_ART_GROUP",
+                                    "machete-black",
+                                    "bloater-pustule",
+                                    "rifle-ruger-scar",
+                                    "smoke-bomb",
+                                    "machete-scar",
+                                    "rifle-winchester-lever",
+                                    "shotgun-remington-pump-sawedoff",
+                                    "lead-pipe",
+                                    "pistol-ruger",
+                                    "t1x-shiv-mod-a",
+                                    "pistol-shotgun-hunter",
+                                    "amp-gift-shop-toy-orca",
+                                    "pistol-revolver-firefly",
+                                    "molotov",
+                                    "smoke-bomb-basic",
+                                    "beer-bottle",
+                                    "machete-black",
+                                    "shotgun-pump-stock-black",
+                                    "pipe-bomb",
+                                    "crossbow",
+                                    "bloater-pustule",
+                                    "shotgun-baserri-over-under",
+                                    "bloater-pustule",
+                                    "pistol-colt-1911-silver",
+                                    "pickaxe-scar",
+                                    "shotgun-remington-pump",
+                                    "rifle-m14-sniper",
+                                    "bow-toy",
+                                    "shiv-e",
+                                    "rifle-sniper-hunter",
+                                    "pistol-revolver-357",
+                                    "syringe",
+                                    "rifle-remington-81",
+                                    "scythe-scar",
+                                    "hatchet-black",
+                                    "crowbar-one-hand",
+                                    "hatchet-modern",
+                                    "shotgun-remington-pump-black",
+                                    "dagger-scar-lev",
+                                    "trap-mine",
+                                    "invisible-cube",
+                                    "rifle-remington-81",
+                                    "two-by-four",
+                                    "shotgun-dbl-barrel-abby",
+                                    "rifle-bolt-m24-dark",
+                                    "firecracker",
+                                    "oil-can-silencer",
+                                    "shotgun-remington-pump",
+                                    "rifle-mpx5-tilt",
+                                    "short-pipe",
+                                    "t1x-turret-sniper",
+                                    "t1x-shiv",
+                                    "molotov",
+                                    "whistle",
+                                    "rifle-mpx5",
+                                    "dagger-scar",
+                                    "NO_ART_GROUP",
+                                    "NO_ART_GROUP",
+                                    "pistol-glock",
+                                    "hatchet-tomahawk",
+                                    "machete-wood",
+                                    "pistol-cz75-black",
+                                    "rifle-bolt-m24",
+                                    "pat-snowball",
+                                    "pistol-browning-scar",
+                                    "sledgehammer",
+                                    "fireman-axe",
+                                    "shiv-c",
+                                    "pistol-revolver-militia",
+                                    "pistol-revolver-military",
+                                    "t1x-shiv-mod-b",
+                                    "pistol-9mm-hunter",
+                                    "rifle-semi-auto-firefly",
+                                    "rifle-bolt-scar",
+                                    "hatchet-scar",
+                                    "rifle-remington-bolt",
+                                    "tennis-ball-throw",
+                                    "t1x-leather-toolkit" };
+
+const char* weapon_list_subsection[] = {
+                                        "invisible-cube",
+                                        "",
+                                        "bandage-autofeed",
+                                        "bandage-autofeed",
+                                        "throw-brick",
+                                        "beer-bottle",
+                                        "nail-bomb-basic",
+                                        "molotov-basic",
+                                        "smoke-bomb-basic",
+                                        "t1x-mal-gas-can",
+                                        "pistol-t1x-beretta-jaguar-pistol",
+                                        "t1x-bow-ellie",
+                                        "t1x-rifle-bolt-m24",
+                                        "rifle-shotgun-pump-hunter",
+                                        "pistol-revolver-hunter",
+                                        "rifle-bolt-hunter",
+                                        "t1x-super-soaker",
+                                        "t1x-pistol-9mm",
+                                        "t1x-taurus-66b4-revolver",
+                                        "t1x-pistol-uber-t1",
+                                        "t1x-pistol-shotgun",
+                                        "t1x-rifle-bolt",
+                                        "t1x-m4-rifle-t1",
+                                        "t1x-shotgun-pump-stock",
+                                        "t1x-bow-dark",
+                                        "t1x-flamethrower",
+                                        "t1x-super-soaker",
+                                        "t1x-machete-blade",
+                                        "t1x-hatchet",
+                                        "t1x-baseball-bat",
+                                        "t1x-two-by-four",
+                                        "t1x-lead-pipe",
+                                        "invisible-cube",
+                                        "t1x-switchblade" };
+
+const char* weapon_subentry_names[] = {
+                                        "Test",
+                                        "Misc",
+                                        "Throwables",
+                                        "Ellie",
+                                        "Joel",
+                                        "Melee" };
+
+#define GIVE_WEAPON_MAIN_MAX 178
+#define GIVE_WEAPON_SUB_MAX 34
+#define GIVE_WEAPON_ENTRY_MAX 6
+
+// Main list
+uint64_t GivePlayerWeapon_ptr_offset = 0;
+uint64_t GivePlayerWeapon_index_count = 0;
+uint64_t GivePlayerWeapon_MainReturn = 0;
+// Sub entry
+uint64_t GivePlayerWeaponSub_ptr_offset = 0;
+uint64_t GivePlayerWeaponSub_index_count = 0;
+uint64_t GivePlayerWeapon_SubReturn = 0;
+// Entry
+uint64_t GivePlayerWeaponEntry_ptr_offset = 0;
+uint64_t GivePlayerWeaponEntry_index_count = 0;
+uint64_t GivePlayerWeapon_EntryReturn = 0;
+
+void __attribute__((naked)) GivePlayerWeapon_MainCC()
+{
+    __asm
+    {
+        mov r8, [GivePlayerWeapon_index_count]
+        cmp r8, GIVE_WEAPON_MAIN_MAX
+        mov r8, 0
+        mov rdx, 1
+        mov r9, 8
+        mov rax, 0
+        jz reset_idx
+        jnz set_ptr
+        reset_idx :
+        mov[GivePlayerWeapon_index_count], r8
+        mov[GivePlayerWeapon_ptr_offset], r8
+        set_ptr:
+        lea rax, [weapon_list_main]
+        add rax, [GivePlayerWeapon_ptr_offset]
+        mov rax, [rax]
+        add[GivePlayerWeapon_ptr_offset], r9
+        add[GivePlayerWeapon_index_count], rdx
+        jmp[GivePlayerWeapon_MainReturn]
+    }
+}
+
+void __attribute__((naked)) GivePlayerWeapon_SubCC()
+{
+    __asm
+    {
+        mov r8, [GivePlayerWeaponSub_index_count]
+        cmp r8, GIVE_WEAPON_SUB_MAX
+        mov r8, 0
+        mov rdx, 1
+        mov r9, 8
+        mov rax, 0
+        jz reset_idx
+        jnz set_ptr
+        reset_idx :
+        mov[GivePlayerWeaponSub_index_count], r8
+        mov[GivePlayerWeaponSub_ptr_offset], r8
+        set_ptr :
+        lea rax, [weapon_list_subsection]
+        add rax, [GivePlayerWeaponSub_ptr_offset]
+        mov rax, [rax]
+        add[GivePlayerWeaponSub_ptr_offset], r9
+        add[GivePlayerWeaponSub_index_count], rdx
+        jmp[GivePlayerWeapon_SubReturn]
+    }
+}
+
+void __attribute__((naked)) GivePlayerWeapon_EntryCC()
+{
+    __asm
+    {
+        mov r8, [GivePlayerWeaponEntry_index_count]
+        cmp r8, GIVE_WEAPON_ENTRY_MAX
+        mov r8, 0
+        mov rdx, 1
+        mov r9, 8
+        mov rax, 0
+        jz reset_idx
+        jnz set_ptr
+        reset_idx :
+        mov[GivePlayerWeaponEntry_index_count], r8
+        mov[GivePlayerWeaponEntry_ptr_offset], r8
+        set_ptr :
+        lea rax, [weapon_subentry_names]
+        add rax, [GivePlayerWeaponEntry_ptr_offset]
+        mov rax, [rax]
+        add[GivePlayerWeaponEntry_ptr_offset], r9
+        add[GivePlayerWeaponEntry_index_count], rdx
+        jmp[GivePlayerWeapon_EntryReturn]
+    }
+}
+
 void ApplyDebugPatches(void)
 {
     if (bDebugMenu)
@@ -124,7 +445,12 @@ void ApplyDebugPatches(void)
         WritePatchPattern(DevMenu_MenuSize, bytes_array_4, sizeof(bytes_array_4), wstr(fDebugMenuSize), 3);
         memset(bytes_array_4, 0, sizeof(bytes_array_4));
         const unsigned char mov_ecx_0[] = { 0xb9, 0x00, 0x00, 0x00, 0x00, 0x90 };
+        const unsigned char nop1x[] = { 0x90 };
         WritePatchPattern(m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(m_onDisc_DevMenu), 0);
+        WritePatchPattern(Assert_LevelDef_LevelManifst, nop1x, sizeof(nop1x), wstr(Assert_LevelDef_LevelManifst), 30);
+        WritePatchPattern_Hook(GivePlayerWeapon_Main, 29, wstr(GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
+        WritePatchPattern_Hook(GivePlayerWeapon_SubSection, 21, wstr(GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
+        WritePatchPattern_Hook(GivePlayerWeapon_Entry, 21, wstr(GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
     }
     if (bShowDebugConsole)
     {
