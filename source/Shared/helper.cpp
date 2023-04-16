@@ -110,6 +110,45 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
     }
 }
 
+void WritePatchPattern_Int(uint32_t mode, const wchar_t* Patch_Pattern, void* Patch_Value, const wchar_t* Patch_Name, uint64_t Patch_Offset)
+{
+    switch (mode)
+    {
+        case 1:
+        {
+            unsigned char bytes_array[1] = { 0 };
+            memcpy((void*)bytes_array, &Patch_Value, sizeof(bytes_array));
+            WritePatchPattern(Patch_Pattern, bytes_array, sizeof(bytes_array), Patch_Name, Patch_Offset);
+            memset(bytes_array, 0, sizeof(bytes_array));
+            break;
+        }
+        case 2:
+        {
+            unsigned char bytes_array[2] = { 0 };
+            memcpy((void*)bytes_array, &Patch_Value, sizeof(bytes_array));
+            WritePatchPattern(Patch_Pattern, bytes_array, sizeof(bytes_array), Patch_Name, Patch_Offset);
+            memset(bytes_array, 0, sizeof(bytes_array));
+            break;
+        }
+        case 4:
+        {
+            unsigned char bytes_array[4] = { 0 };
+            memcpy((void*)bytes_array, &Patch_Value, sizeof(bytes_array));
+            WritePatchPattern(Patch_Pattern, bytes_array, sizeof(bytes_array), Patch_Name, Patch_Offset);
+            memset(bytes_array, 0, sizeof(bytes_array));
+            break;
+        }
+        case 8:
+        {
+            unsigned char bytes_array[8] = { 0 };
+            memcpy((void*)bytes_array, &Patch_Value, sizeof(bytes_array));
+            WritePatchPattern(Patch_Pattern, bytes_array, sizeof(bytes_array), Patch_Name, Patch_Offset);
+            memset(bytes_array, 0, sizeof(bytes_array));
+            break;
+        }
+    }
+}
+
 void WritePatchAddress(uint64_t Patch_Address, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
 {
     uint64_t Patch_Address_Offset = Patch_Address + Patch_Offset;

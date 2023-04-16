@@ -333,8 +333,8 @@ const char* weapon_list_subsection[] = {
                                         "t1x-switchblade" };
 
 const char* weapon_subentry_names[] = {
-                                        "Test",
                                         "Misc",
+                                        "Consumables",
                                         "Throwables",
                                         "Ellie",
                                         "Joel",
@@ -363,15 +363,14 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC()
     {
         mov r8, [GivePlayerWeapon_index_count]
         cmp r8, GIVE_WEAPON_MAIN_MAX
-        mov r8, 0
         mov rdx, 1
         mov r9, 8
-        mov rax, 0
         jz reset_idx
         jnz set_ptr
         reset_idx :
-        mov[GivePlayerWeapon_index_count], r8
-        mov[GivePlayerWeapon_ptr_offset], r8
+        mov rax, 0
+        mov[GivePlayerWeapon_index_count], rax
+        mov[GivePlayerWeapon_ptr_offset], rax
         set_ptr:
         lea rax, [weapon_list_main]
         add rax, [GivePlayerWeapon_ptr_offset]
@@ -388,15 +387,14 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC()
     {
         mov r8, [GivePlayerWeaponSub_index_count]
         cmp r8, GIVE_WEAPON_SUB_MAX
-        mov r8, 0
         mov rdx, 1
         mov r9, 8
-        mov rax, 0
         jz reset_idx
         jnz set_ptr
         reset_idx :
-        mov[GivePlayerWeaponSub_index_count], r8
-        mov[GivePlayerWeaponSub_ptr_offset], r8
+        mov rax, 0
+        mov[GivePlayerWeaponSub_index_count], rax
+        mov[GivePlayerWeaponSub_ptr_offset], rax
         set_ptr :
         lea rax, [weapon_list_subsection]
         add rax, [GivePlayerWeaponSub_ptr_offset]
@@ -413,15 +411,14 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC()
     {
         mov r8, [GivePlayerWeaponEntry_index_count]
         cmp r8, GIVE_WEAPON_ENTRY_MAX
-        mov r8, 0
         mov rdx, 1
         mov r9, 8
-        mov rax, 0
         jz reset_idx
         jnz set_ptr
         reset_idx :
-        mov[GivePlayerWeaponEntry_index_count], r8
-        mov[GivePlayerWeaponEntry_ptr_offset], r8
+        mov rax, 0
+        mov[GivePlayerWeaponEntry_index_count], rax
+        mov[GivePlayerWeaponEntry_ptr_offset], rax
         set_ptr :
         lea rax, [weapon_subentry_names]
         add rax, [GivePlayerWeaponEntry_ptr_offset]
@@ -440,10 +437,7 @@ void ApplyDebugPatches(void)
             fDebugMenuSize = 1.0;
         else if (fDebugMenuSize < 0.4)
             fDebugMenuSize = 0.4;
-        unsigned char bytes_array_4[4] = { 0 };
-        memcpy((void*)bytes_array_4, &fDebugMenuSize, sizeof(bytes_array_4));
-        WritePatchPattern(DevMenu_MenuSize, bytes_array_4, sizeof(bytes_array_4), wstr(fDebugMenuSize), 3);
-        memset(bytes_array_4, 0, sizeof(bytes_array_4));
+        WritePatchPattern_Int(4, DevMenu_MenuSize, (void*)*(uint32_t*)&fDebugMenuSize, wstr(DevMenu_MenuSize), 3);
         const unsigned char mov_ecx_0[] = { 0xb9, 0x00, 0x00, 0x00, 0x00, 0x90 };
         const unsigned char nop1x[] = { 0x90 };
         WritePatchPattern(m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(m_onDisc_DevMenu), 0);
@@ -457,6 +451,7 @@ void ApplyDebugPatches(void)
         const unsigned char mov_cl_1_nop[] = { 0xb1, 0x01, 0x90 };
         WritePatchPattern(ConsoleOutput, mov_cl_1_nop, sizeof(mov_cl_1_nop), wstr(ConsoleOutput), 0);
     }
+    
     if (bExtendedDebugMenu)
     {
         const unsigned char nop5x[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
@@ -464,9 +459,9 @@ void ApplyDebugPatches(void)
         const unsigned char nop1x[] = { 0x90 };
         const unsigned char ret_0[] = { 0x31, 0xc0, 0xc3 };
         const unsigned char heap_type[] = { MEM_TYPE };
-        const unsigned char menu_mem_size[] = { 0x84 };
-        const unsigned char script_mem_size[] = { 0x80 };
-        const unsigned char cpu_mem_size[] = { 0x40 };
+        uint64_t menu_mem_size = 0x840000;
+        uint64_t script_mem_size = 0x800000;
+        uint64_t cpu_mem_size = 0x40e00000;
         WritePatchPattern_Hook(Memory_PushAllocatorJMPAddr, 15, wstr(Memory_PushAllocatorJMPAddr), 0, &Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
         WritePatchPattern(Memory_isDebugMemoryAval, ret_1_al, sizeof(ret_1_al), wstr(Memory_isDebugMemoryAval), 0);
         WritePatchPattern(DebugDrawStaticContext, nop5x, sizeof(nop5x), wstr(DebugDrawStaticContext), 0);
@@ -474,9 +469,9 @@ void ApplyDebugPatches(void)
         WritePatchPattern(ParticlesMenu, ret_0, sizeof(ret_0), wstr(ParticlesMenu), 0);
         WritePatchPattern(UpdateSelectRegionByNameMenu_Heap, heap_type, sizeof(heap_type), wstr(UpdateSelectRegionByNameMenu_Heap), 9);
         WritePatchPattern(UpdateSelectSpawner, heap_type, sizeof(heap_type), wstr(UpdateSelectSpawner), 4);
-        WritePatchPattern(MenuHeap_UsableMemorySize, menu_mem_size, sizeof(menu_mem_size), wstr(MenuHeap_UsableMemorySize), 10);
-        WritePatchPattern(ScriptHeap_UsableMemorySize, script_mem_size, sizeof(script_mem_size), wstr(ScriptHeap_UsableMemorySize), 10);
-        WritePatchPattern(CPUHeap_UsableMemorySize, cpu_mem_size, sizeof(cpu_mem_size), wstr(CPUHeap_UsableMemorySize), 11);
+        WritePatchPattern_Int(8, MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(MenuHeap_UsableMemorySize), 8);
+        WritePatchPattern_Int(8, ScriptHeap_UsableMemorySize, (void*)script_mem_size, wstr(ScriptHeap_UsableMemorySize), 8);
+        WritePatchPattern_Int(8, CPUHeap_UsableMemorySize, (void*)cpu_mem_size, wstr(CPUHeap_UsableMemorySize), 8);
         WritePatchPattern(Memory_ValidateContext, nop1x, sizeof(nop1x), wstr(Memory_ValidateContext), 0);
         WritePatchPattern(Assert_UpdateSelectRegionByNameMenu, nop1x, sizeof(nop1x), wstr(Assert_UpdateSelectRegionByNameMenu), 0);
         WritePatchPattern(Assert_UpdateSelectIgcByNameMenu, nop1x, sizeof(nop1x), wstr(Assert_UpdateSelectIgcByNameMenu), 0);
