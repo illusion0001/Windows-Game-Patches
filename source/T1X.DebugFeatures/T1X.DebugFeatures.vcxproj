@@ -173,12 +173,15 @@
     <ClCompile Include="..\Shared\helper.cpp" />
     <ClCompile Include="..\Shared\memory.cpp" />
     <ClCompile Include="..\Shared\stdafx.cpp" />
+    <ClCompile Include="code_caves.cpp" />
     <ClCompile Include="dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\memory.hpp" />
     <ClInclude Include="..\include\helper.hpp" />
     <ClInclude Include="..\include\stdafx.h" />
+    <ClInclude Include="code_caves.hpp" />
+    <ClInclude Include="patterns.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
