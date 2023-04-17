@@ -340,6 +340,9 @@ const char* weapon_subentry_names[] = {
                                         "Joel",
                                         "Melee" };
 
+const char* actor_name_fmt = "%s (#%.16llx)";
+char temp_str[128] = { 0 };
+
 const constexpr uint64_t GivePlayerWeapon_ListMax = sizeof(weapon_list_main) / sizeof(weapon_list_main[0]);
 const constexpr uint64_t GivePlayerWeapon_SubListMax = sizeof(weapon_list_subsection) / sizeof(weapon_list_subsection[0]);
 const constexpr uint64_t GivePlayerWeapon_EntryListMax = sizeof(weapon_subentry_names) / sizeof(weapon_subentry_names[0]);
@@ -356,6 +359,8 @@ uint64_t GivePlayerWeapon_SubReturn = 0;
 uint64_t GivePlayerWeaponEntry_ptr_offset = 0;
 uint64_t GivePlayerWeaponEntry_index_count = 0;
 uint64_t GivePlayerWeapon_EntryReturn = 0;
+
+uint64_t Game_Snprintf = 0;
 
 void __attribute__((naked)) GivePlayerWeapon_MainCC()
 {
@@ -377,6 +382,18 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC()
         mov r9, 8
         add[GivePlayerWeapon_ptr_offset], r9
         add[GivePlayerWeapon_index_count], rdx
+        cmp [Game_Snprintf], 0
+        jz code_exit
+        lea rcx, [temp_str]
+        mov edx, 128
+        mov r8, [actor_name_fmt]
+        mov    r9, [r15 + 0x8]
+        mov    r9, [rsi + r9 * 1]
+        mov [rsp+0x20], r9
+        mov r9, rax
+        call [Game_Snprintf]
+        lea rax, [temp_str]
+        code_exit:
         jmp[GivePlayerWeapon_MainReturn]
     }
 }
@@ -401,6 +418,18 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC()
         mov r9, 8
         add[GivePlayerWeaponSub_ptr_offset], r9
         add[GivePlayerWeaponSub_index_count], rdx
+        cmp [Game_Snprintf], 0
+        jz code_exit
+        lea rcx, [temp_str]
+        mov edx, 128
+        mov r8, [actor_name_fmt]
+        mov    r9, [r13 + 0x8]
+        mov    r9, [r12 + r9 * 1]
+        mov[rsp + 0x20], r9
+        mov r9, rax
+        call[Game_Snprintf]
+        lea rax, [temp_str]
+        code_exit:
         jmp[GivePlayerWeapon_SubReturn]
     }
 }
@@ -425,6 +454,18 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC()
         mov r9, 8
         add[GivePlayerWeaponEntry_ptr_offset], r9
         add[GivePlayerWeaponEntry_index_count], rdx
+        cmp [Game_Snprintf], 0
+        jz code_exit
+        lea rcx, [temp_str]
+        mov edx, 128
+        mov r8, [actor_name_fmt]
+        mov    r9, [r14 + 0x8]
+        mov    r9, [r15 + r9 * 1]
+        mov[rsp + 0x20], r9
+        mov r9, rax
+        call[Game_Snprintf]
+        lea rax, [temp_str]
+        code_exit:
         jmp[GivePlayerWeapon_EntryReturn]
     }
 }
@@ -442,6 +483,9 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Int(4, DevMenu_MenuSize, (void*)*(uint32_t*)&fDebugMenuSize, wstr(DevMenu_MenuSize), 3);
         const unsigned char mov_ecx_0[] = { 0xb9, 0x00, 0x00, 0x00, 0x00, 0x90 };
         const unsigned char nop1x[] = { 0x90 };
+        const wchar_t* GameSnprintf = L"4c 89 44 24 18 4c 89 4c 24 20 53 55 56 57 48 83 ec 38 49 8b f0 48 8d 6c 24 78 48 8b fa 48 8b d9 e8 ?? ?? ?? ?? 48 89 6c 24 28 4c 8b ce 48 83 64 24 20 00 4c 8b c7 48 8b d3 48 8b 08 48 83 c9 01 e8 ?? ?? ?? ?? 83 c9 ff 85 c0 0f 48 c1 48 83 c4 38 5f 5e 5d 5b c3";
+        Game_Snprintf = uintptr_t(Memory::PatternScanW(baseModule, GameSnprintf));
+        LOG(wstr(Game_Snprintf) L": 0x%016llx\n", Game_Snprintf);
         WritePatchPattern(m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(m_onDisc_DevMenu), 0);
         WritePatchPattern(Assert_LevelDef_LevelManifst, nop1x, sizeof(nop1x), wstr(Assert_LevelDef_LevelManifst), 30);
         WritePatchPattern_Hook(GivePlayerWeapon_Main, 29, wstr(GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
