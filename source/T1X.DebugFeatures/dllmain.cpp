@@ -340,9 +340,9 @@ const char* weapon_subentry_names[] = {
                                         "Joel",
                                         "Melee" };
 
-#define GIVE_WEAPON_MAIN_MAX 178
-#define GIVE_WEAPON_SUB_MAX 34
-#define GIVE_WEAPON_ENTRY_MAX 6
+const constexpr uint64_t GivePlayerWeapon_ListMax = sizeof(weapon_list_main) / sizeof(weapon_list_main[0]);
+const constexpr uint64_t GivePlayerWeapon_SubListMax = sizeof(weapon_list_subsection) / sizeof(weapon_list_subsection[0]);
+const constexpr uint64_t GivePlayerWeapon_EntryListMax = sizeof(weapon_subentry_names) / sizeof(weapon_subentry_names[0]);
 
 // Main list
 uint64_t GivePlayerWeapon_ptr_offset = 0;
@@ -362,9 +362,7 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC()
     __asm
     {
         mov r8, [GivePlayerWeapon_index_count]
-        cmp r8, GIVE_WEAPON_MAIN_MAX
-        mov rdx, 1
-        mov r9, 8
+        cmp r8, [GivePlayerWeapon_ListMax]
         jz reset_idx
         jnz set_ptr
         reset_idx :
@@ -375,6 +373,8 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC()
         lea rax, [weapon_list_main]
         add rax, [GivePlayerWeapon_ptr_offset]
         mov rax, [rax]
+        mov rdx, 1
+        mov r9, 8
         add[GivePlayerWeapon_ptr_offset], r9
         add[GivePlayerWeapon_index_count], rdx
         jmp[GivePlayerWeapon_MainReturn]
@@ -386,9 +386,7 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC()
     __asm
     {
         mov r8, [GivePlayerWeaponSub_index_count]
-        cmp r8, GIVE_WEAPON_SUB_MAX
-        mov rdx, 1
-        mov r9, 8
+        cmp r8, [GivePlayerWeapon_SubListMax]
         jz reset_idx
         jnz set_ptr
         reset_idx :
@@ -399,6 +397,8 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC()
         lea rax, [weapon_list_subsection]
         add rax, [GivePlayerWeaponSub_ptr_offset]
         mov rax, [rax]
+        mov rdx, 1
+        mov r9, 8
         add[GivePlayerWeaponSub_ptr_offset], r9
         add[GivePlayerWeaponSub_index_count], rdx
         jmp[GivePlayerWeapon_SubReturn]
@@ -410,9 +410,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC()
     __asm
     {
         mov r8, [GivePlayerWeaponEntry_index_count]
-        cmp r8, GIVE_WEAPON_ENTRY_MAX
-        mov rdx, 1
-        mov r9, 8
+        cmp r8, [GivePlayerWeapon_EntryListMax]
         jz reset_idx
         jnz set_ptr
         reset_idx :
@@ -423,6 +421,8 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC()
         lea rax, [weapon_subentry_names]
         add rax, [GivePlayerWeaponEntry_ptr_offset]
         mov rax, [rax]
+        mov rdx, 1
+        mov r9, 8
         add[GivePlayerWeaponEntry_ptr_offset], r9
         add[GivePlayerWeaponEntry_index_count], rdx
         jmp[GivePlayerWeapon_EntryReturn]
@@ -437,6 +437,8 @@ void ApplyDebugPatches(void)
             fDebugMenuSize = 1.0;
         else if (fDebugMenuSize < 0.4)
             fDebugMenuSize = 0.4;
+        // This is considered [strict aliasing violation](https://stackoverflow.com/a/45229284)
+        // But it does work
         WritePatchPattern_Int(4, DevMenu_MenuSize, (void*)*(uint32_t*)&fDebugMenuSize, wstr(DevMenu_MenuSize), 3);
         const unsigned char mov_ecx_0[] = { 0xb9, 0x00, 0x00, 0x00, 0x00, 0x90 };
         const unsigned char nop1x[] = { 0x90 };
@@ -451,7 +453,6 @@ void ApplyDebugPatches(void)
         const unsigned char mov_cl_1_nop[] = { 0xb1, 0x01, 0x90 };
         WritePatchPattern(ConsoleOutput, mov_cl_1_nop, sizeof(mov_cl_1_nop), wstr(ConsoleOutput), 0);
     }
-    
     if (bExtendedDebugMenu)
     {
         const unsigned char nop5x[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
@@ -469,9 +470,9 @@ void ApplyDebugPatches(void)
         WritePatchPattern(ParticlesMenu, ret_0, sizeof(ret_0), wstr(ParticlesMenu), 0);
         WritePatchPattern(UpdateSelectRegionByNameMenu_Heap, heap_type, sizeof(heap_type), wstr(UpdateSelectRegionByNameMenu_Heap), 9);
         WritePatchPattern(UpdateSelectSpawner, heap_type, sizeof(heap_type), wstr(UpdateSelectSpawner), 4);
-        WritePatchPattern_Int(8, MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(MenuHeap_UsableMemorySize), 8);
-        WritePatchPattern_Int(8, ScriptHeap_UsableMemorySize, (void*)script_mem_size, wstr(ScriptHeap_UsableMemorySize), 8);
-        WritePatchPattern_Int(8, CPUHeap_UsableMemorySize, (void*)cpu_mem_size, wstr(CPUHeap_UsableMemorySize), 8);
+        WritePatchPattern_Int(sizeof(menu_mem_size), MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(MenuHeap_UsableMemorySize), 8);
+        WritePatchPattern_Int(sizeof(script_mem_size), ScriptHeap_UsableMemorySize, (void*)script_mem_size, wstr(ScriptHeap_UsableMemorySize), 8);
+        WritePatchPattern_Int(sizeof(cpu_mem_size), CPUHeap_UsableMemorySize, (void*)cpu_mem_size, wstr(CPUHeap_UsableMemorySize), 8);
         WritePatchPattern(Memory_ValidateContext, nop1x, sizeof(nop1x), wstr(Memory_ValidateContext), 0);
         WritePatchPattern(Assert_UpdateSelectRegionByNameMenu, nop1x, sizeof(nop1x), wstr(Assert_UpdateSelectRegionByNameMenu), 0);
         WritePatchPattern(Assert_UpdateSelectIgcByNameMenu, nop1x, sizeof(nop1x), wstr(Assert_UpdateSelectIgcByNameMenu), 0);
