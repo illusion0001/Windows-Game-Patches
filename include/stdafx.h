@@ -1,5 +1,6 @@
 #pragma once
 #pragma comment(lib,"Version.lib")
+#pragma comment(lib, "shlwapi.lib")
 #define WIN32_LEAN_AND_MEAN
 
 #include <cassert>
@@ -13,3 +14,5 @@
 #include "inipp/inipp/inipp.h"
 #include <SDKDDKVer.h>
 #include <Windows.h>
+#include <shlwapi.h>
+#include <stdio.h>

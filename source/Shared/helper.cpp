@@ -155,3 +155,10 @@ void WritePatchAddress(uint64_t Patch_Address, const unsigned char* Patch_Bytes,
     Memory::PatchBytes(Patch_Address_Offset, Patch_Bytes, Patch_Size);
     ShowPatchInfo(Patch_Size, Patch_Address_Offset, Patch_Name, 0);
 }
+
+wchar_t* GetRunningPath(wchar_t* output)
+{
+    GetModuleFileNameW(nullptr, output, MAX_PATH);
+    PathRemoveFileSpecW(output);
+    return output;
+}

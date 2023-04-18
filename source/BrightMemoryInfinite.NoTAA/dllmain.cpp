@@ -9,6 +9,8 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define _PROJECT_NAME L"BrightMemoryInfinite.NoTAA"
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
+wchar_t exePath[_MAX_PATH] = { 0 };
+
 // INI Variables
 bool bDisableTAA;
 bool bDisableSharpness;
@@ -17,14 +19,9 @@ void ReadConfig(void)
 {
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
-    LPWSTR exePath = new WCHAR[_MAX_PATH];
-    GetModuleFileNameW(baseModule, exePath, _MAX_PATH);
-    std::wstring exePathWString(exePath);
-    std::wstring wsGameName = Memory::GetVersionProductName();
-
     LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
-    LOG(L"Game Name: %s\n", wsGameName.c_str());
-    LOG(L"Game Path: %s\n", exePathWString.c_str());
+    LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
+    LOG(L"Game Path: %s\n", exePath);
 
     // Initialize config
     // UE4 games use launchers so config path is relative to launcher
@@ -72,7 +69,10 @@ DWORD __stdcall Main(void*)
     bLoggingEnabled = false;
     bDisableTAA = false;
     bDisableSharpness = false;
-    LoggingInit(_PROJECT_NAME, _PROJECT_LOG_PATH);
+    wchar_t LogPath[_MAX_PATH] = { 0 };
+    wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
+    _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
+    LoggingInit(_PROJECT_NAME, LogPath);
     ReadConfig();
     if (bDisableTAA)
         DisableTAA();
