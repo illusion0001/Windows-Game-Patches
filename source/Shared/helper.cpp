@@ -162,3 +162,48 @@ wchar_t* GetRunningPath(wchar_t* output)
     PathRemoveFileSpecW(output);
     return output;
 }
+
+#define FNVA1_BASE 0xCBF29CE484222325
+typedef uint64_t StringId64;
+// https://github.com/icemesh/StringId/blob/main/StringId64/main.c
+StringId64 ToStringId64(const char* str)
+{
+    uint64_t base = FNVA1_BASE;
+    if (*str)
+    {
+        do {
+            base = 0x100000001B3 * (base ^ *str++);
+        } while (*str);
+    }
+    return base;
+}
+
+wchar_t* ConvertToWideChar(const char* input)
+{
+    int length = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
+    if (length == 0)
+    {
+        return nullptr;
+    }
+    wchar_t* output = new wchar_t[length];
+    MultiByteToWideChar(CP_UTF8, 0, input, -1, output, length);
+    return output;
+}
+
+uintptr_t FindNativeAddr(const char* input_native)
+{
+    StringId64 native_hash = ToStringId64(input_native);
+    uintptr_t hash_addr = uintptr_t(Memory::u64_Scan(baseModule, native_hash, sizeof(uint64_t))) - 0x8;
+    uintptr_t native_addr = Memory::ReadMultiLevelPointer(hash_addr, { 0x8, 0x0 });
+    if (!native_addr || native_addr == 0)
+    {
+        LOG(L"Native function: (0x%016llx::%s::#%.16llx) not found!\n", hash_addr, ConvertToWideChar(input_native), native_hash);
+        return 0;
+    }
+    else
+    {
+        LOG(L"Native function: (0x%016llx::%s::#%.16llx) found at 0x%016llx\n", hash_addr, ConvertToWideChar(input_native), native_hash, native_addr);
+        return native_addr;
+    }
+    return 0;
+}

@@ -1,6 +1,8 @@
 #include "memory.hpp"
 
 // TODO: Find out where this came from
+// https://github.com/Lyall/IshinFix/blob/eae0caeecdd17e2959e1a44802c6ea54e19fee03/src/helper.hpp#L6
+// where i found it.
 namespace Memory
 {
 
@@ -34,12 +36,6 @@ namespace Memory
     bool DetourFunction32(void* src, void* dst, int len)
     {
 
-        if (len < 5)
-        {
-            LOG(L"(len (%u) < 5)\n", len);
-            return false;
-        }
-
         DWORD curProtection;
         VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &curProtection);
 
@@ -59,12 +55,6 @@ namespace Memory
     void* DetourFunction64(void* pSource, void* pDestination, DWORD dwLen)
     {
         DWORD MinLen = 14;
-
-        if (dwLen < MinLen)
-        {
-            LOG(L"(dwLen (%u) < MinLen (%u))\n", dwLen, MinLen);
-            return NULL;
-        }
 
         BYTE stub[] = {
         0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
@@ -195,6 +185,22 @@ namespace Memory
                 }
             }
             if (found) {
+                return &scanBytes[i];
+            }
+        }
+        return nullptr;
+    }
+
+    std::uint8_t* u64_Scan(void* module, std::uint64_t value, std::size_t size)
+    {
+        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
+        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+
+        for (std::size_t i = 0; i < sizeOfImage - size; ++i) {
+            auto currentValue = *reinterpret_cast<std::uint64_t*>(&scanBytes[i]);
+            if (currentValue == value) {
                 return &scanBytes[i];
             }
         }
