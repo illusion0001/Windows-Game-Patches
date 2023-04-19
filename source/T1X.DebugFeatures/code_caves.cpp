@@ -260,6 +260,7 @@ uint64_t GivePlayerWeapon_EntryReturn = 0;
 
 // Game funcs
 uint64_t Game_SnprintfAddr = 0;
+uint64_t GamePrintf = 0;
 
 void __attribute__((naked)) GivePlayerWeapon_MainCC() {
     __asm {
@@ -361,4 +362,18 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
         code_exit:
         jmp[GivePlayerWeapon_EntryReturn]
     }
+}
+
+char temp_buffer[1024];
+
+int ScriptPrintWarn_CC(char* buffer, char* fmt, ...)
+{
+    memset(temp_buffer, 0, sizeof(temp_buffer));
+    va_list args;
+    va_start(args, fmt);
+    vsprintf_s(temp_buffer, 256 ,fmt, args);
+    va_end(args);
+    int (*GamePrintf_Caller) (char* param_1) = ((int(*) (char* param_1)) (GamePrintf));
+    GamePrintf_Caller(temp_buffer);
+    return 0;
 }

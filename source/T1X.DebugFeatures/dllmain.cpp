@@ -83,6 +83,22 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
+        GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
+        uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
+        if (GamePrintf && EvalScriptWarns)
+        {
+            LOG(wstr(GamePrintf) L": 0x%016llx\n", GamePrintf);
+            LOG(wstr(EvalScriptWarns) L": 0x%016llx\n", EvalScriptWarns);
+            // First param is buffer
+            // Sprintf eqiv
+            const unsigned char jmp_rcx[] = { 0x48, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe1 };
+            uintptr_t PrintAddr = WritePatchPattern(Patterns::GameWarnScriptPrint, jmp_rcx, sizeof(jmp_rcx), wstr(Patterns::GameWarnScriptPrint), 0);
+            unsigned char bytes_8[8] = { 0 };
+            uintptr_t hook_ptr = uintptr_t((void*)ScriptPrintWarn_CC);
+            memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
+            WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
+            Memory::DetourFunction32((void*)EvalScriptWarns, (void*)GamePrintf, 5);
+        }
     }
     if (bShowDebugConsole)
     {

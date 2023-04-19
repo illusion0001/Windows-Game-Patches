@@ -76,20 +76,23 @@ void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern)
     LOG(L"Pattern %s\n", Patch_Pattern);
 }
 
-void WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
+uintptr_t WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
 {
     uint8_t* Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
-    uint64_t Patch_Address = 0;
+    uintptr_t Patch_Address = 0;
     if (Address_Result)
     {
         Patch_Address = (uintptr_t)Address_Result + Patch_Offset;
         Memory::PatchBytes(Patch_Address, Patch_Bytes, Patch_Size);
         ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, 0);
+        return Patch_Address;
     }
     else
     {
         LogPatchFailed(Patch_Name, Patch_Pattern);
+        return 0;
     }
+    return 0;
 }
 
 void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset, void* Function_Target, uint64_t* Return_Address)
