@@ -178,8 +178,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\memory.hpp" />
-    <ClInclude Include="..\include\helper.hpp" />
-    <ClInclude Include="..\include\stdafx.h" />
+    <ClInclude Include="..\..\include\helper.hpp" />
+    <ClInclude Include="..\..\include\stdafx.h" />
     <ClInclude Include="code_caves.hpp" />
     <ClInclude Include="patterns.hpp" />
   </ItemGroup>
