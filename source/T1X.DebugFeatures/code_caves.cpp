@@ -23,7 +23,7 @@ void __attribute__((naked)) Memory_PushAllocator_CC() {
     }
 }
 
-const char *weapon_list_main[] = {"invisible-cube",
+const char* weapon_list_main[] = {"invisible-cube",
                                   "pistol-shotgun-military",
                                   "bloater-pustule",
                                   "pistol-colt-1911-dark",
@@ -202,7 +202,7 @@ const char *weapon_list_main[] = {"invisible-cube",
                                   "tennis-ball-throw",
                                   "t1x-leather-toolkit"};
 
-const char *weapon_list_subsection[] = {"invisible-cube",
+const char* weapon_list_subsection[] = {"invisible-cube",
                                         "",
                                         "bandage-autofeed",
                                         "bandage-autofeed",
@@ -237,26 +237,20 @@ const char *weapon_list_subsection[] = {"invisible-cube",
                                         "invisible-cube",
                                         "t1x-switchblade"};
 
-const char *weapon_subentry_names[] = {"Misc", "Consumables", "Throwables", "Ellie", "Joel", "Melee"};
+const char* weapon_subentry_names[] = {"Misc", "Consumables", "Throwables", "Ellie", "Joel", "Melee"};
 
-const char *actor_name_fmt = "%s (#%.16llx)";
-char temp_str[128] = {0};
-
-const constexpr uint64_t GivePlayerWeapon_ListMax = sizeof(weapon_list_main) / sizeof(weapon_list_main[0]);
-const constexpr uint64_t GivePlayerWeapon_SubListMax = sizeof(weapon_list_subsection) / sizeof(weapon_list_subsection[0]);
-const constexpr uint64_t GivePlayerWeapon_EntryListMax = sizeof(weapon_subentry_names) / sizeof(weapon_subentry_names[0]);
+const constexpr uint32_t GivePlayerWeapon_ListMax = sizeof(weapon_list_main) / sizeof(weapon_list_main[0]);
+const constexpr uint32_t GivePlayerWeapon_SubListMax = sizeof(weapon_list_subsection) / sizeof(weapon_list_subsection[0]);
+const constexpr uint32_t GivePlayerWeapon_EntryListMax = sizeof(weapon_subentry_names) / sizeof(weapon_subentry_names[0]);
 
 // Main list
-uint64_t GivePlayerWeapon_ptr_offset = 0;
-uint64_t GivePlayerWeapon_index_count = 0;
+uint32_t GivePlayerWeapon_index_count = 0;
 uint64_t GivePlayerWeapon_MainReturn = 0;
 // Sub entry
-uint64_t GivePlayerWeaponSub_ptr_offset = 0;
-uint64_t GivePlayerWeaponSub_index_count = 0;
+uint32_t GivePlayerWeaponSub_index_count = 0;
 uint64_t GivePlayerWeapon_SubReturn = 0;
 // Entry
-uint64_t GivePlayerWeaponEntry_ptr_offset = 0;
-uint64_t GivePlayerWeaponEntry_index_count = 0;
+uint32_t GivePlayerWeaponEntry_index_count = 0;
 uint64_t GivePlayerWeapon_EntryReturn = 0;
 
 // Game funcs
@@ -264,105 +258,71 @@ uint64_t Game_SnprintfAddr = 0;
 uint64_t GamePrintf = 0;
 uint64_t ScriptLookupAddr = 0;
 
+char temp_str[128];
+
+const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
+{
+    const char* string_index = nullptr;
+    switch (mode) {
+    case 1: {
+        if (GivePlayerWeapon_index_count == GivePlayerWeapon_ListMax)
+            GivePlayerWeapon_index_count = 0;
+        string_index = weapon_list_main[GivePlayerWeapon_index_count];
+        GivePlayerWeapon_index_count++;
+        break;
+    }
+    case 2: {
+        if (GivePlayerWeaponSub_index_count == GivePlayerWeapon_SubListMax)
+            GivePlayerWeaponSub_index_count = 0;
+        string_index = weapon_list_subsection[GivePlayerWeaponSub_index_count];
+        GivePlayerWeaponSub_index_count++;
+        break;
+    }
+    case 3: {
+        if (GivePlayerWeaponEntry_index_count == GivePlayerWeapon_EntryListMax)
+            GivePlayerWeaponEntry_index_count = 0;
+        string_index = weapon_subentry_names[GivePlayerWeaponEntry_index_count];
+        GivePlayerWeaponEntry_index_count++;
+        break;
+    }
+    default: {
+        memset(temp_str, 0, sizeof(temp_str));
+        return temp_str;
+    }
+    }
+    if (string_index[0] == '\0')
+        string_index = "(null)";
+    _snprintf_s(temp_str, sizeof(temp_str), "%s (#%.16llx)", string_index, Sid);
+    return temp_str;
+}
+
 void __attribute__((naked)) GivePlayerWeapon_MainCC() {
     __asm {
-        mov r8, [GivePlayerWeapon_index_count]
-        cmp r8, [GivePlayerWeapon_ListMax]
-        jz reset_idx
-        jnz set_ptr
-        reset_idx :
-        mov rax, 0
-        mov[GivePlayerWeapon_index_count], rax
-        mov[GivePlayerWeapon_ptr_offset], rax
-        set_ptr:
-        lea rax, [weapon_list_main]
-        add rax, [GivePlayerWeapon_ptr_offset]
-        mov rax, [rax]
-        mov rdx, 1
-        mov r9, 8
-        add[GivePlayerWeapon_ptr_offset], r9
-        add[GivePlayerWeapon_index_count], rdx
-        cmp [Game_SnprintfAddr], 0
-        jz code_exit
-        lea rcx, [temp_str]
-        mov edx, 128
-        mov r8, [actor_name_fmt]
-        mov    r9, [r15 + 0x8]
-        mov    r9, [rsi + r9 * 1]
-        mov [rsp+0x20], r9
-        mov r9, rax
-        call [Game_SnprintfAddr]
-        lea rax, [temp_str]
-        code_exit:
-        jmp[GivePlayerWeapon_MainReturn]
+        mov rcx, [r15 + 0x8]
+        mov rcx, [rsi + rcx * 1]
+        mov edx, 1
+        call [GivePlayerWeaponMain]
+        jmp [GivePlayerWeapon_MainReturn]
     }
 }
 
 void __attribute__((naked)) GivePlayerWeapon_SubCC() {
     __asm {
-        mov r8, [GivePlayerWeaponSub_index_count]
-        cmp r8, [GivePlayerWeapon_SubListMax]
-        jz reset_idx
-        jnz set_ptr
-        reset_idx :
-        mov rax, 0
-        mov[GivePlayerWeaponSub_index_count], rax
-        mov[GivePlayerWeaponSub_ptr_offset], rax
-        set_ptr :
-        lea rax, [weapon_list_subsection]
-        add rax, [GivePlayerWeaponSub_ptr_offset]
-        mov rax, [rax]
-        mov rdx, 1
-        mov r9, 8
-        add[GivePlayerWeaponSub_ptr_offset], r9
-        add[GivePlayerWeaponSub_index_count], rdx
-        cmp [Game_SnprintfAddr], 0
-        jz code_exit
-        lea rcx, [temp_str]
-        mov edx, 128
-        mov r8, [actor_name_fmt]
-        mov    r9, [r13 + 0x8]
-        mov    r9, [r12 + r9 * 1]
-        mov[rsp + 0x20], r9
-        mov r9, rax
-        call[Game_SnprintfAddr]
-        lea rax, [temp_str]
-        code_exit:
-        jmp[GivePlayerWeapon_SubReturn]
+        mov rcx, [r13 + 0x8]
+        mov rcx, [r12 + rcx * 1]
+        mov edx, 2
+        call [GivePlayerWeaponMain]
+        jmp [GivePlayerWeapon_SubReturn]
     }
 }
 
 void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
     __asm {
-        mov r8, [GivePlayerWeaponEntry_index_count]
-        cmp r8, [GivePlayerWeapon_EntryListMax]
-        jz reset_idx
-        jnz set_ptr
-        reset_idx :
-        mov rax, 0
-        mov[GivePlayerWeaponEntry_index_count], rax
-        mov[GivePlayerWeaponEntry_ptr_offset], rax
-        set_ptr :
-        lea rax, [weapon_subentry_names]
-        add rax, [GivePlayerWeaponEntry_ptr_offset]
-        mov rax, [rax]
-        mov rdx, 1
-        mov r9, 8
-        add[GivePlayerWeaponEntry_ptr_offset], r9
-        add[GivePlayerWeaponEntry_index_count], rdx
-        cmp [Game_SnprintfAddr], 0
-        jz code_exit
-        lea rcx, [temp_str]
-        mov edx, 128
-        mov r8, [actor_name_fmt]
-        mov    r9, [r14 + 0x8]
-        mov    r9, [r15 + r9 * 1]
-        mov[rsp + 0x20], r9
-        mov r9, rax
-        call[Game_SnprintfAddr]
-        lea rax, [temp_str]
-        code_exit:
-        jmp[GivePlayerWeapon_EntryReturn]
+        mov rcx, [r14 + 0x8]
+        mov rcx, [r15 + rcx * 1]
+        mov edx, 3
+        call [GivePlayerWeaponMain]
+        jmp [GivePlayerWeapon_EntryReturn]
     }
 }
 
