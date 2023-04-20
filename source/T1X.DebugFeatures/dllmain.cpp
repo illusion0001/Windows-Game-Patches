@@ -83,6 +83,8 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
+        WritePatchPattern_Hook(Patterns::CrashScriptTest, 14, wstr(Patterns::CrashScriptTest), 0, (void*)CrashTest_OnClick, nullptr);
+        ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
         GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
         uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
         if (GamePrintf && EvalScriptWarns)

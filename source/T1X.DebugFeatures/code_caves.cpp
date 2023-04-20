@@ -1,4 +1,5 @@
 #include "code_caves.hpp"
+#include "memory.hpp"
 
 uint64_t Memory_PushAllocatorReturnAddr = 0;
 void __attribute__((naked)) Memory_PushAllocator_CC() {
@@ -261,6 +262,7 @@ uint64_t GivePlayerWeapon_EntryReturn = 0;
 // Game funcs
 uint64_t Game_SnprintfAddr = 0;
 uint64_t GamePrintf = 0;
+uint64_t ScriptLookupAddr = 0;
 
 void __attribute__((naked)) GivePlayerWeapon_MainCC() {
     __asm {
@@ -364,16 +366,51 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
     }
 }
 
-char temp_buffer[1024];
-
-int ScriptPrintWarn_CC(char* buffer, char* fmt, ...)
+char temp_buffer[256];
+int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
 {
-    memset(temp_buffer, 0, sizeof(temp_buffer));
     va_list args;
     va_start(args, fmt);
-    vsprintf_s(temp_buffer, 256 ,fmt, args);
+    vsprintf_s(temp_buffer, sizeof(temp_buffer), fmt, args);
     va_end(args);
-    int (*GamePrintf_Caller) (char* param_1) = ((int(*) (char* param_1)) (GamePrintf));
+    int (*GamePrintf_Caller) (const char* fmt, ...) = ((int(*) (const char* fmt, ...)) (GamePrintf));
     GamePrintf_Caller(temp_buffer);
+    memset(temp_buffer, 0, sizeof(temp_buffer));
+    return 0;
+}
+
+int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+{
+    if (click_mode == 5)
+    {
+        int (*GamePrintf_Caller) (const char* fmt, ...) = ((int(*) (const char* fmt, ...)) (GamePrintf));
+        uintptr_t (*ScriptManager_LookupClass) (StringId64 sid, int unk) = ((uintptr_t(*) (StringId64 sid, int unk)) (ScriptLookupAddr));
+        GamePrintf_Caller(
+                        str(click_mode)": %i\n"
+                        str(&DMenu)": 0x%p\n"
+                        str(DMenu.DMENU_TEXT)": %s\n"
+                        str(DMenu.DMENU_ARG)": 0x%016llx\n"
+                        str(DMenu.DMENU_FUNC)": 0x%016llx\n",
+                        click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+        const char* native_name = "add-player-weapon-reserve-ammo";
+        StringId64 native_hash = ToStringId64(native_name);
+        uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
+        if (LookupPtr)
+        {
+            LookupPtr = LookupPtr + 8;
+            LookupPtr = Memory::ReadMultiLevelPointer(LookupPtr, { 0x0 });
+            GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
+            void(*NativeFunc) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first) = ((void(*) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first)) (LookupPtr));
+            uint64_t argv_test[] = { 32767 };
+            uint32_t argc = sizeof(argv_test) / sizeof(argv_test[0]);
+            GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
+            NativeFunc(argv_test, argc, &argv_test[0]);
+        }
+        else
+        {
+            GamePrintf_Caller("Can't find #%.16llx (%s)!\n", native_hash, native_name);
+            return 1;
+        }
+    }
     return 0;
 }

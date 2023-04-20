@@ -103,7 +103,8 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
     if (Address_Result)
     {
         Patch_Address = (uintptr_t)Address_Result + Patch_Offset;
-        *Return_Address = Patch_Address + Patch_Size;
+        if (Return_Address)
+            *Return_Address = Patch_Address + Patch_Size;
         Memory::DetourFunction64((void*)(Patch_Address), Function_Target, Patch_Size);
         ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, uintptr_t(Function_Target));
     }
@@ -164,21 +165,6 @@ wchar_t* GetRunningPath(wchar_t* output)
     GetModuleFileNameW(nullptr, output, MAX_PATH);
     PathRemoveFileSpecW(output);
     return output;
-}
-
-#define FNVA1_BASE 0xCBF29CE484222325
-typedef uint64_t StringId64;
-// https://github.com/icemesh/StringId/blob/main/StringId64/main.c
-StringId64 ToStringId64(const char* str)
-{
-    uint64_t base = FNVA1_BASE;
-    if (*str)
-    {
-        do {
-            base = 0x100000001B3 * (base ^ *str++);
-        } while (*str);
-    }
-    return base;
 }
 
 wchar_t* ConvertToWideChar(const char* input)
