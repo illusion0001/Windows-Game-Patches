@@ -84,6 +84,14 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
         WritePatchPattern_Hook(Patterns::CrashScriptTest, 14, wstr(Patterns::CrashScriptTest), 0, (void*)CrashTest_OnClick, nullptr);
+        // Create DMENU Test
+        CreateDevMenuStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::CreateDevMenuStructure));
+        AllocDevMenuMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenuMemoryforStructure));
+        AllocDevMenu1Addr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenu1));
+        DevMenuCreateHeaderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateHeader));
+        DevMenuCreateEntryAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateEntry));
+        WritePatchPattern_Hook(Patterns::MeleeMenuHook, 167, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu_CC, &MeleeMenuHook_ReturnAddr);
+        //
         ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
         GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
         uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));

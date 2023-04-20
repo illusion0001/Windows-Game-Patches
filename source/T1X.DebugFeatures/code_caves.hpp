@@ -9,6 +9,12 @@ extern uint64_t GivePlayerWeapon_EntryReturn;
 extern uint64_t Game_SnprintfAddr;
 extern uint64_t GamePrintf;
 extern uint64_t ScriptLookupAddr;
+extern uint64_t CreateDevMenuStructureAddr;
+extern uint64_t AllocDevMenuMemoryforStructureAddr;
+extern uint64_t AllocDevMenu1Addr;
+extern uint64_t DevMenuCreateHeaderAddr;
+extern uint64_t DevMenuCreateEntryAddr;
+extern uint64_t MeleeMenuHook_ReturnAddr;
 
 struct DMenu_ClickStructure // 200 bytes
 {
@@ -25,4 +31,6 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC();
 void __attribute__((naked)) GivePlayerWeapon_SubCC();
 void __attribute__((naked)) GivePlayerWeapon_EntryCC();
 int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...);
+// void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure);
+void __attribute__((naked)) MakeMeleeMenu_CC();
 int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
