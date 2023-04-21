@@ -354,6 +354,7 @@ int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
 
 bool* test_boolean[100];
 char menu_entry_text[128];
+char BuildVer[128];
 
 const char* AppendEllipsisToText(const char* text)
 {
@@ -372,7 +373,7 @@ const char* FormatEntryText(const char* fmt, ...)
     return menu_entry_text;
 }
 
-void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
+void MakeMeleeMenu(uintptr_t menu_structure)
 {
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure)
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file)
@@ -380,7 +381,6 @@ void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk)
     FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle)
     FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle)
-    CreateDevMenuStructure_Caller(menu_structure, last_menu_structure);
     // Create the header
     uint32_t header_menu_size = 224;
     uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
@@ -392,7 +392,7 @@ void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
 #if 1
-    for (uint32_t i = 1; i < 101; i++)
+    for (uint32_t i = 0; i < 100; i++)
     {
         // Create the bool
         uint32_t bool_menu_size = 192;
@@ -401,7 +401,7 @@ void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
         if (FirstBool_ptr)
         {
             AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
-            BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i), &test_boolean[i], nullptr);
+            BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i + 1), &test_boolean[i], nullptr);
         }
         CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
     }
@@ -412,18 +412,10 @@ void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
     if (entry_ptr)
     {
         AllocDevMenu1_Caller(entry_ptr, 0, entry_menu_size);
-        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, "Example Subtitles");
+        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, BuildVer);
     }
+    CreateDevMenuStructure_Caller(menu_structure, entry_ptr);
     memset(menu_entry_text, 0, sizeof(menu_entry_text));
-}
-
-void __attribute__((naked)) MakeMeleeMenu_CC()
-{
-    __asm
-    {
-        CALL MakeMeleeMenu
-        JMP [MeleeMenuHook_ReturnAddr]
-    }
 }
 
 int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)

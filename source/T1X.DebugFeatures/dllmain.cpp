@@ -7,7 +7,8 @@
 HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define _PROJECT_NAME L"T1X.DebugFeatures"
+#define PROJECT_NAME "T1X.DebugFeatures"
+#define _PROJECT_NAME L"" PROJECT_NAME
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
 wchar_t exePath[_MAX_PATH] = { 0 };
@@ -84,7 +85,6 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
         WritePatchPattern_Hook(Patterns::CrashScriptTest, 14, wstr(Patterns::CrashScriptTest), 0, (void*)CrashTest_OnClick, nullptr);
-        // Create DMENU Test
         AllocMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocMemoryforStructure));
         CreateDevMenuStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::CreateDevMenuStructure));
         AllocDevMenuMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenuMemoryforStructure));
@@ -92,6 +92,14 @@ void ApplyDebugPatches(void)
         DevMenuCreateHeaderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateHeader));
         DevMenuCreateEntryAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateEntry));
         DevMenuAddBoolAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddBool));
+        LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -102,9 +110,9 @@ void ApplyDebugPatches(void)
             DevMenuAddBoolAddr
             )
         {
-            WritePatchPattern_Hook(Patterns::MeleeMenuHook, 167, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu_CC, &MeleeMenuHook_ReturnAddr);
+            _snprintf_s(BuildVer, sizeof(BuildVer), PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
+            WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
         }
-        //
         ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
         GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
         uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
