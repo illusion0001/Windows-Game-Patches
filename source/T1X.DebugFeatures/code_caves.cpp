@@ -352,14 +352,23 @@ int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
     return 0;
 }
 
-bool* test_boolean;
-bool* test_boolean2;
-
+bool* test_boolean[100];
 char menu_entry_text[128];
+
 const char* AppendEllipsisToText(const char* text)
 {
     memset(menu_entry_text, 0, sizeof(menu_entry_text));
     _snprintf_s(menu_entry_text, sizeof(menu_entry_text), "%s...", text);
+    return menu_entry_text;
+}
+
+const char* FormatEntryText(const char* fmt, ...)
+{
+    memset(menu_entry_text, 0, sizeof(menu_entry_text));
+    va_list args;
+    va_start(args, fmt);
+    vsprintf_s(menu_entry_text, sizeof(menu_entry_text), fmt, args);
+    va_end(args);
     return menu_entry_text;
 }
 
@@ -383,25 +392,19 @@ void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
 #if 1
-    // Create the bool
-    uint32_t bool_menu_size = 192;
-    uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    uintptr_t BoolPtr = 0;
-    if (FirstBool_ptr)
+    for (uint32_t i = 1; i < 101; i++)
     {
-        AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
-        BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, "Test Boolean", &test_boolean, nullptr);
+        // Create the bool
+        uint32_t bool_menu_size = 192;
+        uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+        uintptr_t BoolPtr = 0;
+        if (FirstBool_ptr)
+        {
+            AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
+            BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i), &test_boolean[i], nullptr);
+        }
+        CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
     }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
-    // Create the second bool
-    FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    BoolPtr = 0;
-    if (FirstBool_ptr)
-    {
-        AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
-        BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, "Test Boolean2", &test_boolean2, nullptr);
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
 #endif
     // Create the entry point
     uint32_t entry_menu_size = 200;
