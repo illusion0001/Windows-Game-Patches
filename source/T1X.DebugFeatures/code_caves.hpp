@@ -9,11 +9,13 @@ extern uint64_t GivePlayerWeapon_EntryReturn;
 extern uint64_t Game_SnprintfAddr;
 extern uint64_t GamePrintf;
 extern uint64_t ScriptLookupAddr;
+extern uint64_t AllocMemoryforStructureAddr;
 extern uint64_t CreateDevMenuStructureAddr;
 extern uint64_t AllocDevMenuMemoryforStructureAddr;
 extern uint64_t AllocDevMenu1Addr;
 extern uint64_t DevMenuCreateHeaderAddr;
 extern uint64_t DevMenuCreateEntryAddr;
+extern uint64_t DevMenuAddBoolAddr;
 extern uint64_t MeleeMenuHook_ReturnAddr;
 
 struct DMenu_ClickStructure // 200 bytes

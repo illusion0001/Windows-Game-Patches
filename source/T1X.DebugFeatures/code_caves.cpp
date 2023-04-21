@@ -258,11 +258,13 @@ uint64_t Game_SnprintfAddr = 0;
 uint64_t GamePrintf = 0;
 uint64_t ScriptLookupAddr = 0;
 
+uint64_t AllocMemoryforStructureAddr = 0;
 uint64_t CreateDevMenuStructureAddr = 0;
 uint64_t AllocDevMenuMemoryforStructureAddr = 0;
 uint64_t AllocDevMenu1Addr = 0;
 uint64_t DevMenuCreateHeaderAddr = 0;
 uint64_t DevMenuCreateEntryAddr = 0;
+uint64_t DevMenuAddBoolAddr = 0;
 uint64_t MeleeMenuHook_ReturnAddr = 0;
 
 char temp_str[128];
@@ -346,28 +348,66 @@ int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
     return 0;
 }
 
+bool* test_boolean;
+bool* test_boolean2;
+
+char menu_entry_text[128];
+const char* AppendEllipsisToText(const char* text)
+{
+    _snprintf_s(menu_entry_text, sizeof(menu_entry_text), "%s...", text);
+    return menu_entry_text;
+}
+
 void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
 {
+    // uintptr_t(*AllocMemoryforStructure) (uint32_t structure_size) = ((uintptr_t(*) (uint32_t structure_size)) (AllocMemoryforStructureAddr));
     uintptr_t(*CreateDevMenuStructure_Caller) (uintptr_t menu_structure, uintptr_t last_menu_structure) = ((uintptr_t(*) (uintptr_t menu_structure, uintptr_t last_menu_structure)) (CreateDevMenuStructureAddr));
-    uintptr_t(*AllocDevMenuMemoryforStructure_Caller) (uint32_t menu_size, uint32_t unk, const char* source_line, uint32_t unk2) = ((uintptr_t(*) (uint32_t menu_size, uint32_t unk, const char* source_line, uint32_t unk2)) (AllocDevMenuMemoryforStructureAddr));
+    uintptr_t(*AllocDevMenuMemoryforStructure_Caller) (uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file) = ((uintptr_t(*) (uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file)) (AllocDevMenuMemoryforStructureAddr));
     void(*AllocDevMenu1_Caller) (uintptr_t menu_structure_ptr, uint32_t unk, uint32_t menu_size) = ((void(*) (uintptr_t menu_structure_ptr, uint32_t unk, uint32_t menu_size)) (AllocDevMenu1Addr));
     uintptr_t(*DevMenuCreateHeader_Caller) (uintptr_t menu_structure_ptr, const char* name, uint32_t unk) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* name, uint32_t unk)) (DevMenuCreateHeaderAddr));
+    uintptr_t(*DevMenuAddBool_Caller) (uintptr_t menu_structure_ptr, const char* bool_name, bool ** bool_var, const char* bool_subtitle) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle)) (DevMenuAddBoolAddr));
     uintptr_t(*DevMenuCreateEntry_Caller) (uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle)) (DevMenuCreateEntryAddr));
     CreateDevMenuStructure_Caller(menu_structure, last_menu_structure);
-    uint32_t menu_size1 = 224;
-    uintptr_t ptr = AllocDevMenuMemoryforStructure_Caller(menu_size1, 0x10, "UNKNOWN", 0);
-    if (ptr)
+    // Create the header
+    uint32_t header_menu_size = 224;
+    uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t SubHeaderPtr = 0;
+    const char* MyMenuEntryText = "Example Menu";
+    if (Header_ptr)
     {
-        AllocDevMenu1_Caller(ptr, 0, menu_size1);
-        DevMenuCreateHeader_Caller(ptr, "Hi", 0);
+        AllocDevMenu1_Caller(Header_ptr, 0, header_menu_size);
+        SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
-    menu_size1 = 200;
-    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(menu_size1, 0x10, __FUNCSIG__, 0);
+#if 1
+    // Create the bool
+    uint32_t bool_menu_size = 192;
+    uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t BoolPtr = 0;
+    if (FirstBool_ptr)
+    {
+        AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
+        BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, "Test Boolean", &test_boolean, nullptr);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
+    // Create the second bool
+    FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    BoolPtr = 0;
+    if (FirstBool_ptr)
+    {
+        AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
+        BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, "Test Boolean2", &test_boolean2, nullptr);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
+#endif
+    // Create the entry point
+    uint32_t entry_menu_size = 200;
+    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     if (entry_ptr)
     {
-        AllocDevMenu1_Caller(entry_ptr, 0, menu_size1);
-        DevMenuCreateEntry_Caller(entry_ptr, "Hi...", ptr, 0, 0, __FUNCSIG__);
+        AllocDevMenu1_Caller(entry_ptr, 0, entry_menu_size);
+        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, "Example Subtitles");
     }
+    memset(menu_entry_text, 0, sizeof(menu_entry_text));
 }
 
 void __attribute__((naked)) MakeMeleeMenu_CC()
