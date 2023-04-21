@@ -16,6 +16,7 @@ extern uint64_t AllocDevMenu1Addr;
 extern uint64_t DevMenuCreateHeaderAddr;
 extern uint64_t DevMenuCreateEntryAddr;
 extern uint64_t DevMenuAddBoolAddr;
+extern uint64_t DevMenuAddFuncButtonAddr;
 extern uint64_t MeleeMenuHook_ReturnAddr;
 extern char BuildVer[128];
 
@@ -35,4 +36,3 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC();
 void __attribute__((naked)) GivePlayerWeapon_EntryCC();
 int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...);
 void MakeMeleeMenu(uintptr_t menu_structure);
-int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);

@@ -265,6 +265,7 @@ uint64_t AllocDevMenu1Addr = 0;
 uint64_t DevMenuCreateHeaderAddr = 0;
 uint64_t DevMenuCreateEntryAddr = 0;
 uint64_t DevMenuAddBoolAddr = 0;
+uint64_t DevMenuAddFuncButtonAddr = 0;
 uint64_t MeleeMenuHook_ReturnAddr = 0;
 
 char temp_str[128];
@@ -373,14 +374,18 @@ const char* FormatEntryText(const char* fmt, ...)
     return menu_entry_text;
 }
 
+int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
+int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
+
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure)
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file)
-    FUNCTION_PTR(void, AllocDevMenu1_Caller, AllocDevMenu1Addr, uintptr_t menu_structure_ptr, uint32_t unk, uint32_t structure_size)
-    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk)
-    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle)
-    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle)
+    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
+    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
+    FUNCTION_PTR(void, AllocDevMenu1_Caller, AllocDevMenu1Addr, uintptr_t menu_structure_ptr, uint32_t unk, uint32_t structure_size);
+    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
+    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle);
+    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void** func_target, uint32_t arg, void* unk);
+    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle);
     // Create the header
     uint32_t header_menu_size = 224;
     uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
@@ -391,7 +396,25 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         AllocDevMenu1_Caller(Header_ptr, 0, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
-#if 1
+    uint32_t func_button_size = 200;
+    uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Fill ammo", (void**)CrashTest_OnClick, 0, nullptr);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+    func_button_size = 200;
+    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void**)SetPlayerHealth_OnClick, 20, nullptr);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+#if 0
     for (uint32_t i = 0; i < 100; i++)
     {
         // Create the bool
@@ -418,12 +441,47 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     memset(menu_entry_text, 0, sizeof(menu_entry_text));
 }
 
-int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
 {
+    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
     if (click_mode == 5)
     {
-        FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...)
-        // uintptr_t (*ScriptManager_LookupClass) (StringId64 sid, int unk) = ((uintptr_t(*) (StringId64 sid, int unk)) (ScriptLookupAddr));
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk)
+        GamePrintf_Caller(
+                        str(click_mode)": %i\n"
+                        str(&DMenu)": 0x%p\n"
+                        str(DMenu.DMENU_TEXT)": %s\n"
+                        str(DMenu.DMENU_ARG)": 0x%016llx\n"
+                        str(DMenu.DMENU_FUNC)": 0x%016llx\n",
+                        click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+        const char* native_name = "set-player-health";
+        StringId64 native_hash = ToStringId64(native_name);
+        uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
+        if (LookupPtr)
+        {
+            LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
+            GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint32_t argc, uint64_t * argv_first);
+            uint64_t _argv[] = { DMenu.DMENU_ARG };
+            uint32_t argc = sizeof(_argv) / sizeof(_argv[0]);
+            GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
+            NativeFunc(_argv, argc, &_argv[0]);
+            return 1;
+        }
+        else
+        {
+            GamePrintf_Caller("Can't find #%.16llx (%s)!\n", native_hash, native_name);
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+{
+    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
+    if (click_mode == 5)
+    {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk)
         GamePrintf_Caller(
                         str(click_mode)": %i\n"
@@ -437,15 +495,13 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
         if (LookupPtr)
         {
-            LookupPtr = LookupPtr + 8;
-            LookupPtr = Memory::ReadMultiLevelPointer(LookupPtr, { 0x0 });
+            LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
             GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
-            // void(*NativeFunc) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first) = ((void(*) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first)) (LookupPtr));
-            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint64_t argc, uintptr_t *argv_first)
-            uint64_t argv_test[] = { 32767 };
-            uint32_t argc = sizeof(argv_test) / sizeof(argv_test[0]);
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint32_t argc, uint64_t *argv_first);
+            uint64_t _argv[] = { 32767 };
+            uint32_t argc = sizeof(_argv) / sizeof(_argv[0]);
             GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
-            NativeFunc(argv_test, argc, &argv_test[0]);
+            NativeFunc(_argv, argc, &_argv[0]);
             return 1;
         }
         else

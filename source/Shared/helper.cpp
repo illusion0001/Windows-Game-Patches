@@ -117,7 +117,6 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
             LOG(L"Please make sure it is intentional\n");
         }
         Memory::DetourFunction64((void*)(Patch_Address), Function_Target, Patch_Size);
-        // ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, uintptr_t(Function_Target));
     }
     else
     {

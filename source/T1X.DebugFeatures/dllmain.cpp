@@ -64,6 +64,11 @@ void ReadConfig(void)
     LOG(L"%s: %s (%i)\n", wstr(bExtendedDebugMenu), GetBoolStr(bExtendedDebugMenu), bExtendedDebugMenu);
 }
 
+int nullsub_int()
+{
+    return 0;
+}
+
 void ApplyDebugPatches(void)
 {
     if (bDebugMenu)
@@ -84,7 +89,6 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
-        WritePatchPattern_Hook(Patterns::CrashScriptTest, 14, wstr(Patterns::CrashScriptTest), 0, (void*)CrashTest_OnClick, nullptr);
         AllocMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocMemoryforStructure));
         CreateDevMenuStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::CreateDevMenuStructure));
         AllocDevMenuMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenuMemoryforStructure));
@@ -92,14 +96,7 @@ void ApplyDebugPatches(void)
         DevMenuCreateHeaderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateHeader));
         DevMenuCreateEntryAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateEntry));
         DevMenuAddBoolAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddBool));
-        LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
+        DevMenuAddFuncButtonAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddFuncButton));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -107,19 +104,36 @@ void ApplyDebugPatches(void)
             AllocDevMenu1Addr &&
             DevMenuCreateHeaderAddr &&
             DevMenuCreateEntryAddr &&
-            DevMenuAddBoolAddr
+            DevMenuAddBoolAddr &&
+            DevMenuAddFuncButtonAddr
             )
         {
             _snprintf_s(BuildVer, sizeof(BuildVer), PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
         }
+        else
+        {
+            LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
+            LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddFuncButtonAddr), DevMenuAddFuncButtonAddr);
+            LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
+        }
         ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
         GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
         uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
-        if (GamePrintf && EvalScriptWarns)
+        if (EvalScriptWarns)
         {
-            LOG(wstr(GamePrintf) L": 0x%016llx\n", GamePrintf);
-            LOG(wstr(EvalScriptWarns) L": 0x%016llx\n", EvalScriptWarns);
+            if (!GamePrintf)
+            {
+                LOG(L"Using fallback for %s\n", wstr(GamePrintf));
+                GamePrintf = uintptr_t(&nullsub_int);
+                LOG(L"%s: 0x%016llx\n", wstr(GamePrintf), GamePrintf);
+            }
             // First param is buffer
             // Sprintf eqiv
             const unsigned char jmp_rcx[] = { 0x48, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe1 };
@@ -129,6 +143,11 @@ void ApplyDebugPatches(void)
             memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
             WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
             Memory::DetourFunction32((void*)EvalScriptWarns, (void*)GamePrintf, 5);
+        }
+        else
+        {
+            LOG(wstr(GamePrintf) L": 0x%016llx\n", GamePrintf);
+            LOG(wstr(EvalScriptWarns) L": 0x%016llx\n", EvalScriptWarns);
         }
     }
     if (bShowDebugConsole)
