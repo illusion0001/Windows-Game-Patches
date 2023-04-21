@@ -16,7 +16,7 @@ void log_time(void)
 
 void file_log(const wchar_t* fmt, ...)
 {
-    if (!bLoggingEnabled)
+    if (!bLoggingEnabled || !fp_log)
         return;
     log_time();
     va_list args;
@@ -27,7 +27,7 @@ void file_log(const wchar_t* fmt, ...)
 
 void file_log2(const wchar_t* fmt, ...)
 {
-    if (!bLoggingEnabled)
+    if (!bLoggingEnabled || !fp_log)
         return;
     va_list args;
     va_start(args, fmt);
@@ -104,9 +104,20 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
     {
         Patch_Address = (uintptr_t)Address_Result + Patch_Offset;
         if (Return_Address)
+        {
             *Return_Address = Patch_Address + Patch_Size;
+            LOG(L"%s Hook Info:\n", Patch_Name);
+            LOG(L"Start address: 0x%016llx\n", Address_Result);
+            LOG(L"Return address: 0x%016llx\n", *Return_Address);
+            LOG(L"Function target address: 0x%016llx\n", uintptr_t(Function_Target));
+        }
+        else
+        {
+            LOG(L"%s Hook does not contain a returning address\n", Patch_Name);
+            LOG(L"Please make sure it is intentional\n");
+        }
         Memory::DetourFunction64((void*)(Patch_Address), Function_Target, Patch_Size);
-        ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, uintptr_t(Function_Target));
+        // ShowPatchInfo(Patch_Size, Patch_Address, Patch_Name, uintptr_t(Function_Target));
     }
     else
     {
