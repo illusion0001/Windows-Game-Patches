@@ -335,6 +335,10 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
     }
 }
 
+#define FUNCTION_PTR(return_type, func_name, func_addr, ...) \
+    typedef return_type (*func_name##_t)(__VA_ARGS__); \
+    func_name##_t func_name = (func_name##_t)(func_addr);
+
 char temp_buffer[256];
 int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
 {
@@ -342,7 +346,7 @@ int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
     va_start(args, fmt);
     vsprintf_s(temp_buffer, sizeof(temp_buffer), fmt, args);
     va_end(args);
-    int (*GamePrintf_Caller) (const char* fmt, ...) = ((int(*) (const char* fmt, ...)) (GamePrintf));
+    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...)
     GamePrintf_Caller(temp_buffer);
     memset(temp_buffer, 0, sizeof(temp_buffer));
     return 0;
@@ -354,19 +358,19 @@ bool* test_boolean2;
 char menu_entry_text[128];
 const char* AppendEllipsisToText(const char* text)
 {
+    memset(menu_entry_text, 0, sizeof(menu_entry_text));
     _snprintf_s(menu_entry_text, sizeof(menu_entry_text), "%s...", text);
     return menu_entry_text;
 }
 
 void MakeMeleeMenu(uintptr_t menu_structure, uintptr_t last_menu_structure)
 {
-    // uintptr_t(*AllocMemoryforStructure) (uint32_t structure_size) = ((uintptr_t(*) (uint32_t structure_size)) (AllocMemoryforStructureAddr));
-    uintptr_t(*CreateDevMenuStructure_Caller) (uintptr_t menu_structure, uintptr_t last_menu_structure) = ((uintptr_t(*) (uintptr_t menu_structure, uintptr_t last_menu_structure)) (CreateDevMenuStructureAddr));
-    uintptr_t(*AllocDevMenuMemoryforStructure_Caller) (uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file) = ((uintptr_t(*) (uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file)) (AllocDevMenuMemoryforStructureAddr));
-    void(*AllocDevMenu1_Caller) (uintptr_t menu_structure_ptr, uint32_t unk, uint32_t menu_size) = ((void(*) (uintptr_t menu_structure_ptr, uint32_t unk, uint32_t menu_size)) (AllocDevMenu1Addr));
-    uintptr_t(*DevMenuCreateHeader_Caller) (uintptr_t menu_structure_ptr, const char* name, uint32_t unk) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* name, uint32_t unk)) (DevMenuCreateHeaderAddr));
-    uintptr_t(*DevMenuAddBool_Caller) (uintptr_t menu_structure_ptr, const char* bool_name, bool ** bool_var, const char* bool_subtitle) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle)) (DevMenuAddBoolAddr));
-    uintptr_t(*DevMenuCreateEntry_Caller) (uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle) = ((uintptr_t(*) (uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle)) (DevMenuCreateEntryAddr));
+    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure)
+    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file)
+    FUNCTION_PTR(void, AllocDevMenu1_Caller, AllocDevMenu1Addr, uintptr_t menu_structure_ptr, uint32_t unk, uint32_t structure_size)
+    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk)
+    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle)
+    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle)
     CreateDevMenuStructure_Caller(menu_structure, last_menu_structure);
     // Create the header
     uint32_t header_menu_size = 224;
@@ -415,7 +419,6 @@ void __attribute__((naked)) MakeMeleeMenu_CC()
     __asm
     {
         CALL MakeMeleeMenu
-        //CALL MakeMeleeMenu2
         JMP [MeleeMenuHook_ReturnAddr]
     }
 }
@@ -424,8 +427,9 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
 {
     if (click_mode == 5)
     {
-        int (*GamePrintf_Caller) (const char* fmt, ...) = ((int(*) (const char* fmt, ...)) (GamePrintf));
-        uintptr_t (*ScriptManager_LookupClass) (StringId64 sid, int unk) = ((uintptr_t(*) (StringId64 sid, int unk)) (ScriptLookupAddr));
+        FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...)
+        // uintptr_t (*ScriptManager_LookupClass) (StringId64 sid, int unk) = ((uintptr_t(*) (StringId64 sid, int unk)) (ScriptLookupAddr));
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk)
         GamePrintf_Caller(
                         str(click_mode)": %i\n"
                         str(&DMenu)": 0x%p\n"
@@ -441,16 +445,17 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             LookupPtr = LookupPtr + 8;
             LookupPtr = Memory::ReadMultiLevelPointer(LookupPtr, { 0x0 });
             GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
-            void(*NativeFunc) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first) = ((void(*) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first)) (LookupPtr));
+            // void(*NativeFunc) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first) = ((void(*) (uint64_t argv[], uint64_t argc, uintptr_t *argv_first)) (LookupPtr));
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint64_t argc, uintptr_t *argv_first)
             uint64_t argv_test[] = { 32767 };
             uint32_t argc = sizeof(argv_test) / sizeof(argv_test[0]);
             GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
             NativeFunc(argv_test, argc, &argv_test[0]);
+            return 1;
         }
         else
         {
             GamePrintf_Caller("Can't find #%.16llx (%s)!\n", native_hash, native_name);
-            return 1;
         }
     }
     return 0;
