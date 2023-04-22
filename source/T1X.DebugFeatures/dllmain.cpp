@@ -8,9 +8,7 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
 #define PROJECT_NAME "T1X.DebugFeatures"
-#define _PROJECT_NAME L"" PROJECT_NAME
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
-#define _PROJECT_LOG_PATH L"" PROJECT_LOG_PATH
 #define BUILD_TIME PROJECT_NAME " Built: " __DATE__ " @ " __TIME__
 
 wchar_t exePath[_MAX_PATH] = { 0 };
@@ -30,7 +28,7 @@ void ReadConfig(void)
     LOG(L"Game Path: %s\n", exePath);
 
     // Initialize config
-    std::wstring config_path = _PROJECT_NAME L".ini";
+    std::wstring config_path = L"" PROJECT_NAME ".ini";
     std::wifstream iniFile(config_path);
     if (!iniFile)
     {
@@ -109,11 +107,11 @@ void ApplyDebugPatches(void)
             MeleeMenuResult
             )
         {
-            _snprintf_s(BuildVer, sizeof(BuildVer), BUILD_TIME);
+            strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
         }
-        ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
-        uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
+        ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
+        uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
         if (EvalScriptWarns)
         {
             // First param is buffer
@@ -175,8 +173,8 @@ void __stdcall Main()
     fDebugMenuSize = 0.6;
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
-    _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
-    LoggingInit(_PROJECT_NAME, LogPath);
+    _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, L"" PROJECT_LOG_PATH);
+    LoggingInit(L"" PROJECT_NAME, LogPath);
     ReadConfig();
     ApplyDebugPatches();
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
