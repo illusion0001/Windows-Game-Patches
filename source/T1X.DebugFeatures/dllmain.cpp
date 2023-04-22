@@ -89,25 +89,16 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
-        AllocMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocMemoryforStructure));
-        CreateDevMenuStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::CreateDevMenuStructure));
-        AllocDevMenuMemoryforStructureAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenuMemoryforStructure));
-        AllocDevMenu1Addr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::AllocDevMenu1));
-        DevMenuCreateHeaderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateHeader));
-        DevMenuCreateEntryAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateEntry));
-        DevMenuAddBoolAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddBool));
-        DevMenuAddFuncButtonAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddFuncButton));
-        DevMenuAddIntSliderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddIntSlider));
-        LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddFuncButtonAddr), DevMenuAddFuncButtonAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddIntSliderAddr), DevMenuAddIntSliderAddr);
-        LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
+        AllocMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocMemoryforStructure, wstr(Patterns::AllocMemoryforStructure));
+        CreateDevMenuStructureAddr = FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
+        AllocDevMenuMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
+        AllocDevMenu1Addr = FindAndPrintPatternW(Patterns::AllocDevMenu1, wstr(Patterns::AllocDevMenu1));
+        DevMenuCreateHeaderAddr = FindAndPrintPatternW(Patterns::DevMenuCreateHeader, wstr(Patterns::DevMenuCreateHeader));
+        DevMenuCreateEntryAddr = FindAndPrintPatternW(Patterns::DevMenuCreateEntry, wstr(Patterns::DevMenuCreateEntry));
+        DevMenuAddBoolAddr = FindAndPrintPatternW(Patterns::DevMenuAddBool, wstr(Patterns::DevMenuAddBool));
+        DevMenuAddFuncButtonAddr = FindAndPrintPatternW(Patterns::DevMenuAddFuncButton, wstr(Patterns::DevMenuAddFuncButton));
+        DevMenuAddIntSliderAddr = FindAndPrintPatternW(Patterns::DevMenuAddIntSlider, wstr(Patterns::DevMenuAddIntSlider));
+        uintptr_t MeleeMenuResult = FindAndPrintPatternW(Patterns::MeleeMenuHook, wstr(Patterns::MeleeMenuHook));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -117,7 +108,8 @@ void ApplyDebugPatches(void)
             DevMenuCreateEntryAddr &&
             DevMenuAddBoolAddr &&
             DevMenuAddFuncButtonAddr &&
-            DevMenuAddIntSliderAddr
+            DevMenuAddIntSliderAddr &&
+            MeleeMenuResult
             )
         {
             _snprintf_s(BuildVer, sizeof(BuildVer), PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");

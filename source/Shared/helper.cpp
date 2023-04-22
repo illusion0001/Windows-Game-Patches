@@ -206,3 +206,21 @@ uintptr_t FindNativeAddr(const char* input_native)
     }
     return 0;
 }
+
+uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name)
+{
+    uint8_t* Address_Result = nullptr;
+    Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
+    uintptr_t Patch_Address = 0;
+    if (Address_Result)
+    {
+        Patch_Address = uintptr_t(Address_Result);
+        LOG(L"%s: 0x%016llx\n", Pattern_Name, Patch_Address);
+        return Patch_Address;
+    }
+    else
+    {
+        LogPatchFailed(Pattern_Name, Patch_Pattern);
+    }
+    return 0;
+}
