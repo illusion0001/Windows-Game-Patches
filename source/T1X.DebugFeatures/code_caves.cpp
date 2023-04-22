@@ -254,8 +254,6 @@ uint32_t GivePlayerWeaponEntry_index_count = 0;
 uint64_t GivePlayerWeapon_EntryReturn = 0;
 
 // Game funcs
-uint64_t Game_SnprintfAddr = 0;
-uint64_t GamePrintf = 0;
 uint64_t ScriptLookupAddr = 0;
 
 char temp_str[128];
@@ -327,16 +325,15 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
 }
 
 char temp_buffer[256];
-int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
+const char* ScriptPrintWarn_CC(void* unused, char* fmt, ...)
 {
+    memset(temp_buffer, 0, sizeof(temp_buffer));
     va_list args;
     va_start(args, fmt);
     vsprintf_s(temp_buffer, sizeof(temp_buffer), fmt, args);
     va_end(args);
-    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...)
-    GamePrintf_Caller(temp_buffer);
-    memset(temp_buffer, 0, sizeof(temp_buffer));
-    return 0;
+    printf_s(temp_buffer);
+    return temp_buffer;
 }
 
 uint64_t AllocMemoryforStructureAddr = 0;
@@ -469,12 +466,11 @@ void MakeMeleeMenu(uintptr_t menu_structure)
 
 int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
 {
-    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
     if (click_mode == 5)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int);
-        GamePrintf_Caller(
+        printf_s(
                         str(click_mode)": %i\n"
                         str(&DMenu)": 0x%p\n"
                         str(DMenu.DMENU_TEXT)": %s\n"
@@ -487,7 +483,7 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
         if (LookupPtr)
         {
             LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
-            GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
+            printf_s("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
             struct health_args
             {
                 int32_t health = test_int;
@@ -495,13 +491,13 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             health_args _health_args;
             FUNCTION_PTR(void, NativeFunc, LookupPtr, health_args* args, uint32_t argc, int32_t * argv_first);
             uint32_t argc = 1;
-            GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
+            printf_s("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
             NativeFunc(&_health_args, argc, &_health_args.health);
             return 1;
         }
         else
         {
-            GamePrintf_Caller("Can't find #%.16llx (%s)!\n", native_hash, native_name);
+            printf_s("Can't find #%.16llx (%s)!\n", native_hash, native_name);
             return 0;
         }
     }
@@ -510,12 +506,11 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
 
 int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
 {
-    FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
     if (click_mode == 5)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int2);
-        GamePrintf_Caller(
+        printf_s(
                         str(click_mode)": %i\n"
                         str(&DMenu)": 0x%p\n"
                         str(DMenu.DMENU_TEXT)": %s\n"
@@ -528,7 +523,7 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
         if (LookupPtr)
         {
             LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
-            GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
+            printf_s("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
             struct ammo_args
             {
                 int32_t ammo_count = test_int2;
@@ -536,13 +531,13 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             ammo_args _ammo_args;
             FUNCTION_PTR(void, NativeFunc, LookupPtr, ammo_args *args, uint32_t argc, int32_t *argv_first);
             uint32_t argc = 1;
-            GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
+            printf_s("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
             NativeFunc(&_ammo_args, argc, &_ammo_args.ammo_count);
             return 1;
         }
         else
         {
-            GamePrintf_Caller("Can't find #%.16llx (%s)!\n", native_hash, native_name);
+            printf_s("Can't find #%.16llx (%s)!\n", native_hash, native_name);
         }
     }
     return 0;

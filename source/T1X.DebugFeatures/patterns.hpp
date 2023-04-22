@@ -1,11 +1,8 @@
 namespace Patterns
 {
 	const wchar_t* DevMenu_MenuSize = L"c7 41 ?? 9a 99 19 3f 49 8b d1 c6 41 ?? 00 44 89 51 ??";
-	const wchar_t* ConsoleOutput = L"0f 45 ce 88 0d ?? ?? ?? ?? 48 8d ?? ?? ?? ?? ?? e8 ?? ?? ?? ??";
 	const wchar_t* m_onDisc_DevMenu = L"8a 8f ?? ?? ?? ?? 84 c9 0f 94 c2 84 c9 0f 95 c1";
-	const wchar_t* GameSnprintf = L"4c 89 44 24 18 4c 89 4c 24 20 53 55 56 57 48 83 ec 38 49 8b f0 48 8d 6c 24 78 48 8b fa 48 8b d9 e8 ?? ?? ?? ?? 48 89 6c 24 28 4c 8b ce 48 83 64 24 20 00 4c 8b c7 48 8b d3 48 8b 08 48 83 c9 01 e8 ?? ?? ?? ?? 83 c9 ff 85 c0 0f 48 c1 48 83 c4 38 5f 5e 5d 5b c3";
 	const wchar_t* GameWarnScriptPrint = L"4c 89 44 24 18 4c 89 4c 24 20 c3 cc 48 89 5c 24 08 57 48 83 ec 30";
-	const wchar_t* GamePrintf = L"48 8b c4 48 89 48 08 48 89 50 10 4c 89 40 18 4c 89 48 20 53 48 83 ec 20 b9 01 00 00 00 48 8d 58 10 e8 ?? ?? ?? ?? 48 8b 54 24 30 4c 8b cb 45 33 c0 48 8b c8 e8 ?? ?? ?? ?? 48 83 c4 20 5b c3";
 	const wchar_t* GameWarnScriptPrint2 = L"48 89 54 24 10 4c 89 44 24 18 4c 89 4c 24 20 c3 48 89 54 24 10 4c 89 44 24 18 4c 89 4c 24 20 c3 48 89 5c 24 18 48 89 74 24 20 55 57 41 55 41 56 41 57 48 8d ac 24 60 fc ff ff";
 	const wchar_t* CrashScriptTest = L"48 83 ec 28 83 fa 05 75 ?? 48 b9 f5 b8 48 3d 53 2e 17 90";
 	const wchar_t* ScriptManager_LookupClass = L"40 53 48 83 ec ?? 48 8b da e8 ?? ?? ?? ?? 48 85 c0 75 ?? 48 8b c3 eb ?? 48 8b 00 48 83 c4 ?? 5b c3";

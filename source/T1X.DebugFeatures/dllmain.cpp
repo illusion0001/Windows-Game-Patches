@@ -9,7 +9,9 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define wxstr(s) wstr(s)
 #define PROJECT_NAME "T1X.DebugFeatures"
 #define _PROJECT_NAME L"" PROJECT_NAME
-#define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
+#define PROJECT_LOG_PATH PROJECT_NAME ".log"
+#define _PROJECT_LOG_PATH L"" PROJECT_LOG_PATH
+#define BUILD_TIME PROJECT_NAME " Built: " __DATE__ " @ " __TIME__
 
 wchar_t exePath[_MAX_PATH] = { 0 };
 
@@ -23,7 +25,7 @@ void ReadConfig(void)
 {
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
-    LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
+    LOG(L"" BUILD_TIME "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
 
@@ -64,10 +66,7 @@ void ReadConfig(void)
     LOG(L"%s: %s (%i)\n", wstr(bExtendedDebugMenu), GetBoolStr(bExtendedDebugMenu), bExtendedDebugMenu);
 }
 
-int nullsub_int()
-{
-    return 0;
-}
+FILE* fGame;
 
 void ApplyDebugPatches(void)
 {
@@ -82,8 +81,6 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Int(4, Patterns::DevMenu_MenuSize, (void*)*(uint32_t*)&fDebugMenuSize, wstr(Patterns::DevMenu_MenuSize), 3);
         const unsigned char mov_ecx_0[] = { 0xb9, 0x00, 0x00, 0x00, 0x00, 0x90 };
         const unsigned char nop1x[] = { 0x90 };
-        Game_SnprintfAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameSnprintf));
-        LOG(wstr(Patterns::GameSnprintf) L": 0x%016llx\n", Game_SnprintfAddr);
         WritePatchPattern(Patterns::m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(Patterns::m_onDisc_DevMenu), 0);
         WritePatchPattern(Patterns::Assert_LevelDef_LevelManifst, nop1x, sizeof(nop1x), wstr(Patterns::Assert_LevelDef_LevelManifst), 30);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
@@ -112,20 +109,13 @@ void ApplyDebugPatches(void)
             MeleeMenuResult
             )
         {
-            _snprintf_s(BuildVer, sizeof(BuildVer), PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
+            _snprintf_s(BuildVer, sizeof(BuildVer), BUILD_TIME);
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
         }
         ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
-        GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));
         uintptr_t EvalScriptWarns = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GameWarnScriptPrint2));
         if (EvalScriptWarns)
         {
-            if (!GamePrintf)
-            {
-                LOG(L"Using fallback for %s\n", wstr(GamePrintf));
-                GamePrintf = uintptr_t(&nullsub_int);
-                LOG(L"%s: 0x%016llx\n", wstr(GamePrintf), GamePrintf);
-            }
             // First param is buffer
             // Sprintf eqiv
             const unsigned char jmp_rcx[] = { 0x48, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe1 };
@@ -134,18 +124,20 @@ void ApplyDebugPatches(void)
             uintptr_t hook_ptr = uintptr_t((void*)ScriptPrintWarn_CC);
             memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
             WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
-            Memory::DetourFunction32((void*)EvalScriptWarns, (void*)GamePrintf, 5);
         }
         else
         {
-            LOG(wstr(GamePrintf) L": 0x%016llx\n", GamePrintf);
             LOG(wstr(EvalScriptWarns) L": 0x%016llx\n", EvalScriptWarns);
         }
     }
     if (bShowDebugConsole)
     {
-        const unsigned char mov_cl_1_nop[] = { 0xb1, 0x01, 0x90 };
-        WritePatchPattern(Patterns::ConsoleOutput, mov_cl_1_nop, sizeof(mov_cl_1_nop), wstr(Patterns::ConsoleOutput), 0);
+        AllocConsole();
+        freopen_s(&fGame, "CONOUT$", "w", stdout);
+        freopen_s(&fGame, "CONOUT$", "w", stderr);
+        freopen_s(&fGame, "CONOUT$", "w", stdin);
+        printf_s(BUILD_TIME "\n");
+        fprintf_s(fGame, BUILD_TIME "\n");
     }
     if (bExtendedDebugMenu)
     {

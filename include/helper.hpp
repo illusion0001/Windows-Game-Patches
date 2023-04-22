@@ -6,6 +6,7 @@
 extern HMODULE baseModule;
 extern bool bLoggingEnabled;
 extern FILE* fp_log;
+extern FILE* fGame;
 extern std::time_t current_time;
 extern struct tm timeinfo;
 
