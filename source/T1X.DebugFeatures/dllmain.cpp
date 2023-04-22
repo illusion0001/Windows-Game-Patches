@@ -97,6 +97,17 @@ void ApplyDebugPatches(void)
         DevMenuCreateEntryAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuCreateEntry));
         DevMenuAddBoolAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddBool));
         DevMenuAddFuncButtonAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddFuncButton));
+        DevMenuAddIntSliderAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::DevMenuAddIntSlider));
+        LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddFuncButtonAddr), DevMenuAddFuncButtonAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddIntSliderAddr), DevMenuAddIntSliderAddr);
+        LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -105,23 +116,12 @@ void ApplyDebugPatches(void)
             DevMenuCreateHeaderAddr &&
             DevMenuCreateEntryAddr &&
             DevMenuAddBoolAddr &&
-            DevMenuAddFuncButtonAddr
+            DevMenuAddFuncButtonAddr &&
+            DevMenuAddIntSliderAddr
             )
         {
             _snprintf_s(BuildVer, sizeof(BuildVer), PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
-        }
-        else
-        {
-            LOG(L"%s: 0x%016llx\n", wstr(AllocMemoryforStructureAddr), AllocMemoryforStructureAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(CreateDevMenuStructureAddr), CreateDevMenuStructureAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenuMemoryforStructureAddr), AllocDevMenuMemoryforStructureAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(AllocDevMenu1Addr), AllocDevMenu1Addr);
-            LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateHeaderAddr), DevMenuCreateHeaderAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(DevMenuCreateEntryAddr), DevMenuCreateEntryAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddBoolAddr), DevMenuAddBoolAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(DevMenuAddFuncButtonAddr), DevMenuAddFuncButtonAddr);
-            LOG(L"%s: 0x%016llx\n", wstr(Patterns::MeleeMenuHook), uintptr_t(Memory::PatternScanW(baseModule, Patterns::MeleeMenuHook)));
         }
         ScriptLookupAddr = uintptr_t(Memory::PatternScanW(baseModule, Patterns::ScriptManager_LookupClass));
         GamePrintf = uintptr_t(Memory::PatternScanW(baseModule, Patterns::GamePrintf));

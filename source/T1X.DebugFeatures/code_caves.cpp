@@ -258,16 +258,6 @@ uint64_t Game_SnprintfAddr = 0;
 uint64_t GamePrintf = 0;
 uint64_t ScriptLookupAddr = 0;
 
-uint64_t AllocMemoryforStructureAddr = 0;
-uint64_t CreateDevMenuStructureAddr = 0;
-uint64_t AllocDevMenuMemoryforStructureAddr = 0;
-uint64_t AllocDevMenu1Addr = 0;
-uint64_t DevMenuCreateHeaderAddr = 0;
-uint64_t DevMenuCreateEntryAddr = 0;
-uint64_t DevMenuAddBoolAddr = 0;
-uint64_t DevMenuAddFuncButtonAddr = 0;
-uint64_t MeleeMenuHook_ReturnAddr = 0;
-
 char temp_str[128];
 
 const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
@@ -336,10 +326,6 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
     }
 }
 
-#define FUNCTION_PTR(return_type, func_name, func_addr, ...) \
-    typedef return_type (*func_name##_t)(__VA_ARGS__); \
-    func_name##_t func_name = (func_name##_t)(func_addr);
-
 char temp_buffer[256];
 int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
 {
@@ -353,7 +339,20 @@ int32_t ScriptPrintWarn_CC(void* unused, char* fmt, ...)
     return 0;
 }
 
-bool* test_boolean[100];
+uint64_t AllocMemoryforStructureAddr = 0;
+uint64_t CreateDevMenuStructureAddr = 0;
+uint64_t AllocDevMenuMemoryforStructureAddr = 0;
+uint64_t AllocDevMenu1Addr = 0;
+uint64_t DevMenuCreateHeaderAddr = 0;
+uint64_t DevMenuCreateEntryAddr = 0;
+uint64_t DevMenuAddBoolAddr = 0;
+uint64_t DevMenuAddFuncButtonAddr = 0;
+uint64_t DevMenuAddIntSliderAddr = 0;
+uint64_t MeleeMenuHook_ReturnAddr = 0;
+
+bool test_boolean[10] = { false };
+int32_t test_int = 100;
+int32_t test_int2 = 10;
 char menu_entry_text[128];
 char BuildVer[128];
 
@@ -383,9 +382,10 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(void, AllocDevMenu1_Caller, AllocDevMenu1Addr, uintptr_t menu_structure_ptr, uint32_t unk, uint32_t structure_size);
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
-    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool** bool_var, const char* bool_subtitle);
-    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void** func_target, uint32_t arg, void* unk);
-    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* subtitle);
+    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
+    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, void* unk);
+    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t* int_val, int32_t* step_val, DMenu_Int args, const char* int_description);
+    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the header
     uint32_t header_menu_size = 224;
     uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
@@ -396,26 +396,53 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         AllocDevMenu1_Caller(Header_ptr, 0, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
+    uint32_t int_button_size = 368;
+    uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t IntButton_structure = 0;
+    if (IntButton_ptr)
+    {
+        DMenu_Int int_args;
+        int_args.step_size = 10;
+        int_args.min_val = test_int2;
+        int_args.max_val = 1000;
+        int_args.unk = 0;
+        AllocDevMenu1_Caller(IntButton_ptr, 0, int_button_size);
+        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set fill ammo amount", &test_int2, &int_args.min_val, int_args, "For use with fill ammo");
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
     uint32_t func_button_size = 200;
     uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
     {
         AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Fill ammo", (void**)CrashTest_OnClick, 0, nullptr);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Fill ammo", (void*)CrashTest_OnClick, 0, nullptr);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+    int_button_size = 368;
+    IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    IntButton_structure = 0;
+    if (IntButton_ptr)
+    {
+        DMenu_Int int_args;
+        int_args.step_size = 10;
+        int_args.min_val = 10;
+        int_args.max_val = 100;
+        int_args.unk = 0;
+        AllocDevMenu1_Caller(IntButton_ptr, 0, int_button_size);
+        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set health amount", &test_int, &int_args.min_val, int_args, "For use with set player health");
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
     func_button_size = 200;
     FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     funcButton_structure = 0;
     if (FuncButton_ptr)
     {
         AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void**)SetPlayerHealth_OnClick, 20, nullptr);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SetPlayerHealth_OnClick, 0, nullptr);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-#if 0
-    for (uint32_t i = 0; i < 100; i++)
+    for (uint32_t i = 0; i < sizeof(test_boolean); i++)
     {
         // Create the bool
         uint32_t bool_menu_size = 192;
@@ -428,7 +455,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         }
         CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
     }
-#endif
     // Create the entry point
     uint32_t entry_menu_size = 200;
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
@@ -446,7 +472,8 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
     FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
     if (click_mode == 5)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk)
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
+        DMenu.DMENU_ARG = uint64_t(test_int);
         GamePrintf_Caller(
                         str(click_mode)": %i\n"
                         str(&DMenu)": 0x%p\n"
@@ -461,11 +488,15 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
         {
             LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
             GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
-            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint32_t argc, uint64_t * argv_first);
-            uint64_t _argv[] = { DMenu.DMENU_ARG };
-            uint32_t argc = sizeof(_argv) / sizeof(_argv[0]);
+            struct health_args
+            {
+                int32_t health = test_int;
+            };
+            health_args _health_args;
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, health_args* args, uint32_t argc, int32_t * argv_first);
+            uint32_t argc = 1;
             GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
-            NativeFunc(_argv, argc, &_argv[0]);
+            NativeFunc(&_health_args, argc, &_health_args.health);
             return 1;
         }
         else
@@ -482,7 +513,8 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
     FUNCTION_PTR(int, GamePrintf_Caller, GamePrintf, const char* fmt, ...);
     if (click_mode == 5)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk)
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
+        DMenu.DMENU_ARG = uint64_t(test_int2);
         GamePrintf_Caller(
                         str(click_mode)": %i\n"
                         str(&DMenu)": 0x%p\n"
@@ -497,11 +529,15 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
         {
             LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
             GamePrintf_Caller("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
-            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t argv[], uint32_t argc, uint64_t *argv_first);
-            uint64_t _argv[] = { 32767 };
-            uint32_t argc = sizeof(_argv) / sizeof(_argv[0]);
+            struct ammo_args
+            {
+                int32_t ammo_count = test_int2;
+            };
+            ammo_args _ammo_args;
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, ammo_args *args, uint32_t argc, int32_t *argv_first);
+            uint32_t argc = 1;
             GamePrintf_Caller("Firing #%.16llx (%s) with %u arguments\n", native_hash, native_name, argc);
-            NativeFunc(_argv, argc, &_argv[0]);
+            NativeFunc(&_ammo_args, argc, &_ammo_args.ammo_count);
             return 1;
         }
         else
