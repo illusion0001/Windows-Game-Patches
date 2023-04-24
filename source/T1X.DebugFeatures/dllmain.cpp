@@ -3,6 +3,7 @@
 #include "memory.hpp"
 #include "patterns.hpp"
 #include "code_caves.hpp"
+#include "dmenu.hpp"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
