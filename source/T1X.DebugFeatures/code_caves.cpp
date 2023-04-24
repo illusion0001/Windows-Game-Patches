@@ -351,13 +351,26 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
 }
 
 char temp_buffer[256];
-const char* ScriptPrintWarn_CC(void* unused, char* fmt, ...)
+const char* ScriptPrintWarn_CC(const char* ret, const char* fmt, ...)
 {
     memset(temp_buffer, 0, sizeof(temp_buffer));
     va_list args;
     va_start(args, fmt);
     vsprintf_s(temp_buffer, sizeof(temp_buffer), fmt, args);
     va_end(args);
-    printf_s(temp_buffer);
+    ret = temp_buffer;
+    printf_s(ret);
     return temp_buffer;
+}
+
+uint64_t PlayerPtrAddr = 0;
+void __attribute__((naked)) GetPlayerPtrAddr_CC()
+{
+    __asm
+    {
+        CMP[RCX + 0x98], EDX;
+        CMOVZ RAX, RCX;
+        MOV[PlayerPtrAddr],RAX;
+        RET;
+    }
 }

@@ -10,6 +10,10 @@ extern uint64_t DevMenuAddBoolAddr;
 extern uint64_t DevMenuAddFuncButtonAddr;
 extern uint64_t DevMenuAddIntSliderAddr;
 extern uint64_t MeleeMenuHook_ReturnAddr;
+extern uint64_t EntitySpawner_SpawnAddr;
+extern uint64_t EntitySpawnerAddr;
+extern uint64_t LoadLevelByNameAddr;
+extern uint64_t LoadActorByNameAddr;
 extern char BuildVer[128];
 
 struct DMenu_ClickStructure // 200 bytes

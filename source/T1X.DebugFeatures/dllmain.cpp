@@ -82,9 +82,9 @@ void ApplyDebugPatches(void)
         const unsigned char nop1x[] = { 0x90 };
         WritePatchPattern(Patterns::m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(Patterns::m_onDisc_DevMenu), 0);
         WritePatchPattern(Patterns::Assert_LevelDef_LevelManifst, nop1x, sizeof(nop1x), wstr(Patterns::Assert_LevelDef_LevelManifst), 30);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, &GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, &GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, &GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
+        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, (void*)GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
+        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, (void*)GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
+        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, (void*)GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
         AllocMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocMemoryforStructure, wstr(Patterns::AllocMemoryforStructure));
         CreateDevMenuStructureAddr = FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
         AllocDevMenuMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
@@ -95,6 +95,9 @@ void ApplyDebugPatches(void)
         DevMenuAddFuncButtonAddr = FindAndPrintPatternW(Patterns::DevMenuAddFuncButton, wstr(Patterns::DevMenuAddFuncButton));
         DevMenuAddIntSliderAddr = FindAndPrintPatternW(Patterns::DevMenuAddIntSlider, wstr(Patterns::DevMenuAddIntSlider));
         uintptr_t MeleeMenuResult = FindAndPrintPatternW(Patterns::MeleeMenuHook, wstr(Patterns::MeleeMenuHook));
+        EntitySpawnerAddr = FindAndPrintPatternW(Patterns::EntitySpawner, wstr(Patterns::EntitySpawner));
+        LoadLevelByNameAddr = FindAndPrintPatternW(Patterns::LoadLevelByName, wstr(Patterns::LoadLevelByName));
+        LoadActorByNameAddr = FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -105,11 +108,23 @@ void ApplyDebugPatches(void)
             DevMenuAddBoolAddr &&
             DevMenuAddFuncButtonAddr &&
             DevMenuAddIntSliderAddr &&
-            MeleeMenuResult
+            MeleeMenuResult &&
+            EntitySpawnerAddr &&
+            LoadLevelByNameAddr &&
+            LoadActorByNameAddr
             )
         {
+            EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
+            uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
+            if (PlayerPtrAddrJMP)
+            {
+                PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
+                uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Int3_14bytes));
+                Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
+                Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
+            }
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
@@ -123,6 +138,7 @@ void ApplyDebugPatches(void)
             uintptr_t hook_ptr = uintptr_t((void*)ScriptPrintWarn_CC);
             memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
             WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
+            WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
         }
         else
         {
@@ -155,7 +171,7 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Int(sizeof(menu_mem_size), Patterns::MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(Patterns::MenuHeap_UsableMemorySize), 8);
         WritePatchPattern_Int(sizeof(script_mem_size), Patterns::ScriptHeap_UsableMemorySize, (void*)script_mem_size, wstr(Patterns::ScriptHeap_UsableMemorySize), 8);
         WritePatchPattern_Int(sizeof(cpu_mem_size), Patterns::CPUHeap_UsableMemorySize, (void*)cpu_mem_size, wstr(Patterns::CPUHeap_UsableMemorySize), 8);
-        WritePatchPattern(Patterns::Memory_ValidateContext, nop1x, sizeof(nop1x), wstr(Patterns::Memory_ValidateContext), 0);
+        WritePatchPattern(Patterns::Memory_ValidateContext, nop1x, sizeof(nop1x), wstr(Patterns::Memory_ValidateContext), 0x1d);
         WritePatchPattern(Patterns::Assert_UpdateSelectRegionByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectRegionByNameMenu), 0);
         WritePatchPattern(Patterns::Assert_UpdateSelectIgcByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectIgcByNameMenu), 0);
         WritePatchPattern(Patterns::Assert_UpdateSelectSpawnerByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectSpawnerByNameMenu), 0);

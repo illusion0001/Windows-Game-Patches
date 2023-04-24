@@ -13,11 +13,13 @@ extern uint64_t GivePlayerWeapon_SubReturn;
 extern uint64_t GivePlayerWeapon_EntryReturn;
 extern uint64_t Game_SnprintfAddr;
 extern uint64_t ScriptLookupAddr;
+extern uint64_t PlayerPtrAddr;
 
 void __attribute__((naked)) Memory_PushAllocator_CC();
 void __attribute__((naked)) Memory_NewHandler_CC();
 void __attribute__((naked)) GivePlayerWeapon_MainCC();
 void __attribute__((naked)) GivePlayerWeapon_SubCC();
 void __attribute__((naked)) GivePlayerWeapon_EntryCC();
-const char* ScriptPrintWarn_CC(void* unused, char* fmt, ...);
+void __attribute__((naked)) GetPlayerPtrAddr_CC();
+const char* ScriptPrintWarn_CC(const char* ret, const char* fmt, ...);
 void MakeMeleeMenu(uintptr_t menu_structure);
