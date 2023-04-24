@@ -18,7 +18,8 @@ struct DMenu_ClickStructure // 200 bytes
 	char* DMENU_TEXT; // 0x30
 	uintptr_t unk_array2[5];
 	uint64_t DMENU_ARG; // 0x60
-	uintptr_t unk_array3[9];
+	uintptr_t unk_array3[8];
+	uintptr_t DMENU_EXTRA_ARG; // 0xc8
 	uintptr_t DMENU_FUNC; // 0xb0
 };
 

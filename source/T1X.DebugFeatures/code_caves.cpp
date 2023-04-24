@@ -2,24 +2,50 @@
 #include "memory.hpp"
 
 uint64_t Memory_PushAllocatorReturnAddr = 0;
-void __attribute__((naked)) Memory_PushAllocator_CC() {
-    __asm {
+void __attribute__((naked)) Memory_PushAllocator_CC()
+{
+    __asm 
+    {
         // code by infogram
-        cmp eax, 0x10 // Debug DMENU
-        je retail_memory_type
-            // extra check
-        cmp eax, 0xa  // Debug CPU Memory
-        jnz ret_loc
-        retail_memory_type :
-        mov eax, MEM_TYPE
-        mov dword ptr [rcx], eax
-            // original code
-        ret_loc :
-        lea rcx, [rsp + 0x30]
-        mov dword ptr[rsp + 0x30], eax
-        mov r15, r9
-        mov r14d, r8d
-        jmp[Memory_PushAllocatorReturnAddr]
+        cmp eax, 0x10; // Debug DMENU
+        je retail_memory_type;
+        // extra check
+        cmp eax, 0xa;  // Debug CPU Memory
+        jnz ret_loc;
+    retail_memory_type:;
+        mov eax, MEM_TYPE;
+        mov dword ptr[rcx], eax;
+        // original code
+    ret_loc:;
+        lea rcx, [rsp + 0x30];
+        mov dword ptr[rsp + 0x30], eax;
+        mov r15, r9;
+        mov r14d, r8d;
+        jmp[Memory_PushAllocatorReturnAddr];
+    }
+}
+
+uint64_t Memory_NewHandlerReturnAddr = 0;
+void __attribute__((naked)) Memory_NewHandler_CC()
+{
+    __asm
+    {
+        mov eax, [rdx];
+        // code by infogram
+        cmp eax, 0x10; // Debug DMENU
+        je retail_memory_type;
+        // extra check
+        cmp eax, 0xa;  // Debug CPU Memory
+        jnz ret_loc;
+    retail_memory_type:;
+        mov eax, MEM_TYPE;
+        mov[rdx], eax;
+    ret_loc:;
+        mov rbp, rcx;
+        lea rcx, [r11 + 0x20];
+        mov[rsp + 0x58], eax;
+        mov rbx, r8;
+        jmp[Memory_NewHandlerReturnAddr];
     }
 }
 

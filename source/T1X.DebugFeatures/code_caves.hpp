@@ -6,8 +6,8 @@
     typedef return_type (*func_name##_t)(__VA_ARGS__); \
     func_name##_t func_name = (func_name##_t)(func_addr);
 
-
 extern uint64_t Memory_PushAllocatorReturnAddr;
+extern uint64_t Memory_NewHandlerReturnAddr;
 extern uint64_t GivePlayerWeapon_MainReturn;
 extern uint64_t GivePlayerWeapon_SubReturn;
 extern uint64_t GivePlayerWeapon_EntryReturn;
@@ -15,6 +15,7 @@ extern uint64_t Game_SnprintfAddr;
 extern uint64_t ScriptLookupAddr;
 
 void __attribute__((naked)) Memory_PushAllocator_CC();
+void __attribute__((naked)) Memory_NewHandler_CC();
 void __attribute__((naked)) GivePlayerWeapon_MainCC();
 void __attribute__((naked)) GivePlayerWeapon_SubCC();
 void __attribute__((naked)) GivePlayerWeapon_EntryCC();
