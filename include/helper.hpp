@@ -27,11 +27,10 @@ void WritePatchAddress(uint64_t Patch_Address, const unsigned char* Patch_Bytes,
 wchar_t* GetRunningPath(wchar_t* output);
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name);
 
-#define SID(str) (ToStringId64(str))
+#define SID(str) ToStringId64(str)
 typedef uint64_t StringId64;
 #define FNVA1_BASE 0xCBF29CE484222325
 // https://github.com/icemesh/StringId/blob/main/StringId64/main.c
-
 constexpr StringId64 ToStringId64(const char* str)
 {
     uint64_t base = FNVA1_BASE;
@@ -43,7 +42,5 @@ constexpr StringId64 ToStringId64(const char* str)
     }
     return base;
 }
-
-uintptr_t FindNativeAddr(const char* input_native);
 
 #define LOG(fmt, ...) file_log(L"%-24s:%u " fmt, __FUNCTIONW__, __LINE__, __VA_ARGS__);

@@ -189,24 +189,6 @@ wchar_t* ConvertToWideChar(const char* input)
     return output;
 }
 
-uintptr_t FindNativeAddr(const char* input_native)
-{
-    StringId64 native_hash = ToStringId64(input_native);
-    uintptr_t hash_addr = uintptr_t(Memory::u64_Scan(baseModule, native_hash, sizeof(uint64_t))) - 0x8;
-    uintptr_t native_addr = Memory::ReadMultiLevelPointer(hash_addr, { 0x8, 0x0 });
-    if (!native_addr || native_addr == 0)
-    {
-        LOG(L"Native function: (0x%016llx::%s::#%.16llx) not found!\n", hash_addr, ConvertToWideChar(input_native), native_hash);
-        return 0;
-    }
-    else
-    {
-        LOG(L"Native function: (0x%016llx::%s::#%.16llx) found at 0x%016llx\n", hash_addr, ConvertToWideChar(input_native), native_hash, native_addr);
-        return native_addr;
-    }
-    return 0;
-}
-
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name)
 {
     uint8_t* Address_Result = nullptr;

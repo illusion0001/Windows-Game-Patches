@@ -478,7 +478,7 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
                         str(DMenu.DMENU_FUNC)": 0x%016llx\n",
                         click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
         const char* native_name = "set-player-health";
-        StringId64 native_hash = ToStringId64(native_name);
+        StringId64 native_hash = SID(native_name);
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
         if (LookupPtr)
         {
@@ -518,7 +518,7 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
                         str(DMenu.DMENU_FUNC)": 0x%016llx\n",
                         click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
         const char* native_name = "add-player-weapon-reserve-ammo";
-        StringId64 native_hash = ToStringId64(native_name);
+        StringId64 native_hash = SID(native_name);
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
         if (LookupPtr)
         {
