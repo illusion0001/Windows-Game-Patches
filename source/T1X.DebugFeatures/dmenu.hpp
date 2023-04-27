@@ -3,7 +3,6 @@
 extern uint64_t AllocMemoryforStructureAddr;
 extern uint64_t CreateDevMenuStructureAddr;
 extern uint64_t AllocDevMenuMemoryforStructureAddr;
-extern uint64_t AllocDevMenu1Addr;
 extern uint64_t DevMenuCreateHeaderAddr;
 extern uint64_t DevMenuCreateEntryAddr;
 extern uint64_t DevMenuAddBoolAddr;

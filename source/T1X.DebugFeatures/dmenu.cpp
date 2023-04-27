@@ -3,7 +3,6 @@
 uint64_t AllocMemoryforStructureAddr = 0;
 uint64_t CreateDevMenuStructureAddr = 0;
 uint64_t AllocDevMenuMemoryforStructureAddr = 0;
-uint64_t AllocDevMenu1Addr = 0;
 uint64_t DevMenuCreateHeaderAddr = 0;
 uint64_t DevMenuCreateEntryAddr = 0;
 uint64_t DevMenuAddBoolAddr = 0;
@@ -23,14 +22,14 @@ char BuildVer[128];
 
 const char* AppendEllipsisToText(const char* text)
 {
-    memset(menu_entry_text, 0, sizeof(menu_entry_text));
+    SecureZeroMemory((void*)menu_entry_text, sizeof(menu_entry_text));
     _snprintf_s(menu_entry_text, sizeof(menu_entry_text), "%s...", text);
     return menu_entry_text;
 }
 
 const char* FormatEntryText(const char* fmt, ...)
 {
-    memset(menu_entry_text, 0, sizeof(menu_entry_text));
+    SecureZeroMemory((void*)menu_entry_text, sizeof(menu_entry_text));
     va_list args;
     va_start(args, fmt);
     vsprintf_s(menu_entry_text, sizeof(menu_entry_text), fmt, args);
@@ -46,7 +45,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
 {
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(void, AllocDevMenu1_Caller, AllocDevMenu1Addr, uintptr_t menu_structure_ptr, uint32_t unk, uint32_t structure_size);
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
     FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
     FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, bool* unk_bool);
@@ -59,7 +57,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     const char* MyMenuEntryText = "Example Menu";
     if (Header_ptr)
     {
-        AllocDevMenu1_Caller(Header_ptr, 0, header_menu_size);
+        SecureZeroMemory((void*)Header_ptr, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
     uint32_t int_button_size = 368;
@@ -72,7 +70,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         int_args.min_val = test_int2;
         int_args.max_val = 1000;
         int_args.unk = 0;
-        AllocDevMenu1_Caller(IntButton_ptr, 0, int_button_size);
+        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set fill ammo amount", &test_int2, &int_args.min_val, int_args, "For use with fill ammo");
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
@@ -81,7 +79,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
     {
-        AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Fill ammo", (void*)CrashTest_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
@@ -95,7 +93,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         int_args.min_val = 10;
         int_args.max_val = 100;
         int_args.unk = 0;
-        AllocDevMenu1_Caller(IntButton_ptr, 0, int_button_size);
+        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set health amount", &test_int, &int_args.min_val, int_args, "For use with set player health");
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
@@ -104,18 +102,17 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     funcButton_structure = 0;
     if (FuncButton_ptr)
     {
-        AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SetPlayerHealth_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-
 
     func_button_size = 200;
     FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     funcButton_structure = 0;
     if (FuncButton_ptr)
     {
-        AllocDevMenu1_Caller(FuncButton_ptr, 0, func_button_size);
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SpawnTest_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
@@ -128,7 +125,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         uintptr_t BoolPtr = 0;
         if (FirstBool_ptr)
         {
-            AllocDevMenu1_Caller(FirstBool_ptr, 0, bool_menu_size);
+            SecureZeroMemory((void*)FirstBool_ptr, bool_menu_size);
             BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i + 1), &test_boolean[i], nullptr);
         }
         CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
@@ -138,7 +135,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     if (entry_ptr)
     {
-        AllocDevMenu1_Caller(entry_ptr, 0, entry_menu_size);
+        SecureZeroMemory((void*)entry_ptr, entry_menu_size);
         DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, BuildVer);
     }
     CreateDevMenuStructure_Caller(menu_structure, entry_ptr);

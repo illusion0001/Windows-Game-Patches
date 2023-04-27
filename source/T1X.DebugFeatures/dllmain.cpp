@@ -88,7 +88,6 @@ void ApplyDebugPatches(void)
         AllocMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocMemoryforStructure, wstr(Patterns::AllocMemoryforStructure));
         CreateDevMenuStructureAddr = FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
         AllocDevMenuMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
-        AllocDevMenu1Addr = FindAndPrintPatternW(Patterns::AllocDevMenu1, wstr(Patterns::AllocDevMenu1));
         DevMenuCreateHeaderAddr = FindAndPrintPatternW(Patterns::DevMenuCreateHeader, wstr(Patterns::DevMenuCreateHeader));
         DevMenuCreateEntryAddr = FindAndPrintPatternW(Patterns::DevMenuCreateEntry, wstr(Patterns::DevMenuCreateEntry));
         DevMenuAddBoolAddr = FindAndPrintPatternW(Patterns::DevMenuAddBool, wstr(Patterns::DevMenuAddBool));
@@ -102,7 +101,6 @@ void ApplyDebugPatches(void)
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
             AllocDevMenuMemoryforStructureAddr &&
-            AllocDevMenu1Addr &&
             DevMenuCreateHeaderAddr &&
             DevMenuCreateEntryAddr &&
             DevMenuAddBoolAddr &&
