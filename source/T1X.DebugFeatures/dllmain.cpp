@@ -136,7 +136,7 @@ void ApplyDebugPatches(void)
             uintptr_t hook_ptr = uintptr_t((void*)ScriptPrintWarn_CC);
             memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
             WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
-            WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
+            // WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
         }
         else
         {

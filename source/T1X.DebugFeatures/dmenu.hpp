@@ -15,21 +15,42 @@ extern uint64_t LoadLevelByNameAddr;
 extern uint64_t LoadActorByNameAddr;
 extern char BuildVer[128];
 
-struct DMenu_ClickStructure // 200 bytes
+class DMenu
 {
-	uintptr_t unk_array1[6];
-	char* DMENU_TEXT; // 0x30
-	uintptr_t unk_array2[5];
-	uint64_t DMENU_ARG; // 0x60
-	uintptr_t unk_array3[8];
-	uintptr_t DMENU_EXTRA_ARG; // 0xc8
-	uintptr_t DMENU_FUNC; // 0xb0
-};
+public:
+	enum Message
+	{
+		None = 0,
+		Unk1,
+		Unk2,
+		Unk3,
+		Unk4,
+		OnExecute
+	};
 
-struct DMenu_Int
-{
-	int32_t step_size;
-	int32_t min_val;
-	int32_t max_val;
-	int32_t unk;
+	enum FunctionReturnCode
+	{
+		NoAction = 0,
+		Failure = 0,
+		Success = 1
+	};
+
+	struct OnExecuteStructure // 200 bytes
+	{
+		uintptr_t unk_array1[6];
+		char* DMENU_TEXT; // 0x30
+		uintptr_t unk_array2[5];
+		uint64_t DMENU_ARG; // 0x60
+		uintptr_t unk_array3[8];
+		uintptr_t DMENU_EXTRA_ARG; // 0xc8
+		uintptr_t DMENU_FUNC; // 0xb0
+	};
+
+	struct IntSettings
+	{
+		int32_t step_size;
+		int32_t min_val;
+		int32_t max_val;
+		int32_t unk;
+	};
 };

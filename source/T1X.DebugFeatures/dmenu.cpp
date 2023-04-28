@@ -37,9 +37,9 @@ const char* FormatEntryText(const char* fmt, ...)
     return menu_entry_text;
 }
 
-int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
-int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
-int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode);
+bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
+bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
+bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
 
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
@@ -48,7 +48,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
     FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
     FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, bool* unk_bool);
-    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu_Int args, const char* int_description);
+    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
     FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the header
     uint32_t header_menu_size = 224;
@@ -65,7 +65,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     uintptr_t IntButton_structure = 0;
     if (IntButton_ptr)
     {
-        DMenu_Int int_args{};
+        DMenu::IntSettings int_args{};
         int_args.step_size = 10;
         int_args.min_val = test_int2;
         int_args.max_val = 1000;
@@ -80,7 +80,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     if (FuncButton_ptr)
     {
         SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Fill ammo", (void*)CrashTest_OnClick, 0, 0);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Respawn player", (void*)CrashTest_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
     int_button_size = 368;
@@ -88,7 +88,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     IntButton_structure = 0;
     if (IntButton_ptr)
     {
-        DMenu_Int int_args{};
+        DMenu::IntSettings int_args{};
         int_args.step_size = 10;
         int_args.min_val = 10;
         int_args.max_val = 100;
@@ -113,10 +113,11 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     if (FuncButton_ptr)
     {
         SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SpawnTest_OnClick, 0, 0);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
 
+#if 0
     for (uint32_t i = 0; i < sizeof(test_boolean); i++)
     {
         // Create the bool
@@ -130,6 +131,8 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         }
         CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
     }
+#endif
+
     // Create the entry point
     uint32_t entry_menu_size = 200;
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
@@ -142,19 +145,21 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     memset(menu_entry_text, 0, sizeof(menu_entry_text));
 }
 
-int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+uint32_t spawn_count = 0;
+
+bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
-    if (click_mode == 5)
+    if (Message == DMenu::Message::OnExecute)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int);
         printf_s(
-            str(click_mode)": %i\n"
+            str(DMenu::Message)": %i\n"
             str(&DMenu)": 0x%p\n"
             str(DMenu.DMENU_TEXT)": %s\n"
             str(DMenu.DMENU_ARG)": 0x%016llx\n"
             str(DMenu.DMENU_FUNC)": 0x%016llx\n",
-            click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+            Message, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
         const char* get_spawner_native_name = "get-spawner";
         StringId64 get_spawner_hash = SID(get_spawner_native_name);
         uintptr_t get_spawner_LookupPtr = ScriptManager_LookupClass(get_spawner_hash, 0);
@@ -171,8 +176,10 @@ int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
                 float Spawner_x;
                 float Spawner_y;
                 float Spawner_z;
-                uint8_t unk[0x75];
-                uint8_t spawner_multi;
+                uint8_t unk[0x20];
+                const char* spawner_name; // 30
+                uint8_t unk2[0x49];
+                uint8_t spawner_multi; // 81
             };
             StringId64 spawner_hash = SID(spawner_name);
             FUNCTION_PTR(void, get_spawner_caller, get_spawner_LookupPtr, spawner_struct**, uint32_t argc, StringId64 * spawnerID);
@@ -201,12 +208,12 @@ int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             }
             else
             {
-                printf_s("not found\n");
-                return 0;
+                printf_s(str(PlayerPtrAddr) " not found\n");
+                return DMenu::FunctionReturnCode::Failure;
             }
             // FUNCTION_PTR(void, LoadActorByName_Caller, LoadActorByNameAddr, const char* actor_name, uint32_t arg1, uint32_t arg2);
             FUNCTION_PTR(void, LoadLevelByName_Caller, LoadLevelByNameAddr, const char* level_name, uint64_t arg1);
-            LoadLevelByName_Caller("lab-const", 0);
+            // LoadLevelByName_Caller("lab-const", 0);
             LoadLevelByName_Caller("lab-lower-floor-ai", 0);
             if (spawner_ptr && PlayerPtrAddr)
             {
@@ -218,15 +225,21 @@ int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
                 spawner_ptr->Spawner_y = player_cord[1];
                 spawner_ptr->Spawner_z = player_cord[2];
                 spawner_ptr->spawner_multi = 0x10;
-                printf_s("Before %.3f %.3f %.3f 0x%02x\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag);
-                printf_s("After %.3f %.3f %.3f 0x%02x\n", spawner_ptr->Spawner_x, spawner_ptr->Spawner_y, spawner_ptr->Spawner_z, spawner_ptr->spawner_multi);
-                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct*, uint32_t arg1, uint64_t arg2, uint32_t arg3, uint32_t arg4);
-                EntitySpawner_Caller(spawner_ptr, 0, 0, 0, 0);
+                const char* old_spawner = spawner_ptr->spawner_name;
+                char new_spawner[16] = { 0 };
+                _snprintf_s(new_spawner, sizeof(new_spawner), "npc-%u", spawn_count);
+                printf_s("Before %.3f %.3f %.3f 0x%02x %s\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag, spawner_ptr->spawner_name);
+                spawner_ptr->spawner_name = new_spawner;
+                printf_s("After %.3f %.3f %.3f 0x%02x %s\n", spawner_ptr->Spawner_x, spawner_ptr->Spawner_y, spawner_ptr->Spawner_z, spawner_ptr->spawner_multi, spawner_ptr->spawner_name);
+                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct*, uint32_t arg1, uint64_t arg2, bool arg3, uint32_t arg4);
+                EntitySpawner_Caller(spawner_ptr, 0, 0, 1, 0);
                 spawner_ptr->Spawner_x = before_spawn_x;
                 spawner_ptr->Spawner_y = before_spawn_y;
                 spawner_ptr->Spawner_z = before_spawn_z;
+                spawner_ptr->spawner_name = old_spawner;
                 spawner_ptr->spawner_multi = before_spawner_flag;
-                return 1;
+                spawn_count++;
+                return DMenu::FunctionReturnCode::Success;
             }
         }
         else
@@ -234,22 +247,22 @@ int32_t SpawnTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             printf_s("Can't find #%.16llx (%s)!\n", get_spawner_hash, get_spawner_native_name);
         }
     }
-    return 0;
+    return DMenu::FunctionReturnCode::NoAction;
 }
 
-int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
-    if (click_mode == 5)
+    if (Message == DMenu::Message::OnExecute)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int);
         printf_s(
-            str(click_mode)": %i\n"
+            str(DMenu::Message)": %i\n"
             str(&DMenu)": 0x%p\n"
             str(DMenu.DMENU_TEXT)": %s\n"
             str(DMenu.DMENU_ARG)": 0x%016llx\n"
             str(DMenu.DMENU_FUNC)": 0x%016llx\n",
-            click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+            Message, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
         const char* native_name = "set-player-health";
         StringId64 native_hash = SID(native_name);
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
@@ -264,30 +277,30 @@ int32_t SetPlayerHealth_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             printf_s("Firing #%.16llx (%s) with %u arguments\nArg: %u\n", native_hash, native_name, argc, health_value);
             NativeFunc(&ret_func, argc, &health_value);
             printf_s("#%.16llx (%s) returned 0x%016llx\n", native_hash, native_name, ret_func);
-            return 1;
+            return DMenu::FunctionReturnCode::Success;
         }
         else
         {
             printf_s("Can't find #%.16llx (%s)!\n", native_hash, native_name);
-            return 0;
+            return DMenu::FunctionReturnCode::Failure;
         }
     }
-    return 0;
+    return DMenu::FunctionReturnCode::NoAction;
 }
 
-int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
+bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
-    if (click_mode == 5)
+    if (Message == DMenu::Message::OnExecute)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int2);
         printf_s(
-            str(click_mode)": %i\n"
+            str(DMenu::Message)": %i\n"
             str(&DMenu)": 0x%p\n"
             str(DMenu.DMENU_TEXT)": %s\n"
             str(DMenu.DMENU_ARG)": 0x%016llx\n"
             str(DMenu.DMENU_FUNC)": 0x%016llx\n",
-            click_mode, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+            Message, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
         const char* native_name = "spawn-player";
         StringId64 native_hash = SID(native_name);
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
@@ -303,12 +316,13 @@ int32_t CrashTest_OnClick(DMenu_ClickStructure DMenu, int32_t click_mode)
             printf_s("Firing #%.16llx (%s) with %u arguments\nArg: %u\n", native_hash, native_name, argc, ammo_value);
             NativeFunc(&ret_func, argc, &ammo_value, &ammo_value2);
             printf_s("#%.16llx (%s) returned 0x%016llx\n", native_hash, native_name, ret_func);
-            return 1;
+            return DMenu::FunctionReturnCode::Success;
         }
         else
         {
             printf_s("Can't find #%.16llx (%s)!\n", native_hash, native_name);
+            return DMenu::FunctionReturnCode::Failure;
         }
     }
-    return 0;
+    return DMenu::FunctionReturnCode::NoAction;
 }
