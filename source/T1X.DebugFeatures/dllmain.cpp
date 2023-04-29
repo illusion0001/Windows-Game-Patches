@@ -161,9 +161,13 @@ void ApplyDebugPatches(void)
         uint64_t menu_mem_size = 0x840000;
         uint64_t script_mem_size = 0x800000;
         uint64_t cpu_mem_size = 0x40e00000;
+        int32_t OffsetToisDebugMemoryAval = 0;
+        uintptr_t ParticlesMenu = FindAndPrintPatternW(Patterns::ParticlesMenu, wstr(Patterns::ParticlesMenu));
+        ParticlesMenu = ParticlesMenu + 12;
+        OffsetToisDebugMemoryAval = *reinterpret_cast<uint32_t*>(ParticlesMenu);
+        WritePatchAddress(ParticlesMenu + OffsetToisDebugMemoryAval + 4, ret_1_al, sizeof(ret_1_al), wstr(Patterns::Memory_isDebugMemoryAval), 0);
         WritePatchPattern_Hook(Patterns::Memory_PushAllocator, 15, wstr(Patterns::Memory_PushAllocator), 0, (void*)Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
         WritePatchPattern_Hook(Patterns::Memory_NewHandler, 16, wstr(Patterns::Memory_NewHandler), 0, (void*)Memory_NewHandler_CC, &Memory_NewHandlerReturnAddr);
-        WritePatchPattern(Patterns::Memory_isDebugMemoryAval, ret_1_al, sizeof(ret_1_al), wstr(Patterns::Memory_isDebugMemoryAval), 0);
         WritePatchPattern(Patterns::DebugDrawStaticContext, nop5x, sizeof(nop5x), wstr(Patterns::DebugDrawStaticContext), 0);
         WritePatchPattern(Patterns::ParticlesMenu, ret_0, sizeof(ret_0), wstr(Patterns::ParticlesMenu), 0);
         WritePatchPattern_Int(sizeof(menu_mem_size), Patterns::MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(Patterns::MenuHeap_UsableMemorySize), 8);
