@@ -114,6 +114,8 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
         else
         {
             LOG(L"%s Hook does not contain a returning address\n", Patch_Name);
+            LOG(L"Start address: 0x%016llx\n", Address_Result);
+            LOG(L"Function target address: 0x%016llx\n", uintptr_t(Function_Target));
             LOG(L"Please make sure it is intentional\n");
         }
         Memory::DetourFunction64((void*)(Patch_Address), Function_Target, Patch_Size);
