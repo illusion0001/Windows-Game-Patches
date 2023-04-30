@@ -37,114 +37,6 @@ const char* FormatEntryText(const char* fmt, ...)
     return menu_entry_text;
 }
 
-bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
-bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
-bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message);
-
-void MakeMeleeMenu(uintptr_t menu_structure)
-{
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
-    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
-    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, bool* unk_bool);
-    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
-    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
-    // Create the header
-    uint32_t header_menu_size = 224;
-    uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    uintptr_t SubHeaderPtr = 0;
-    const char* MyMenuEntryText = "Example Menu";
-    if (Header_ptr)
-    {
-        SecureZeroMemory((void*)Header_ptr, header_menu_size);
-        SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
-    }
-    uint32_t int_button_size = 368;
-    uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    uintptr_t IntButton_structure = 0;
-    if (IntButton_ptr)
-    {
-        DMenu::IntSettings int_args{};
-        int_args.step_size = 10;
-        int_args.min_val = test_int2;
-        int_args.max_val = 1000;
-        int_args.unk = 0;
-        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
-        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set fill ammo amount", &test_int2, &int_args.min_val, int_args, "For use with fill ammo");
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
-    uint32_t func_button_size = 200;
-    uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    uintptr_t funcButton_structure = 0;
-    if (FuncButton_ptr)
-    {
-        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Respawn player", (void*)CrashTest_OnClick, 0, 0);
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-    int_button_size = 368;
-    IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    IntButton_structure = 0;
-    if (IntButton_ptr)
-    {
-        DMenu::IntSettings int_args{};
-        int_args.step_size = 10;
-        int_args.min_val = 10;
-        int_args.max_val = 100;
-        int_args.unk = 0;
-        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
-        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set health amount", &test_int, &int_args.min_val, int_args, "For use with set player health");
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
-    func_button_size = 200;
-    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    funcButton_structure = 0;
-    if (FuncButton_ptr)
-    {
-        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SetPlayerHealth_OnClick, 0, 0);
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-
-    func_button_size = 200;
-    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    funcButton_structure = 0;
-    if (FuncButton_ptr)
-    {
-        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
-        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, 0);
-    }
-    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-
-#if 0
-    for (uint32_t i = 0; i < sizeof(test_boolean); i++)
-    {
-        // Create the bool
-        uint32_t bool_menu_size = 192;
-        uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-        uintptr_t BoolPtr = 0;
-        if (FirstBool_ptr)
-        {
-            SecureZeroMemory((void*)FirstBool_ptr, bool_menu_size);
-            BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i + 1), &test_boolean[i], nullptr);
-        }
-        CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
-    }
-#endif
-
-    // Create the entry point
-    uint32_t entry_menu_size = 200;
-    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
-    if (entry_ptr)
-    {
-        SecureZeroMemory((void*)entry_ptr, entry_menu_size);
-        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, BuildVer);
-    }
-    CreateDevMenuStructure_Caller(menu_structure, entry_ptr);
-    memset(menu_entry_text, 0, sizeof(menu_entry_text));
-}
-
 uint32_t spawn_count = 0;
 
 bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
@@ -177,9 +69,9 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 float Spawner_y;
                 float Spawner_z;
                 uint8_t unk[0x20];
-                const char* spawner_name; // 30
+                const char* spawner_name;
                 uint8_t unk2[0x49];
-                uint8_t spawner_multi; // 81
+                uint8_t spawner_multi;
             };
             StringId64 spawner_hash = SID(spawner_name);
             FUNCTION_PTR(void, get_spawner_caller, get_spawner_LookupPtr, spawner_struct**, uint32_t argc, StringId64 * spawnerID);
@@ -220,16 +112,16 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 float before_spawn_x = spawner_ptr->Spawner_x;
                 float before_spawn_y = spawner_ptr->Spawner_y;
                 float before_spawn_z = spawner_ptr->Spawner_z;
+                const char* old_spawner = spawner_ptr->spawner_name;
                 uint8_t before_spawner_flag = spawner_ptr->spawner_multi;
+                char new_spawner[16] = { 0 };
+                _snprintf_s(new_spawner, sizeof(new_spawner), "npc-%u", spawn_count);
                 spawner_ptr->Spawner_x = player_cord[0];
                 spawner_ptr->Spawner_y = player_cord[1];
                 spawner_ptr->Spawner_z = player_cord[2];
-                spawner_ptr->spawner_multi = 0x10;
-                const char* old_spawner = spawner_ptr->spawner_name;
-                char new_spawner[16] = { 0 };
-                _snprintf_s(new_spawner, sizeof(new_spawner), "npc-%u", spawn_count);
-                printf_s("Before %.3f %.3f %.3f 0x%02x %s\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag, spawner_ptr->spawner_name);
                 spawner_ptr->spawner_name = new_spawner;
+                spawner_ptr->spawner_multi = 0x10;
+                printf_s("Before %.3f %.3f %.3f 0x%02x %s\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag, old_spawner);
                 printf_s("After %.3f %.3f %.3f 0x%02x %s\n", spawner_ptr->Spawner_x, spawner_ptr->Spawner_y, spawner_ptr->Spawner_z, spawner_ptr->spawner_multi, spawner_ptr->spawner_name);
                 FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct*, uint32_t arg1, uint64_t arg2, bool arg3, uint32_t arg4);
                 EntitySpawner_Caller(spawner_ptr, 0, 0, 1, 0);
@@ -288,7 +180,7 @@ bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
     return DMenu::FunctionReturnCode::NoAction;
 }
 
-bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+bool SpawnPlayer_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
     if (Message == DMenu::Message::OnExecute)
     {
@@ -301,20 +193,59 @@ bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
             str(DMenu.DMENU_ARG)": 0x%016llx\n"
             str(DMenu.DMENU_FUNC)": 0x%016llx\n",
             Message, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
-        const char* native_name = "spawn-player";
+        const char* spawn_player_native_name = "spawn-player";
+        StringId64 spawn_player_native_hash = SID(spawn_player_native_name);
+        uintptr_t spawn_player_LookupPtr = ScriptManager_LookupClass(spawn_player_native_hash, 1);
+        if (spawn_player_LookupPtr)
+        {
+            spawn_player_LookupPtr = *reinterpret_cast<uintptr_t*>(spawn_player_LookupPtr + 8);
+            printf_s("#%.16llx (%s) found at 0x%016llx\n", spawn_player_native_hash, spawn_player_native_name, spawn_player_LookupPtr);
+            FUNCTION_PTR(void, spawn_player_NativeFunc, spawn_player_LookupPtr, uint64_t * ret_val, uint32_t argc, uint64_t * argv_first, uint32_t * argv_sec);
+            uint64_t arg1 = 0;
+            uint32_t arg2 = 0;
+            uint32_t argc = 2;
+            uint64_t ret_func = 0;
+            printf_s("Firing #%.16llx (%s) with %u arguments\nArg: %u\n", spawn_player_native_hash, spawn_player_native_name, argc, arg1);
+            spawn_player_NativeFunc(&ret_func, argc, &arg1, &arg2);
+            printf_s("#%.16llx (%s) returned 0x%016llx\n", spawn_player_native_hash, spawn_player_native_name, ret_func);
+            return DMenu::FunctionReturnCode::Success;
+        }
+        else
+        {
+            printf_s("Can't find #%.16llx (%s)!\n", spawn_player_native_hash, spawn_player_native_name);
+            return DMenu::FunctionReturnCode::Failure;
+        }
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
+bool OnExecuteShowEntityInfo(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
+        DMenu.DMENU_ARG = uint64_t(test_int2);
+        printf_s(
+            str(DMenu::Message)": %i\n"
+            str(&DMenu)": 0x%p\n"
+            str(DMenu.DMENU_TEXT)": %s\n"
+            str(DMenu.DMENU_ARG)": 0x%016llx\n"
+            str(DMenu.DMENU_FUNC)": 0x%016llx\n",
+            Message, &DMenu, DMenu.DMENU_TEXT, DMenu.DMENU_ARG, DMenu.DMENU_FUNC);
+        const char* native_name = "entity-info->string";
+        const char* spawner_name = "npc-lab-lower-1";
         StringId64 native_hash = SID(native_name);
+        StringId64 spawner_hash = SID(spawner_name);
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
-        if (LookupPtr && PlayerPtrAddr)
+        if (LookupPtr)
         {
             LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
-            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t * ret_val, uint32_t argc, uint64_t * argv_first, uint32_t * argv_sec);
-            uint64_t ammo_value = 0;
-            uint32_t ammo_value2 = 0;
-            uint32_t argc = 2;
+            FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t * ret_val, uint32_t argc, StringId64 * argv_first);
+            uint32_t argc = 1;
             uint64_t ret_func = 0;
-            printf_s("Firing #%.16llx (%s) with %u arguments\nArg: %u\n", native_hash, native_name, argc, ammo_value);
-            NativeFunc(&ret_func, argc, &ammo_value, &ammo_value2);
+            printf_s("Firing #%.16llx (%s) with %u arguments\nArg: '%s\n", native_hash, native_name, argc, spawner_name);
+            NativeFunc(&ret_func, argc, &spawner_hash);
             printf_s("#%.16llx (%s) returned 0x%016llx\n", native_hash, native_name, ret_func);
             return DMenu::FunctionReturnCode::Success;
         }
@@ -325,4 +256,118 @@ bool CrashTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
         }
     }
     return DMenu::FunctionReturnCode::NoAction;
+}
+
+void MakeMeleeMenu(uintptr_t menu_structure)
+{
+    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
+    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
+    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
+    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
+    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, bool* unk_bool);
+    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
+    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
+    // Create the header
+    uint32_t header_menu_size = 224;
+    uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t SubHeaderPtr = 0;
+    const char* MyMenuEntryText = "Example Menu";
+    if (Header_ptr)
+    {
+        SecureZeroMemory((void*)Header_ptr, header_menu_size);
+        SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
+    }
+    uint32_t int_button_size = 368;
+    uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t IntButton_structure = 0;
+    if (IntButton_ptr)
+    {
+        DMenu::IntSettings int_args{};
+        int_args.step_size = 10;
+        int_args.min_val = test_int2;
+        int_args.max_val = 1000;
+        int_args.unk = 0;
+        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
+        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set fill ammo amount", &test_int2, &int_args.min_val, int_args, "For use with fill ammo");
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
+    uint32_t func_button_size = 200;
+    uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Respawn player", (void*)SpawnPlayer_OnClick, 0, 0);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+    int_button_size = 368;
+    IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    IntButton_structure = 0;
+    if (IntButton_ptr)
+    {
+        DMenu::IntSettings int_args{};
+        int_args.step_size = 10;
+        int_args.min_val = 10;
+        int_args.max_val = 100;
+        int_args.unk = 0;
+        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
+        IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set health amount", &test_int, &int_args.min_val, int_args, "For use with set player health");
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
+    func_button_size = 200;
+    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Set player health", (void*)SetPlayerHealth_OnClick, 0, 0);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+
+    func_button_size = 200;
+    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, 0);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+
+    func_button_size = 200;
+    FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    funcButton_structure = 0;
+    if (FuncButton_ptr)
+    {
+        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+        funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0, 0);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+
+#if 0
+    for (uint32_t i = 0; i < sizeof(test_boolean); i++)
+    {
+        // Create the bool
+        uint32_t bool_menu_size = 192;
+        uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+        uintptr_t BoolPtr = 0;
+        if (FirstBool_ptr)
+        {
+            SecureZeroMemory((void*)FirstBool_ptr, bool_menu_size);
+            BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, FormatEntryText("Test Bool %u", i + 1), &test_boolean[i], nullptr);
+        }
+        CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
+    }
+#endif
+
+    // Create the entry point
+    uint32_t entry_menu_size = 200;
+    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    if (entry_ptr)
+    {
+        SecureZeroMemory((void*)entry_ptr, entry_menu_size);
+        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(MyMenuEntryText), Header_ptr, 0, 0, BuildVer);
+    }
+    CreateDevMenuStructure_Caller(menu_structure, entry_ptr);
+    SecureZeroMemory(menu_entry_text, sizeof(menu_entry_text));
 }

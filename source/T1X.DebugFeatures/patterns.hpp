@@ -9,6 +9,7 @@ namespace Patterns
 	const wchar_t* Int3_14bytes = L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc";
 	const wchar_t* PlayerPtr = L"48 8b 54 24 30 48 8d 4c 24 50 8a 44 24 38 45 33 c9 44 8b c6 48 89 53 20 88 83 98 00 00 00";
 	const wchar_t* DoutMemPrint = L"48 89 5c 24 08 48 89 6c 24 10 48 89 74 24 18 57 41 54 41 55 41 56 41 57 48 83 ec 30 48 8b 01 4c 8b e2 48 8b d9 ff 50 48 84 c0 0f 84 d5 01 00 00 48 83 c8 ff";
+	const wchar_t* DoutPrintf = L"48 8b c4 48 89 48 08 48 89 50 10 4c 89 40 18 4c 89 48 20 53 57 48 83 ec 28";
 	const wchar_t* EntitySpawner = L"45 33 e4 45 8a f9 49 8b f0 4c 8b ea 48 8b d9 48 85 ff";
 	const wchar_t* LoadLevelByName = L"40 53 48 83 ec 50 48 8b da 4c 8b c1 ba 01 00 00 00 48 8d 4c 24 20";
 	const wchar_t* LoadActorByName = L"48 89 5c 24 08 48 89 6c 24 10 48 89 74 24 18 57 41 56 41 57 48 83 ec 50 41 bf 02 00 00 00";

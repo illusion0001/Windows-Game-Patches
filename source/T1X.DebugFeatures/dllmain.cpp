@@ -97,6 +97,7 @@ void ApplyDebugPatches(void)
         EntitySpawnerAddr = FindAndPrintPatternW(Patterns::EntitySpawner, wstr(Patterns::EntitySpawner));
         LoadLevelByNameAddr = FindAndPrintPatternW(Patterns::LoadLevelByName, wstr(Patterns::LoadLevelByName));
         LoadActorByNameAddr = FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
+        uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -109,38 +110,32 @@ void ApplyDebugPatches(void)
             MeleeMenuResult &&
             EntitySpawnerAddr &&
             LoadLevelByNameAddr &&
-            LoadActorByNameAddr
+            LoadActorByNameAddr &&
+            PlayerPtrAddrJMP
             )
         {
             EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
-            uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
-            if (PlayerPtrAddrJMP)
-            {
-                PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
-                uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Int3_14bytes));
-                Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
-                Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
-            }
+            PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
+            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
+            Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
-        if (EvalScriptWarns)
+        uintptr_t PrintAddr = FindAndPrintPatternW(Patterns::GameWarnScriptPrint, wstr(Patterns::GameWarnScriptPrint));
+        if (EvalScriptWarns && PrintAddr)
         {
-            // First param is buffer
-            // Sprintf eqiv
-            const unsigned char jmp_rcx[] = { 0x48, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe1 };
-            uintptr_t PrintAddr = WritePatchPattern(Patterns::GameWarnScriptPrint, jmp_rcx, sizeof(jmp_rcx), wstr(Patterns::GameWarnScriptPrint), 0);
-            unsigned char bytes_8[8] = { 0 };
-            uintptr_t hook_ptr = uintptr_t((void*)ScriptPrintWarn_CC);
-            memcpy((void*)bytes_8, &hook_ptr, sizeof(bytes_8));
-            WritePatchAddress(PrintAddr, bytes_8, sizeof(bytes_8), wstr(ScriptPrintWarn_CC), 2);
-            // WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
-        }
-        else
-        {
-            LOG(wstr(EvalScriptWarns) L": 0x%016llx\n", EvalScriptWarns);
+            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Memory::DetourFunction32((void*)PrintAddr, (void*)JumpPattern, 5);
+            Memory::DetourFunction64((void*)JumpPattern, (void*)ScriptPrintWarn_CC, 14);
+            WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
+            for (uint32_t i = 0; i < 2; i++)
+            {
+                uintptr_t DoutPrintfAddr = FindAndPrintPatternW(Patterns::DoutPrintf, wstr(Patterns::DoutPrintf));
+                Memory::DetourFunction64((void*)DoutPrintfAddr, (void*)printf_s, 14);
+            }
         }
     }
     if (bShowDebugConsole)
@@ -150,7 +145,7 @@ void ApplyDebugPatches(void)
         freopen_s(&fGame, "CONOUT$", "w", stderr);
         freopen_s(&fGame, "CONOUT$", "w", stdin);
         printf_s(BUILD_TIME "\n");
-        fprintf_s(fGame, BUILD_TIME "\n");
+        // fprintf_s(fGame, BUILD_TIME "\n");
     }
     if (bExtendedDebugMenu)
     {
