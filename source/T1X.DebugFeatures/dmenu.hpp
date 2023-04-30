@@ -13,7 +13,10 @@ extern uint64_t EntitySpawner_SpawnAddr;
 extern uint64_t EntitySpawnerAddr;
 extern uint64_t LoadLevelByNameAddr;
 extern uint64_t LoadActorByNameAddr;
+extern uint64_t ReadCurrentLookIDAddr;
 extern char BuildVer[128];
+
+uintptr_t* ReadLookID_Hook(uintptr_t PlayerPtr, uintptr_t* LookIDPtr);
 
 class DMenu
 {

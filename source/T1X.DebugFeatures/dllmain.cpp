@@ -98,6 +98,7 @@ void ApplyDebugPatches(void)
         LoadLevelByNameAddr = FindAndPrintPatternW(Patterns::LoadLevelByName, wstr(Patterns::LoadLevelByName));
         LoadActorByNameAddr = FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
         uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
+        ReadCurrentLookIDAddr = FindAndPrintPatternW(Patterns::ReadCurrentLookID, wstr(Patterns::ReadCurrentLookID));
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -111,7 +112,8 @@ void ApplyDebugPatches(void)
             EntitySpawnerAddr &&
             LoadLevelByNameAddr &&
             LoadActorByNameAddr &&
-            PlayerPtrAddrJMP
+            PlayerPtrAddrJMP &&
+            ReadCurrentLookIDAddr
             )
         {
             EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
@@ -121,6 +123,7 @@ void ApplyDebugPatches(void)
             uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
             Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
             Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
+            Memory::DetourFunction64((void*)ReadCurrentLookIDAddr, (void*)ReadLookID_Hook, 14);
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
@@ -159,7 +162,7 @@ void ApplyDebugPatches(void)
         int32_t OffsetToisDebugMemoryAval = 0;
         uintptr_t ParticlesMenu = FindAndPrintPatternW(Patterns::ParticlesMenu, wstr(Patterns::ParticlesMenu));
         ParticlesMenu = ParticlesMenu + 12;
-        OffsetToisDebugMemoryAval = *reinterpret_cast<uint32_t*>(ParticlesMenu);
+        OffsetToisDebugMemoryAval = *(uint32_t*)(ParticlesMenu);
         WritePatchAddress(ParticlesMenu + OffsetToisDebugMemoryAval + 4, ret_1_al, sizeof(ret_1_al), wstr(Patterns::Memory_isDebugMemoryAval), 0);
         WritePatchPattern_Hook(Patterns::Memory_PushAllocator, 15, wstr(Patterns::Memory_PushAllocator), 0, (void*)Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
         WritePatchPattern_Hook(Patterns::Memory_NewHandler, 16, wstr(Patterns::Memory_NewHandler), 0, (void*)Memory_NewHandler_CC, &Memory_NewHandlerReturnAddr);

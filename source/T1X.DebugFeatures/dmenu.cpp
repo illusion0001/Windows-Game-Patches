@@ -13,6 +13,10 @@ uint64_t EntitySpawner_SpawnAddr = 0;
 uint64_t EntitySpawnerAddr = 0;
 uint64_t LoadLevelByNameAddr = 0;
 uint64_t LoadActorByNameAddr = 0;
+// player look id
+uint64_t ReadCurrentLookIDAddr = 0;
+bool OverrideLookID = false;
+StringId64 CurrentOverrideLookID = SID("t1x-tess-costume-01");
 
 bool test_boolean[10] = { false };
 int32_t test_int = 100;
@@ -39,6 +43,20 @@ const char* FormatEntryText(const char* fmt, ...)
 
 uint32_t spawn_count = 0;
 
+uintptr_t* ReadLookID_Hook(uintptr_t PlayerPtr, uintptr_t* LookIDPtr)
+{
+    if (OverrideLookID)
+    {
+        *LookIDPtr = CurrentOverrideLookID;
+        return LookIDPtr;
+    }
+    else
+    {
+        *LookIDPtr = *(uintptr_t*)(PlayerPtr + 0x1ce0);
+        return LookIDPtr;
+    }
+}
+
 bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
     if (Message == DMenu::Message::OnExecute)
@@ -60,7 +78,7 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
             LoadLevelByNameAddr &&
             LoadActorByNameAddr)
         {
-            get_spawner_LookupPtr = *reinterpret_cast<uintptr_t*>(get_spawner_LookupPtr + 8);
+            get_spawner_LookupPtr = *(uintptr_t*)(get_spawner_LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", get_spawner_hash, get_spawner_native_name, get_spawner_LookupPtr);
             const char* spawner_name = "npc-lab-lower-1";
             struct spawner_struct
@@ -160,7 +178,7 @@ bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
         if (LookupPtr)
         {
-            LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
+            LookupPtr = *(uintptr_t*)(LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
             FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t * ret_val, uint32_t argc, uint32_t * argv_first);
             uint32_t health_value = test_int;
@@ -198,7 +216,7 @@ bool SpawnPlayer_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Me
         uintptr_t spawn_player_LookupPtr = ScriptManager_LookupClass(spawn_player_native_hash, 1);
         if (spawn_player_LookupPtr)
         {
-            spawn_player_LookupPtr = *reinterpret_cast<uintptr_t*>(spawn_player_LookupPtr + 8);
+            spawn_player_LookupPtr = *(uintptr_t*)(spawn_player_LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", spawn_player_native_hash, spawn_player_native_name, spawn_player_LookupPtr);
             FUNCTION_PTR(void, spawn_player_NativeFunc, spawn_player_LookupPtr, uint64_t * ret_val, uint32_t argc, uint64_t * argv_first, uint32_t * argv_sec);
             uint64_t arg1 = 0;
@@ -239,7 +257,7 @@ bool OnExecuteShowEntityInfo(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
         uintptr_t LookupPtr = ScriptManager_LookupClass(native_hash, 1);
         if (LookupPtr)
         {
-            LookupPtr = *reinterpret_cast<uintptr_t*>(LookupPtr + 8);
+            LookupPtr = *(uintptr_t*)(LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", native_hash, native_name, LookupPtr);
             FUNCTION_PTR(void, NativeFunc, LookupPtr, uint64_t * ret_val, uint32_t argc, StringId64 * argv_first);
             uint32_t argc = 1;
@@ -343,6 +361,17 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
+
+    // Create the bool
+    uint32_t bool_menu_size = 192;
+    uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t BoolPtr = 0;
+    if (FirstBool_ptr)
+    {
+        SecureZeroMemory((void*)FirstBool_ptr, bool_menu_size);
+        BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, "Test Bool 1", &OverrideLookID, nullptr);
+    }
+    CreateDevMenuStructure_Caller(SubHeaderPtr, BoolPtr);
 
 #if 0
     for (uint32_t i = 0; i < sizeof(test_boolean); i++)
