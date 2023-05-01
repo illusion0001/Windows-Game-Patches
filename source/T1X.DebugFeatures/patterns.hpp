@@ -14,6 +14,7 @@ namespace Patterns
 	const wchar_t* LoadLevelByName = L"40 53 48 83 ec 50 48 8b da 4c 8b c1 ba 01 00 00 00 48 8d 4c 24 20";
 	const wchar_t* LoadActorByName = L"48 89 5c 24 08 48 89 6c 24 10 48 89 74 24 18 57 41 56 41 57 48 83 ec 50 41 bf 02 00 00 00";
 	const wchar_t* ReadCurrentLookID = L"48 8b 81 e0 1c 00 00 48 89 02 48 8b c2 c3";
+	const wchar_t* DebugOutputString1 = L"48 8b c4 48 89 48 08 48 89 50 10 4c 89 40 18 4c 89 48 20 48 83 ec 28 48 8d 50 10";
 	// Dev Menu
 	const wchar_t* AllocMemoryforStructure = L"48 83 ec ?? 45 33 c9 4c 8d 05 ?? ?? ?? ?? 4c 89 44 24 ?? 41 8d 51 ?? e8 ?? ?? ?? ?? 48 83 c4 38 c3";
 	const wchar_t* CreateDevMenuStructure = L"40 53 48 83 ec ?? 48 8b 81 b0 00 00 00 48 8b da 48 85 c0 74 22 66 66 66 0f 1f 84 00 00 00 00 00 48 8b d0 48 8b 40 40 48 85 c0 75 f4 48 85 d2 74 06 48 89 5a 40 eb 07 48 89 99 b0 00 00 00 48 8b d3 48 c7 43 40 00 00 00 00 48 89 4b 38 e8 ?? ?? ?? ?? 48 8b c3 48 83 c4 20 5b c3";

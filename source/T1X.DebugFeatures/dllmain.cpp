@@ -137,7 +137,15 @@ void ApplyDebugPatches(void)
             for (uint32_t i = 0; i < 2; i++)
             {
                 uintptr_t DoutPrintfAddr = FindAndPrintPatternW(Patterns::DoutPrintf, wstr(Patterns::DoutPrintf));
-                Memory::DetourFunction64((void*)DoutPrintfAddr, (void*)printf_s, 14);
+                uintptr_t DebugOutputString1Addr = FindAndPrintPatternW(Patterns::DebugOutputString1, wstr(Patterns::DebugOutputString1));
+                if (DoutPrintfAddr)
+                {
+                    Memory::DetourFunction64((void*)DoutPrintfAddr, (void*)printf_s, 14);
+                }
+                if (DebugOutputString1Addr)
+                {
+                    Memory::DetourFunction64((void*)DebugOutputString1Addr, (void*)printf_s, 14);
+                }
             }
         }
     }
