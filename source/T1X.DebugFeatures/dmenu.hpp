@@ -41,7 +41,7 @@ public:
 	struct OnExecuteStructure // 200 bytes
 	{
 		uintptr_t unk_array1[6];
-		char* DMENU_TEXT; // 0x30
+		const char* DMENU_TEXT; // 0x30
 		uintptr_t unk_array2[5];
 		uint64_t DMENU_ARG; // 0x60
 		uintptr_t unk_array3[8];

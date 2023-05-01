@@ -38,6 +38,7 @@ const char* FormatEntryText(const char* fmt, ...)
     va_start(args, fmt);
     vsprintf_s(menu_entry_text, sizeof(menu_entry_text), fmt, args);
     va_end(args);
+    printf_s("%s\n", menu_entry_text);
     return menu_entry_text;
 }
 
@@ -121,9 +122,7 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 printf_s(str(PlayerPtrAddr) " not found\n");
                 return DMenu::FunctionReturnCode::Failure;
             }
-            // FUNCTION_PTR(void, LoadActorByName_Caller, LoadActorByNameAddr, const char* actor_name, uint32_t arg1, uint32_t arg2);
             FUNCTION_PTR(void, LoadLevelByName_Caller, LoadLevelByNameAddr, const char* level_name, uint64_t arg1);
-            // LoadLevelByName_Caller("lab-const", 0);
             LoadLevelByName_Caller("lab-lower-floor-ai", 0);
             if (spawner_ptr && PlayerPtrAddr)
             {
@@ -141,8 +140,8 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 spawner_ptr->spawner_multi = 0x10;
                 printf_s("Before %.3f %.3f %.3f 0x%02x %s\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag, old_spawner);
                 printf_s("After %.3f %.3f %.3f 0x%02x %s\n", spawner_ptr->Spawner_x, spawner_ptr->Spawner_y, spawner_ptr->Spawner_z, spawner_ptr->spawner_multi, spawner_ptr->spawner_name);
-                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct*, uint32_t arg1, uint64_t arg2, bool arg3, uint32_t arg4);
-                EntitySpawner_Caller(spawner_ptr, 0, 0, 1, 0);
+                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct* arg1, uint64_t* arg2, uint64_t* arg3, bool arg4, uint64_t* arg5);
+                EntitySpawner_Caller(spawner_ptr, nullptr, nullptr, 1, nullptr);
                 spawner_ptr->Spawner_x = before_spawn_x;
                 spawner_ptr->Spawner_y = before_spawn_y;
                 spawner_ptr->Spawner_z = before_spawn_z;
@@ -276,13 +275,107 @@ bool OnExecuteShowEntityInfo(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
     return DMenu::FunctionReturnCode::NoAction;
 }
 
+bool OnExecuteSpawnNPC(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
+        StringId64 get_spawner_hash = SID("get-spawner");
+        uintptr_t get_spawner_LookupPtr = ScriptManager_LookupClass(get_spawner_hash, 0);
+        if (get_spawner_LookupPtr &&
+            EntitySpawnerAddr &&
+            LoadLevelByNameAddr &&
+            LoadActorByNameAddr)
+        {
+            get_spawner_LookupPtr = *(uintptr_t*)(get_spawner_LookupPtr + 8);
+            struct spawner_struct
+            {
+                float Spawner_x;
+                float Spawner_y;
+                float Spawner_z;
+                uint8_t unk[0x20];
+                const char* spawner_name;
+                uint8_t unk2[0x49];
+                uint8_t spawner_multi;
+            };
+            StringId64 spawner_hash = DMenu.DMENU_ARG;
+            FUNCTION_PTR(void, get_spawner_caller, get_spawner_LookupPtr, spawner_struct**, uint32_t argc, StringId64 * spawnerID);
+            uint32_t argc = 1;
+            spawner_struct* spawner_ptr{};
+            get_spawner_caller(&spawner_ptr, argc, &spawner_hash);
+            struct player_cord_struct
+            {
+                float world_x;
+                float world_y;
+                float world_z;
+            };
+            float player_cord[3] = { 0 };
+            if (PlayerPtrAddr)
+            {
+                struct player_cord_struct* pointer;
+                void* addr = (void*)(PlayerPtrAddr + 0x1b0);
+                pointer = (struct player_cord_struct*)addr;
+                player_cord[0] = pointer->world_x;
+                player_cord[1] = pointer->world_y;
+                player_cord[2] = pointer->world_z;
+            }
+            else
+            {
+                return DMenu::FunctionReturnCode::Failure;
+            }
+            FUNCTION_PTR(void, LoadLevelByName_Caller, LoadLevelByNameAddr, const char* level_name, uint64_t arg1);
+            LoadLevelByName_Caller("lab-lower-floor-ai", 0);
+            if (spawner_ptr && PlayerPtrAddr)
+            {
+                float before_spawn_x = spawner_ptr->Spawner_x;
+                float before_spawn_y = spawner_ptr->Spawner_y;
+                float before_spawn_z = spawner_ptr->Spawner_z;
+                const char* old_spawner = spawner_ptr->spawner_name;
+                uint8_t before_spawner_flag = spawner_ptr->spawner_multi;
+                char new_spawner[16] = { 0 };
+                _snprintf_s(new_spawner, sizeof(new_spawner), "npc-%u", spawn_count);
+                spawner_ptr->Spawner_x = player_cord[0];
+                spawner_ptr->Spawner_y = player_cord[1];
+                spawner_ptr->Spawner_z = player_cord[2];
+                spawner_ptr->spawner_name = new_spawner;
+                spawner_ptr->spawner_multi = 0x10;
+                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct* arg1, uint64_t* arg2, uint64_t* arg3, bool arg4, uint64_t* arg5);
+                EntitySpawner_Caller(spawner_ptr, nullptr, nullptr, 1, nullptr);
+                spawner_ptr->Spawner_x = before_spawn_x;
+                spawner_ptr->Spawner_y = before_spawn_y;
+                spawner_ptr->Spawner_z = before_spawn_z;
+                spawner_ptr->spawner_name = old_spawner;
+                spawner_ptr->spawner_multi = before_spawner_flag;
+                spawn_count++;
+                return DMenu::FunctionReturnCode::Success;
+            }
+        }
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
+const char* npc_list1[] = {
+    "npc-lab-lower-1",
+    "npc-lab-lower-2",
+    "npc-lab-lower-3",
+    "npc-lab-lower-4",
+    "npc-lab-lower-5",
+    "npc-lab-lower-6",
+    "npc-lab-lower-7",
+    "npc-lab-lower-8",
+    "npc-lab-lower-9",
+    "npc-lab-lower-10",
+};
+
+constexpr uint32_t num_npc_list = sizeof(npc_list1) / sizeof(npc_list1[0]);
+
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
     FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
-    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint32_t arg, bool* unk_bool);
+    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, void* arg, bool* unk_bool);
     FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
     FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the header
@@ -295,6 +388,44 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         SecureZeroMemory((void*)Header_ptr, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
+    
+    header_menu_size = 224;
+    uintptr_t SubHeader_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t SubMenuHeaderPtr = 0;
+    const char* level_name = "lab-lower-floor-ai";
+    const char* MySubMenuEntryText = level_name;
+    if (SubHeader_ptr)
+    {
+        SecureZeroMemory((void*)SubHeader_ptr, header_menu_size);
+        SubMenuHeaderPtr = DevMenuCreateHeader_Caller(SubHeader_ptr, MySubMenuEntryText, 0);
+    }
+
+#if 1
+    for (uint32_t i = 0; i < num_npc_list; i++)
+    {
+        uint32_t func_button_size = 200;
+        uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+        uintptr_t funcButton_structure = 0;
+        if (FuncButton_ptr)
+        {
+            SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+            funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, npc_list1[i], (void*)OnExecuteSpawnNPC, (void*)SID(npc_list1[i]), 0);
+        }
+        CreateDevMenuStructure_Caller(SubMenuHeaderPtr, funcButton_structure);
+    }
+#endif
+
+    // Create the entry point
+    uint32_t entry_menu_size = 200;
+    uintptr_t subentry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    if (subentry_ptr)
+    {
+        SecureZeroMemory((void*)subentry_ptr, entry_menu_size);
+        DevMenuCreateEntry_Caller(subentry_ptr, AppendEllipsisToText(MySubMenuEntryText), SubHeader_ptr, 0, 0, nullptr);
+    }
+    CreateDevMenuStructure_Caller(Header_ptr, subentry_ptr);
+
+
     uint32_t int_button_size = 368;
     uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t IntButton_structure = 0;
@@ -390,7 +521,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
 #endif
 
     // Create the entry point
-    uint32_t entry_menu_size = 200;
+    entry_menu_size = 200;
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     if (entry_ptr)
     {
