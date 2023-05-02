@@ -369,6 +369,12 @@ const char* npc_list1[] = {
 
 constexpr uint32_t num_npc_list = sizeof(npc_list1) / sizeof(npc_list1[0]);
 
+constexpr uint32_t bool_menu_size = 192;
+constexpr uint32_t entry_menu_size = 200;
+constexpr uint32_t func_button_size = 200;
+constexpr uint32_t header_menu_size = 224;
+constexpr uint32_t int_button_size = 368;
+
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
@@ -379,7 +385,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
     FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the header
-    uint32_t header_menu_size = 224;
     uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t SubHeaderPtr = 0;
     const char* MyMenuEntryText = "Example Menu";
@@ -388,8 +393,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         SecureZeroMemory((void*)Header_ptr, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, MyMenuEntryText, 0);
     }
-    
-    header_menu_size = 224;
+
     uintptr_t SubHeader_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t SubMenuHeaderPtr = 0;
     const char* level_name = "lab-lower-floor-ai";
@@ -416,7 +420,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
 #endif
 
     // Create the entry point
-    uint32_t entry_menu_size = 200;
     uintptr_t subentry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     if (subentry_ptr)
     {
@@ -425,8 +428,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     }
     CreateDevMenuStructure_Caller(Header_ptr, subentry_ptr);
 
-
-    uint32_t int_button_size = 368;
     uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t IntButton_structure = 0;
     if (IntButton_ptr)
@@ -440,7 +441,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set fill ammo amount", &test_int2, &int_args.min_val, int_args, "For use with fill ammo");
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
-    uint32_t func_button_size = 200;
     uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
@@ -449,7 +449,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, "Respawn player", (void*)SpawnPlayer_OnClick, 0, 0);
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
-    int_button_size = 368;
     IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     IntButton_structure = 0;
     if (IntButton_ptr)
@@ -463,7 +462,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, "Set health amount", &test_int, &int_args.min_val, int_args, "For use with set player health");
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, IntButton_structure);
-    func_button_size = 200;
     FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     funcButton_structure = 0;
     if (FuncButton_ptr)
@@ -473,7 +471,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
 
-    func_button_size = 200;
     FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     funcButton_structure = 0;
     if (FuncButton_ptr)
@@ -483,7 +480,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     }
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
 
-    func_button_size = 200;
     FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     funcButton_structure = 0;
     if (FuncButton_ptr)
@@ -494,7 +490,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     CreateDevMenuStructure_Caller(SubHeaderPtr, funcButton_structure);
 
     // Create the bool
-    uint32_t bool_menu_size = 192;
     uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     uintptr_t BoolPtr = 0;
     if (FirstBool_ptr)
@@ -521,7 +516,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
 #endif
 
     // Create the entry point
-    entry_menu_size = 200;
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
     if (entry_ptr)
     {
