@@ -1,4 +1,5 @@
 #include "dmenu.hpp"
+#include "LookId.hpp"
 
 uint64_t AllocMemoryforStructureAddr = 0;
 uint64_t CreateDevMenuStructureAddr = 0;
@@ -16,7 +17,7 @@ uint64_t LoadActorByNameAddr = 0;
 // player look id
 uint64_t ReadCurrentLookIDAddr = 0;
 bool OverrideLookID = false;
-StringId64 CurrentOverrideLookID = SID("t1x-tess-costume-01");
+StringId64 CurrentOverrideLookID = 0;
 
 bool test_boolean[10] = { false };
 int32_t test_int = 100;
@@ -202,7 +203,7 @@ bool SpawnPlayer_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Me
     if (Message == DMenu::Message::OnExecute)
     {
         FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
-        DMenu.DMENU_ARG = uint64_t(test_int2);
+        CurrentOverrideLookID = DMenu.DMENU_ARG;
         printf_s(
             str(DMenu::Message)": %i\n"
             str(&DMenu)": 0x%p\n"
@@ -375,11 +376,60 @@ constexpr uint32_t func_button_size = 200;
 constexpr uint32_t header_menu_size = 224;
 constexpr uint32_t int_button_size = 368;
 
-uintptr_t Create_DMenu_Header(const char* title)
+class MenuItem {
+public:
+    MenuItem(const char* name) : name_(name) {}
+    virtual ~MenuItem() {}
+
+    void addChild(MenuItem* child) {
+        children_.push_back(child);
+    }
+
+    const char* getName() const {
+        return name_;
+    }
+
+    const std::vector<MenuItem*>& getChildren() const {
+        return children_;
+    }
+
+private:
+    const char* name_;
+    std::vector<MenuItem*> children_;
+};
+
+class Function_Button : public MenuItem {
+public:
+    typedef void* FunctionPtr;
+
+    Function_Button(const char* name, FunctionPtr func, uint64_t arg) : MenuItem(name), func_(func), arg_(arg) {}
+
+    const uint64_t getFuncArg() const
+    {
+        return arg_;
+    }
+
+    const uintptr_t getFuncAddr() const
+    {
+        return (uintptr_t)(void*)func_;
+    }
+
+private:
+    FunctionPtr func_;
+    uint64_t arg_;
+};
+
+struct Player {
+    const char* name;
+    const char** lookid;
+    size_t numLookid;
+};
+
+uintptr_t Create_DMenu_Header(const char* title, const char* source_func, uint32_t source_line, const char* source_file)
 {
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
-    uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, source_func, source_line, source_file);
     uintptr_t SubHeaderPtr = 0;
     if (Header_ptr)
     {
@@ -390,13 +440,13 @@ uintptr_t Create_DMenu_Header(const char* title)
     return 0;
 }
 
-void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, const char* button_description, bool* bool_button)
+void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, const char* button_description, bool* bool_button, const char* source_func, uint32_t source_line, const char* source_file)
 {
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
     // Create the bool
-    uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, source_func, source_line, source_file);
     uintptr_t BoolPtr = 0;
     if (FirstBool_ptr)
     {
@@ -406,12 +456,12 @@ void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, 
     CreateDevMenuStructure_Caller(menu_structure, BoolPtr);
 }
 
-void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_name, void* function_button, uint64_t arg)
+void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_name, void* function_button, uint64_t arg, const char* source_func, uint32_t source_line, const char* source_file)
 {
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint64_t arg, bool* unk_bool);
-    uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, source_func, source_line, source_file);
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
     {
@@ -421,12 +471,12 @@ void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_na
     CreateDevMenuStructure_Caller(menu_structure, funcButton_structure);
 }
 
-void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, const char* button_description, int32_t* int_value, DMenu::IntSettings int_args)
+void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, const char* button_description, int32_t* int_value, DMenu::IntSettings int_args, const char* source_func, uint32_t source_line, const char* source_file)
 {
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
-    uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, source_func, source_line, source_file);
     uintptr_t IntButton_structure = 0;
     if (IntButton_ptr)
     {
@@ -436,41 +486,127 @@ void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, c
     CreateDevMenuStructure_Caller(menu_structure, IntButton_structure);
 }
 
-void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const char* title)
+void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const char* title, const char* description, const char* source_func, uint32_t source_line, const char* source_file)
 {
     FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
     FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the entry point
-    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, __FUNCSIG__, __LINE__, __FILE__);
+    uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, source_func, source_line, source_file);
     if (entry_ptr)
     {
         SecureZeroMemory((void*)entry_ptr, entry_menu_size);
-        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(title), SubHeaderPtr, 0, 0, BuildVer);
+        DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(title), SubHeaderPtr, 0, 0, description);
     }
     CreateDevMenuStructure_Caller(menu_structure, entry_ptr);
 }
 
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
-    uintptr_t Header_ptr = Create_DMenu_Header("Custom");
+    uintptr_t Header_ptr = Create_DMenu_Header("Custom", __FUNCSIG__, __LINE__, __FILE__);
     const char* lab_level_name = "lab-lower-floor-ai";
-    uintptr_t lab_level_header_ptr = Create_DMenu_Header(lab_level_name);
+    uintptr_t lab_level_header_ptr = Create_DMenu_Header(lab_level_name, __FUNCSIG__, __LINE__, __FILE__);
+
     for (uint32_t i = 0; i < num_npc_list; i++)
     {
-        Create_DMenu_FunctionButton(lab_level_header_ptr, npc_list1[i], (void*)OnExecuteSpawnNPC, SID(npc_list1[i]));
+        Create_DMenu_FunctionButton(lab_level_header_ptr, npc_list1[i], (void*)OnExecuteSpawnNPC, SID(npc_list1[i]), __FUNCSIG__, __LINE__, __FILE__);
     }
-    Create_DMenu_Entry(Header_ptr, lab_level_header_ptr, lab_level_name);
-    Create_DMenu_FunctionButton(Header_ptr, "Respawn Player", (void*)SpawnPlayer_OnClick, 0);
+    Create_DMenu_Entry(Header_ptr, lab_level_header_ptr, lab_level_name, nullptr, __FUNCSIG__, __LINE__, __FILE__);
+
+    Player Player_LookID[] = {
+        {"Player Bill", LookID::bill_lookid, STRING_SIZEOF(LookID::bill_lookid)},
+        {"Player David", LookID::david_lookid, STRING_SIZEOF(LookID::david_lookid)},
+        {"Player Ellie", LookID::ellie_lookid, STRING_SIZEOF(LookID::ellie_lookid)},
+        {"Player Henry", LookID::henry_lookid, STRING_SIZEOF(LookID::henry_lookid)},
+        {"Player James", LookID::james_lookid, STRING_SIZEOF(LookID::james_lookid)},
+        {"Player Joel", LookID::joel_lookid, STRING_SIZEOF(LookID::joel_lookid)},
+        {"Player Maria", LookID::maria_lookid, STRING_SIZEOF(LookID::maria_lookid)},
+        {"Player Marlene", LookID::marlene_lookid, STRING_SIZEOF(LookID::marlene_lookid)},
+        {"Player Riley", LookID::riley_lookid, STRING_SIZEOF(LookID::riley_lookid)},
+        {"Player Robert", LookID::robert_lookid, STRING_SIZEOF(LookID::robert_lookid)},
+        {"Player Sam", LookID::sam_lookid, STRING_SIZEOF(LookID::sam_lookid)},
+        {"Player Sarah", LookID::sarah0_lookid, STRING_SIZEOF(LookID::sarah0_lookid)},
+        {"Player (Sarah)", LookID::sarah1_lookid, STRING_SIZEOF(LookID::sarah1_lookid)},
+        {"Player Tess", LookID::tess_lookid, STRING_SIZEOF(LookID::tess_lookid)},
+        {"Player Tommy", LookID::tommy_lookid, STRING_SIZEOF(LookID::tommy_lookid)},
+        {"Player NPC - Cannibal", LookID::cannibal_lookid, STRING_SIZEOF(LookID::cannibal_lookid)},
+        {"Player NPC - Hunter", LookID::hunter_lookid, STRING_SIZEOF(LookID::hunter_lookid)},
+        {"Player NPC - Infected", LookID::infected_lookid, STRING_SIZEOF(LookID::infected_lookid)},
+        {"Player NPC - Jackson", LookID::jackson_lookid, STRING_SIZEOF(LookID::jackson_lookid)},
+        {"Player NPC - Marauder", LookID::marauder_lookid, STRING_SIZEOF(LookID::marauder_lookid)},
+        {"Player NPC - Military", LookID::military_lookid, STRING_SIZEOF(LookID::military_lookid)},
+        {"Player NPC - Smuggler", LookID::smuggler_lookid, STRING_SIZEOF(LookID::smuggler_lookid)},
+        {"Player NPC - Survivor", LookID::survivor_lookid, STRING_SIZEOF(LookID::survivor_lookid)},
+        {"Player NPC - Texan", LookID::texan_lookid, STRING_SIZEOF(LookID::texan_lookid)},
+        {"Player NPC - Tourist", LookID::tourist_lookid, STRING_SIZEOF(LookID::tourist_lookid)},
+        {"Player Misc", LookID::misc_lookid, STRING_SIZEOF(LookID::misc_lookid)},
+        {"Player NPC", LookID::npc_lookid, STRING_SIZEOF(LookID::npc_lookid)},
+        {"Player MP", LookID::mp_lookid, STRING_SIZEOF(LookID::mp_lookid)},
+        {"Player Test", LookID::test_lookid, STRING_SIZEOF(LookID::test_lookid)},
+        {"NPC", LookID::npc2_lookid, STRING_SIZEOF(LookID::npc2_lookid)},
+        {"Militia 1Hmelee", LookID::militia_1, STRING_SIZEOF(LookID::militia_1)},
+        {"Militia Baseball Bat", LookID::militia_2, STRING_SIZEOF(LookID::militia_2)},
+        {"Militia Pistol", LookID::militia_3, STRING_SIZEOF(LookID::militia_3)},
+        {"Militia Rifle Remington Bolt", LookID::militia_4, STRING_SIZEOF(LookID::militia_4)},
+        {"Militia Rifle Semi Auto", LookID::militia_5, STRING_SIZEOF(LookID::militia_5)},
+        {"Militia Shotgun", LookID::militia_6, STRING_SIZEOF(LookID::militia_6)},
+        {"Militia Hybrid Pistol - 1Hmelee", LookID::militia_7, STRING_SIZEOF(LookID::militia_7)},
+        {"Militia Hybrid Rifle - 1Hmelee", LookID::militia_8, STRING_SIZEOF(LookID::militia_8)},
+        {"Militia Hybrid Pistol - 2Hmelee", LookID::militia_9, STRING_SIZEOF(LookID::militia_9)},
+        {"Militia Hybrid Rifle - 2Hmelee", LookID::militia_10, STRING_SIZEOF(LookID::militia_10)},
+        {"Infected Runner", LookID::runner_lookid, STRING_SIZEOF(LookID::runner_lookid)},
+        {"Infected Stalker", LookID::stalker_lookid, STRING_SIZEOF(LookID::stalker_lookid)},
+        {"Gore", LookID::gore_lookid, STRING_SIZEOF(LookID::gore_lookid)},
+        {"TD NPC test spawns", LookID::mp_td_npc, STRING_SIZEOF(LookID::mp_td_npc)},
+        {"Horses", LookID::horses_t1, STRING_SIZEOF(LookID::horses_t1)},
+    };
+
+    MenuItem root("DC Spawn");
+
+    for (uint32_t i = 0; i < sizeof(Player_LookID) / sizeof(Player); i++) {
+        Player& player = Player_LookID[i];
+        MenuItem* submenu = new MenuItem(player.name);
+        for (uint32_t j = 0; j < player.numLookid; j++) {
+#if 0
+            void* target_func = nullptr;
+            const char player_str[] = "Player";
+            if (strncmp(player_str, player.name, sizeof(player_str) - 1) == 0)
+                target_func = (void*)SpawnPlayer_OnClick;
+            else
+                target_func = (void*)SpawnTest_OnClick;
+#endif
+            const char* costume = player.lookid[j];
+            submenu->addChild(new Function_Button(costume, (void*)SpawnPlayer_OnClick /* target_func */, SID(costume)));
+        }
+        root.addChild(submenu);
+    }
+
+    uintptr_t SchemaHeader_ptr = Create_DMenu_Header(root.getName(), __FUNCSIG__, __LINE__, __FILE__);
+    for (auto submenu : root.getChildren())
+    {
+        uintptr_t SubSchemaHeader_ptr = Create_DMenu_Header(submenu->getName(), __FUNCSIG__, __LINE__, __FILE__);
+        for (auto button : submenu->getChildren())
+        {
+            if (dynamic_cast<Function_Button*>(button))
+            {
+                Function_Button* func_button = static_cast<Function_Button*>(button);
+                Create_DMenu_FunctionButton(SubSchemaHeader_ptr, func_button->getName(), (void*)func_button->getFuncAddr(), func_button->getFuncArg(), __FUNCSIG__, __LINE__, __FILE__);
+            }
+        }
+        Create_DMenu_Entry(SchemaHeader_ptr, SubSchemaHeader_ptr, submenu->getName(), nullptr, __FUNCSIG__, __LINE__, __FILE__);
+    }
+    Create_DMenu_Entry(Header_ptr, SchemaHeader_ptr, root.getName(), nullptr, __FUNCSIG__, __LINE__, __FILE__);
+
+    Create_DMenu_FunctionButton(Header_ptr, "Respawn Player", (void*)SpawnPlayer_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
     DMenu::IntSettings int_args{};
     int_args.step_size = 10;
     int_args.min_val = 10;
     int_args.max_val = 100;
     int_args.unk = 0;
-    Create_DMenu_IntSlider(Header_ptr, "Set health amount", "For use with set player health", &test_int, int_args);
-    Create_DMenu_FunctionButton(Header_ptr, "Set Player Health", (void*)SetPlayerHealth_OnClick, 0);
-    Create_DMenu_FunctionButton(Header_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0);
-    Create_DMenu_FunctionButton(Header_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0);
-    Create_DMenu_BoolButton(Header_ptr, "Test Bool 1", nullptr, &OverrideLookID);
-    Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu");
+    Create_DMenu_IntSlider(Header_ptr, "Set health amount", "For use with set player health", &test_int, int_args, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Set Player Health", (void*)SetPlayerHealth_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }

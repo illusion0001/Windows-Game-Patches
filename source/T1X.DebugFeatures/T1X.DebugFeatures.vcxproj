@@ -183,6 +183,7 @@
     <ClInclude Include="..\..\include\stdafx.h" />
     <ClInclude Include="code_caves.hpp" />
     <ClInclude Include="dmenu.hpp" />
+    <ClInclude Include="LookId.hpp" />
     <ClInclude Include="patterns.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

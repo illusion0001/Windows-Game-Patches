@@ -265,9 +265,9 @@ const char* weapon_list_subsection[] = {"invisible-cube",
 
 const char* weapon_subentry_names[] = {"Misc", "Consumables", "Throwables", "Ellie", "Joel", "Melee"};
 
-const constexpr uint32_t GivePlayerWeapon_ListMax = sizeof(weapon_list_main) / sizeof(weapon_list_main[0]);
-const constexpr uint32_t GivePlayerWeapon_SubListMax = sizeof(weapon_list_subsection) / sizeof(weapon_list_subsection[0]);
-const constexpr uint32_t GivePlayerWeapon_EntryListMax = sizeof(weapon_subentry_names) / sizeof(weapon_subentry_names[0]);
+const constexpr uint32_t GivePlayerWeapon_ListMax = STRING_SIZEOF(weapon_list_main);
+const constexpr uint32_t GivePlayerWeapon_SubListMax = STRING_SIZEOF(weapon_list_subsection);
+const constexpr uint32_t GivePlayerWeapon_EntryListMax = STRING_SIZEOF(weapon_subentry_names);
 
 // Main list
 uint32_t GivePlayerWeapon_index_count = 0;

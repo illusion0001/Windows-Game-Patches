@@ -6,6 +6,8 @@
     typedef return_type (*func_name##_t)(__VA_ARGS__); \
     func_name##_t func_name = (func_name##_t)(func_addr);
 
+#define STRING_SIZEOF(str) sizeof(str) / sizeof(const char*)
+
 extern uint64_t Memory_PushAllocatorReturnAddr;
 extern uint64_t Memory_NewHandlerReturnAddr;
 extern uint64_t GivePlayerWeapon_MainReturn;
