@@ -355,6 +355,135 @@ bool OnExecuteSpawnNPC(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
     return DMenu::FunctionReturnCode::NoAction;
 }
 
+const char* anim_actor_list[] = {
+    "anim-bill-facial",
+    "anim-david-facial",
+    "anim-dog-mm",
+    "anim-dog-reactions",
+    "anim-horse",
+    "anim-horse-melee",
+    "anim-horse-mm",
+    "anim-npc-alert-caps",
+    "anim-npc-ambi-caps",
+    "anim-npc-brute",
+    "anim-npc-f-ambi-explore-caps",
+    "anim-npc-m",
+    "anim-npc-m-ambi",
+    "anim-npc-m-cover-share",
+    "anim-npc-m-crouch",
+    "anim-npc-m-enemy-only",
+    "anim-npc-m-gestures",
+    "anim-npc-m-horse",
+    "anim-npc-m-lg",
+    "anim-npc-m-lg-enemy-only",
+    "anim-npc-m-mm-taps",
+    "anim-npc-m-p-enemy-only",
+    "anim-npc-m-p-enemy-only",
+    "anim-npc-m-shared",
+    "anim-npc-m-taps",
+    "anim-npc-m-taps-bus",
+    "anim-npc-m-turret",
+    "anim-npc-m-uneasy",
+    "anim-npc-m-wade",
+    "anim-npc-uneasy-caps",
+    "anim-player-gun-ellie",
+    "anim-player-gun-shared",
+    "anim-player-movement-push-pull",
+    "anim-tess-facial",
+    "t1x-anim-bill",
+    "t1x-anim-bill-gestures",
+    "t1x-anim-david",
+    "t1x-anim-david-boss",
+    "t1x-anim-david-gestures",
+    "t1x-anim-ellie",
+    "t1x-anim-ellie-player",
+    "t1x-anim-ellie-player-gun",
+    "t1x-anim-ellie-player-scavenge",
+    "t1x-anim-ellie-v-david-melee",
+    "t1x-anim-ellie-v-inf-dlc-melee",
+    "t1x-anim-ellie-v-inf-melee",
+    "t1x-anim-ellie-v-thug-melee",
+    "t1x-anim-inf-v-tess-melee",
+    "t1x-anim-joel",
+    "t1x-anim-joel-gestures",
+    "t1x-anim-joel-melee"
+    "t1x-anim-joel-relaxed",
+    "t1x-anim-joel-relaxed-sprint",
+    "t1x-anim-npc-bliz",
+    "t1x-anim-npc-gestures",
+    "t1x-anim-npc-m-caps",
+    "t1x-anim-npc-melee",
+    "t1x-anim-npc-normal",
+    "t1x-anim-tess",
+    "t1x-anim-tess-caps",
+    "t1x-anim-tess-gestures",
+    "t1x-anim-tess-ladder",
+    "t1x-tess-anim-wade",
+};
+
+const char* anim_actor_list_infected[] = {
+    "anim-bloater",
+    "anim-clicker",
+    "anim-inf-legless",
+    "anim-inf-melee",
+    "anim-inf-melee-stalker",
+    "anim-inf-shared",
+    "anim-melee-abby-inf-t2",
+    "anim-melee-ellie-inf-t2",
+    "anim-melee-inf-bloater-t2",
+    "anim-melee-inf-clicker-t2",
+    "anim-melee-inf-crawler-t2",
+    "anim-melee-inf-runner-t2",
+    "anim-melee-inf-shared-t2",
+    "anim-melee-inf-stalker-t2",
+    "anim-melee-player-shared-inf-t2",
+    "anim-runner",
+    "anim-runner-horde",
+    "anim-runr-stlkr-shared",
+    "anim-stalker",
+    "gore-muscle-tendon",
+    "t1x-anim-bloater",
+    "t1x-anim-inf-melee",
+    "t1x-anim-inf-melee-clicker-female",
+    "t1x-anim-inf-melee-clicker-male",
+    "t1x-anim-inf-melee-runner-female",
+    "t1x-anim-inf-melee-runner-male",
+    "t1x-anim-inf-melee-stream-runner-female",
+    "t1x-anim-inf-melee-stream-runner-male",
+    "t1x-anim-inf-shared",
+    "t1x-anim-inf-vs-npc-melee",
+};
+
+bool sync_actor = false;
+
+bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        FUNCTION_PTR(bool, LoadActorByName_Caller, LoadActorByNameAddr, const char* level_name, uint32_t arg1, bool sync_actor);
+        if (DMenu.DMENU_ARG == 0)
+        {
+            for (uint32_t i = 0; i < STRING_SIZEOF(anim_actor_list); i++)
+            {
+                printf_s("Actor open: %s\nSync mode: %i", anim_actor_list[i], sync_actor);
+                bool load_ret = LoadActorByName_Caller(anim_actor_list[i], 0, sync_actor);
+                printf_s("LoadActor Returned: 0x%02x\n", load_ret);
+            }
+        }
+        else
+        {
+            for (uint32_t i = 0; i < STRING_SIZEOF(anim_actor_list_infected); i++)
+            {
+                printf_s("Actor open: %s\nSync mode: %i", anim_actor_list_infected[i], sync_actor);
+                bool load_ret = LoadActorByName_Caller(anim_actor_list_infected[i], 0, sync_actor);
+                printf_s("LoadActor Returned: 0x%02x\n", load_ret);
+            }
+        }
+        return DMenu::FunctionReturnCode::Success;
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
 const char* npc_list1[] = {
     "npc-lab-lower-1",
     "npc-lab-lower-2",
@@ -607,6 +736,9 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Set Player Health", (void*)SetPlayerHealth_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_BoolButton(Header_ptr, "Sync actor after load", nullptr, &sync_actor, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Try to load animations", (void*)OnExecuteLoadActor, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }
