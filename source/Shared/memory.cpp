@@ -44,7 +44,7 @@ namespace Memory
         uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - 5;
 
         *(BYTE*)src = 0xE9;
-        *(uintptr_t*)((uintptr_t)src + 1) = relativeAddress;
+        *(uint32_t*)((uintptr_t)src + 1) = relativeAddress;
 
         DWORD temp;
         VirtualProtect(src, len, curProtection, &temp);
