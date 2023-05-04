@@ -19,6 +19,7 @@ bool bDebugMenu;
 bool bShowDebugConsole;
 float fDebugMenuSize;
 bool bExtendedDebugMenu;
+bool bTestMode;
 
 void ReadConfig(void)
 {
@@ -56,6 +57,7 @@ void ReadConfig(void)
         inipp::get_value(ini.sections[L"Settings"], wstr(bShowDebugConsole), bShowDebugConsole);
         inipp::get_value(ini.sections[L"Settings"], wstr(bExtendedDebugMenu), bExtendedDebugMenu);
         inipp::get_value(ini.sections[L"Settings"], wstr(fDebugMenuSize), fDebugMenuSize);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bTestMode), bTestMode);
     }
 
     // Log config parse
@@ -99,6 +101,10 @@ void ApplyDebugPatches(void)
         LoadActorByNameAddr = FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
         uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
         ReadCurrentLookIDAddr = FindAndPrintPatternW(Patterns::ReadCurrentLookID, wstr(Patterns::ReadCurrentLookID));
+        ActiveTaskDisplayAddr = FindAndPrintPatternW(Patterns::ActiveTaskDisplay, wstr(Patterns::ActiveTaskDisplay));
+        uintptr_t DebugPrintAddr = FindAndPrintPatternW(Patterns::CharPrintText, wstr(Patterns::CharPrintText));
+        TextPrintV_Addr = FindAndPrintPatternW(Patterns::TextPrintV, wstr(Patterns::TextPrintV));
+        uintptr_t JumpPattern = 0;
         if (
             AllocMemoryforStructureAddr &&
             CreateDevMenuStructureAddr &&
@@ -113,17 +119,30 @@ void ApplyDebugPatches(void)
             LoadLevelByNameAddr &&
             LoadActorByNameAddr &&
             PlayerPtrAddrJMP &&
-            ReadCurrentLookIDAddr
+            ReadCurrentLookIDAddr &&
+            ActiveTaskDisplayAddr &&
+            DebugPrintAddr
             )
         {
             EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
             PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
-            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
             Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
             Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
             Memory::DetourFunction64((void*)ReadCurrentLookIDAddr, (void*)ReadLookID_Hook, 14);
+            if (bTestMode)
+            {
+                WritePatchPattern_Hook(Patterns::ActiveTaskDisplay, 24, wstr(Patterns::ActiveTaskDisplay), 0, (void*)ActiveTaskDisplay_CC, &ActiveTaskDisplayReturnAddr);
+                DebugPrintAddr = DebugPrintAddr + 24;
+                uint32_t OffsetToOriginalPrint = *(uint32_t*)(DebugPrintAddr + 1);
+                DebugPrint_OriginalAddr = DebugPrintAddr + OffsetToOriginalPrint + 5;
+                JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+                Memory::DetourFunction32((void*)DebugPrintAddr, (void*)JumpPattern, 5);
+                Memory::DetourFunction64((void*)JumpPattern, (void*)DebugPrint_CC, 14);
+                DebugPrint_ReturnAddr = DebugPrintAddr + 5;
+            }
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
@@ -192,6 +211,7 @@ void __stdcall Main()
     bDebugMenu = false;
     bShowDebugConsole = false;
     bExtendedDebugMenu = false;
+    bTestMode = false;
     fDebugMenuSize = 0.6;
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));

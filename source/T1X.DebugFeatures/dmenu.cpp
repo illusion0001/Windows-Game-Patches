@@ -465,7 +465,7 @@ bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mes
         {
             for (uint32_t i = 0; i < STRING_SIZEOF(anim_actor_list); i++)
             {
-                printf_s("Actor open: %s\nSync mode: %i", anim_actor_list[i], sync_actor);
+                printf_s("Actor open: %s\nSync mode: %i\n", anim_actor_list[i], sync_actor);
                 bool load_ret = LoadActorByName_Caller(anim_actor_list[i], 0, sync_actor);
                 printf_s("LoadActor Returned: 0x%02x\n", load_ret);
             }
@@ -474,12 +474,36 @@ bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mes
         {
             for (uint32_t i = 0; i < STRING_SIZEOF(anim_actor_list_infected); i++)
             {
-                printf_s("Actor open: %s\nSync mode: %i", anim_actor_list_infected[i], sync_actor);
+                printf_s("Actor open: %s\nSync mode: %i\n", anim_actor_list_infected[i], sync_actor);
                 bool load_ret = LoadActorByName_Caller(anim_actor_list_infected[i], 0, sync_actor);
                 printf_s("LoadActor Returned: 0x%02x\n", load_ret);
             }
         }
         return DMenu::FunctionReturnCode::Success;
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
+bool OnExecuteShowTaskData(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        struct ActiveTaskData
+        {
+            void* unk_callback;
+            size_t buffer_size;
+            size_t formatted_size;
+            char text_buffer[512];
+        };
+        struct ActiveTaskData* pointer;
+        void* addr = (void*)(TaskDataStructure);
+        pointer = (struct ActiveTaskData*)addr;
+        if (pointer->text_buffer[0] != 0)
+        {
+            printf_s("Task callback: 0x%016llx\nBuffer size: %lli\nFormatted size: %lli\nFormatted String: %s\n\n", pointer->unk_callback, pointer->buffer_size, pointer->formatted_size, pointer->text_buffer);
+            return DMenu::FunctionReturnCode::Success;
+        }
+        return DMenu::FunctionReturnCode::Failure;
     }
     return DMenu::FunctionReturnCode::NoAction;
 }
@@ -739,6 +763,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_BoolButton(Header_ptr, "Sync actor after load", nullptr, &sync_actor, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load animations", (void*)OnExecuteLoadActor, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Show task data", (void*)OnExecuteShowTaskData, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }

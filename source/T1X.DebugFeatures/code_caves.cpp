@@ -374,3 +374,44 @@ void __attribute__((naked)) GetPlayerPtrAddr_CC()
         RET;
     }
 }
+
+uint64_t ActiveTaskDisplayAddr = 0;
+uint64_t ActiveTaskDisplayReturnAddr = 0;
+char TaskDataStructure[512 + (8 * 3)] = { 0 };
+
+void __attribute__((naked)) ActiveTaskDisplay_CC()
+{
+    __asm
+    {
+        lea    rcx, [TaskDataStructure];
+        lea    rax, [rbp + 0x3c0];
+        mov    r8, r14;
+        mov    QWORD PTR[rsp + 0x28], rax;
+        mov    QWORD PTR[rsp + 0x20], rsi;
+        jmp qword ptr[ActiveTaskDisplayReturnAddr];
+    }
+}
+
+uint64_t DebugPrint_ReturnAddr = 0;
+uint64_t DebugPrint_WindowContext = 0;
+uint64_t DebugPrint_OriginalAddr = 0;
+uint64_t TextPrintV_Addr = 0;
+
+void MyDebugPrintFunction(uintptr_t window_context)
+{
+    FUNCTION_PTR(void, TextPrintV, TextPrintV_Addr, uintptr_t WindowContext, float font_x, float font_y, float font_scale_x, float font_scale_y, uint32_t color, const char* fmt, ...);
+    TextPrintV(window_context, 100., 50., 1., 1., 0xffffffff, "Hello from '%s'!", __FUNCSIG__);
+    return;
+}
+
+void __attribute__((naked)) DebugPrint_CC()
+{
+    __asm
+    {
+        mov qword ptr[DebugPrint_WindowContext], rcx;
+        call qword ptr[DebugPrint_OriginalAddr];
+        mov rcx, qword ptr[DebugPrint_WindowContext]; // need the window context
+        call qword ptr[MyDebugPrintFunction];
+        jmp qword ptr[DebugPrint_ReturnAddr];
+    }
+}
