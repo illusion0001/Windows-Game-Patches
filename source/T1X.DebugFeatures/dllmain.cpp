@@ -121,7 +121,8 @@ void ApplyDebugPatches(void)
             PlayerPtrAddrJMP &&
             ReadCurrentLookIDAddr &&
             ActiveTaskDisplayAddr &&
-            DebugPrintAddr
+            DebugPrintAddr &&
+            TextPrintV_Addr
             )
         {
             EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
@@ -132,17 +133,14 @@ void ApplyDebugPatches(void)
             Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
             Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
             Memory::DetourFunction64((void*)ReadCurrentLookIDAddr, (void*)ReadLookID_Hook, 14);
-            if (bTestMode)
-            {
-                WritePatchPattern_Hook(Patterns::ActiveTaskDisplay, 24, wstr(Patterns::ActiveTaskDisplay), 0, (void*)ActiveTaskDisplay_CC, &ActiveTaskDisplayReturnAddr);
-                DebugPrintAddr = DebugPrintAddr + 24;
-                uint32_t OffsetToOriginalPrint = *(uint32_t*)(DebugPrintAddr + 1);
-                DebugPrint_OriginalAddr = DebugPrintAddr + OffsetToOriginalPrint + 5;
-                JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
-                Memory::DetourFunction32((void*)DebugPrintAddr, (void*)JumpPattern, 5);
-                Memory::DetourFunction64((void*)JumpPattern, (void*)DebugPrint_CC, 14);
-                DebugPrint_ReturnAddr = DebugPrintAddr + 5;
-            }
+            WritePatchPattern_Hook(Patterns::ActiveTaskDisplay, 24, wstr(Patterns::ActiveTaskDisplay), 0, (void*)ActiveTaskDisplay_CC, &ActiveTaskDisplayReturnAddr);
+            DebugPrintAddr = DebugPrintAddr + 24;
+            uint32_t OffsetToOriginalPrint = *(uint32_t*)(DebugPrintAddr + 1);
+            DebugPrint_OriginalAddr = DebugPrintAddr + OffsetToOriginalPrint + 5;
+            JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Memory::DetourFunction32((void*)DebugPrintAddr, (void*)JumpPattern, 5);
+            Memory::DetourFunction64((void*)JumpPattern, (void*)DebugPrint_CC, 14);
+            DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
