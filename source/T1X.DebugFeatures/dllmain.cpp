@@ -130,16 +130,14 @@ void ApplyDebugPatches(void)
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
             PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
             JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
-            Memory::DetourFunction32((void*)PlayerPtrAddrJMP, (void*)JumpPattern, 6);
-            Memory::DetourFunction64((void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 14);
+            Make32to64Hook((void*)PlayerPtrAddrJMP, (void*)JumpPattern, (void*)GetPlayerPtrAddr_CC, 6, wstr(PlayerPtrAddrJMP), wstr(Patterns::Int3_14bytes), wstr(GetPlayerPtrAddr_CC));
             Memory::DetourFunction64((void*)ReadCurrentLookIDAddr, (void*)ReadLookID_Hook, 14);
             WritePatchPattern_Hook(Patterns::ActiveTaskDisplay, 24, wstr(Patterns::ActiveTaskDisplay), 0, (void*)ActiveTaskDisplay_CC, &ActiveTaskDisplayReturnAddr);
             DebugPrintAddr = DebugPrintAddr + 24;
             uint32_t OffsetToOriginalPrint = *(uint32_t*)(DebugPrintAddr + 1);
             DebugPrint_OriginalAddr = DebugPrintAddr + OffsetToOriginalPrint + 5;
             JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
-            Memory::DetourFunction32((void*)DebugPrintAddr, (void*)JumpPattern, 5);
-            Memory::DetourFunction64((void*)JumpPattern, (void*)DebugPrint_CC, 14);
+            Make32to64Hook((void*)DebugPrintAddr, (void*)JumpPattern, (void*)DebugPrint_CC, 5, wstr(DebugPrintAddr), wstr(Patterns::Int3_14bytes), wstr(DebugPrint_CC));
             DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
         ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
@@ -148,8 +146,7 @@ void ApplyDebugPatches(void)
         if (EvalScriptWarns && PrintAddr)
         {
             uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
-            Memory::DetourFunction32((void*)PrintAddr, (void*)JumpPattern, 5);
-            Memory::DetourFunction64((void*)JumpPattern, (void*)ScriptPrintWarn_CC, 14);
+            Make32to64Hook((void*)PrintAddr, (void*)JumpPattern, (void*)ScriptPrintWarn_CC, 6, wstr(PrintAddr), wstr(Patterns::Int3_14bytes), wstr(ScriptPrintWarn_CC));
             WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
             for (uint32_t i = 0; i < 2; i++)
             {
