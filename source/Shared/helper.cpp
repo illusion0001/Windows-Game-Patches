@@ -208,3 +208,11 @@ uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Patt
     }
     return 0;
 }
+
+void Make32to64Hook(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name)
+{
+    Memory::DetourFunction32((void*)source_target, (void*)second_jmp, source_size);
+    LOG(L"Created jump %s (0x%016llx) to %s (0x%016llx)\n", source_name, (uintptr_t)source_target, second_jmp_name, (uintptr_t)second_jmp);
+    Memory::DetourFunction64((void*)second_jmp, (void*)target_jmp, 14);
+    LOG(L"Created jump %s (0x%016llx) to %s (0x%016llx)\n", second_jmp_name, (uintptr_t)second_jmp, target_jmp_name, (uintptr_t)target_jmp);
+}
