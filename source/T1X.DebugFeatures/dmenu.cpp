@@ -27,14 +27,14 @@ char BuildVer[128];
 
 const char* AppendEllipsisToText(const char* text)
 {
-    SecureZeroMemory((void*)menu_entry_text, sizeof(menu_entry_text));
+    CLEAR_MEM((void*)menu_entry_text, sizeof(menu_entry_text));
     _snprintf_s(menu_entry_text, sizeof(menu_entry_text), "%s...", text);
     return menu_entry_text;
 }
 
 const char* FormatEntryText(const char* fmt, ...)
 {
-    SecureZeroMemory((void*)menu_entry_text, sizeof(menu_entry_text));
+    CLEAR_MEM((void*)menu_entry_text, sizeof(menu_entry_text));
     va_list args;
     va_start(args, fmt);
     vsprintf_s(menu_entry_text, sizeof(menu_entry_text), fmt, args);
@@ -586,7 +586,7 @@ uintptr_t Create_DMenu_Header(const char* title, const char* source_func, uint32
     uintptr_t SubHeaderPtr = 0;
     if (Header_ptr)
     {
-        SecureZeroMemory((void*)Header_ptr, header_menu_size);
+        CLEAR_MEM((void*)Header_ptr, header_menu_size);
         SubHeaderPtr = DevMenuCreateHeader_Caller(Header_ptr, title, 0);
         return SubHeaderPtr;
     }
@@ -603,7 +603,7 @@ void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, 
     uintptr_t BoolPtr = 0;
     if (FirstBool_ptr)
     {
-        SecureZeroMemory((void*)FirstBool_ptr, bool_menu_size);
+        CLEAR_MEM((void*)FirstBool_ptr, bool_menu_size);
         BoolPtr = DevMenuAddBool_Caller(FirstBool_ptr, button_name, bool_button, button_description);
     }
     CreateDevMenuStructure_Caller(menu_structure, BoolPtr);
@@ -618,7 +618,7 @@ void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_na
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
     {
-        SecureZeroMemory((void*)FuncButton_ptr, func_button_size);
+        CLEAR_MEM((void*)FuncButton_ptr, func_button_size);
         funcButton_structure = DevMenuAddFuncButton_Caller(FuncButton_ptr, button_name, (void*)function_button, arg, 0);
     }
     CreateDevMenuStructure_Caller(menu_structure, funcButton_structure);
@@ -633,7 +633,7 @@ void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, c
     uintptr_t IntButton_structure = 0;
     if (IntButton_ptr)
     {
-        SecureZeroMemory((void*)IntButton_ptr, int_button_size);
+        CLEAR_MEM((void*)IntButton_ptr, int_button_size);
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, button_name, int_value, &int_args.min_val, int_args, button_description);
     }
     CreateDevMenuStructure_Caller(menu_structure, IntButton_structure);
@@ -648,7 +648,7 @@ void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const 
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, source_func, source_line, source_file);
     if (entry_ptr)
     {
-        SecureZeroMemory((void*)entry_ptr, entry_menu_size);
+        CLEAR_MEM((void*)entry_ptr, entry_menu_size);
         DevMenuCreateEntry_Caller(entry_ptr, AppendEllipsisToText(title), SubHeaderPtr, 0, 0, description);
     }
     CreateDevMenuStructure_Caller(menu_structure, entry_ptr);

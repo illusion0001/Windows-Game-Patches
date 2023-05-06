@@ -7,6 +7,7 @@
     func_name##_t func_name = (func_name##_t)(func_addr);
 
 #define STRING_SIZEOF(str) sizeof(str) / sizeof(const char*)
+#define CLEAR_MEM(input, size_input) memset(input, 0, size_input)
 
 extern uint64_t Memory_PushAllocatorReturnAddr;
 extern uint64_t Memory_NewHandlerReturnAddr;

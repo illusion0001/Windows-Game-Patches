@@ -310,7 +310,7 @@ const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
         break;
     }
     default: {
-        SecureZeroMemory((void*)temp_str, sizeof(temp_str));
+        CLEAR_MEM((void*)temp_str, sizeof(temp_str));
         return temp_str;
     }
     }
@@ -353,7 +353,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
 char temp_buffer[256];
 const char* ScriptPrintWarn_CC(const char* ret, const char* fmt, ...)
 {
-    SecureZeroMemory((void*)temp_buffer, sizeof(temp_buffer));
+    CLEAR_MEM((void*)temp_buffer, sizeof(temp_buffer));
     va_list args;
     va_start(args, fmt);
     vsprintf_s(temp_buffer, sizeof(temp_buffer), fmt, args);
