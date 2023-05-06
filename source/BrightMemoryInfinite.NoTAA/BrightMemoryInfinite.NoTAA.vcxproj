@@ -138,6 +138,7 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +150,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UNICODE;_UNICODE;_USRDLL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -159,6 +160,8 @@
       <LanguageStandard_C>Default</LanguageStandard_C>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
