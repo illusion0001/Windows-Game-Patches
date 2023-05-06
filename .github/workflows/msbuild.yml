@@ -120,9 +120,10 @@ jobs:
         
         $compress = @{
             Path             = ".\${{ env.BUILD_CONFIGURATION }}\dist\*"
-            CompressionLevel = "NoCompression"
+            CompressionLevel = "Optimal"
             DestinationPath  = ".\${{ env.zip_name }}.zip"
         }
         
         Compress-Archive @compress
-        gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md # --draft --prerelease
+        mv ${{ env.BUILD_CONFIGURATION }}/pdb.zip ${{ env.zip_name }}-pdb.zip
+        gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip ${{ env.ZIP_NAME }}-pdb.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md # --draft --prerelease
