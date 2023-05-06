@@ -15,6 +15,8 @@
 
 ### **The Last of Us: Part 1**
   - Debug Menu
+  - Custom Debug Menu (Work in Progress)
+  - Restored Active Task Display
   - Extended Debug Menu by [infogram](https://web.archive.org/web/20230413143249/https://cs.rin.ru/forum/viewtopic.php?p=2806625)
 
 ### **Wo Long: Fallen Dynasty**
