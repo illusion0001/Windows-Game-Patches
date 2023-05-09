@@ -2,6 +2,7 @@
 
 extern uint64_t MeleeMenuHook_ReturnAddr;
 extern uint64_t ReadCurrentLookIDAddr;
+extern uint64_t InitProfileMenuAddr;
 extern char BuildVer[128];
 
 uintptr_t* ReadLookID_Hook(uintptr_t PlayerPtr, uintptr_t* LookIDPtr);

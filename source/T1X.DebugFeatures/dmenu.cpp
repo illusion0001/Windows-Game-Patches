@@ -14,6 +14,8 @@ INIT_FUNCTION_PTR(DevMenuCreateEntry_Caller);
 INIT_FUNCTION_PTR(DevMenuAddIntSlider_Caller);
 INIT_FUNCTION_PTR(CreateDevMenuStructure_Caller);
 
+uint64_t InitProfileMenuAddr = 0;
+
 // player look id
 uint64_t ReadCurrentLookIDAddr = 0;
 bool OverrideLookID = false;
@@ -606,6 +608,14 @@ void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const 
 
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
+    const char* ProfileTitle = "Profile";
+    uintptr_t ProfileHeader_ptr = Create_DMenu_Header(ProfileTitle, __FUNCSIG__, __LINE__, __FILE__);
+    {
+        FUNCTION_PTR(void, InitProfileMenu, InitProfileMenuAddr, uintptr_t menu_structure);
+        InitProfileMenu(ProfileHeader_ptr);
+    }
+    Create_DMenu_Entry(menu_structure, ProfileHeader_ptr, ProfileTitle, nullptr, __FUNCSIG__, __LINE__, __FILE__);
+
     uintptr_t Header_ptr = Create_DMenu_Header("Custom", __FUNCSIG__, __LINE__, __FILE__);
     const char* lab_level_name = "lab-lower-floor-ai";
     uintptr_t lab_level_header_ptr = Create_DMenu_Header(lab_level_name, __FUNCSIG__, __LINE__, __FILE__);

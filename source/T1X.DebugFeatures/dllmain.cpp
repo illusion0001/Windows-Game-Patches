@@ -103,6 +103,7 @@ void ApplyDebugPatches(void)
         ActiveTaskDisplayAddr = FindAndPrintPatternW(Patterns::ActiveTaskDisplay, wstr(Patterns::ActiveTaskDisplay));
         uintptr_t DebugPrintAddr = FindAndPrintPatternW(Patterns::CharPrintText, wstr(Patterns::CharPrintText));
         TextPrintV = (TextPrintV_ptr)FindAndPrintPatternW(Patterns::TextPrintV, wstr(Patterns::TextPrintV));
+        InitProfileMenuAddr = FindAndPrintPatternW(Patterns::InitProfileMenu, wstr(Patterns::InitProfileMenu));
         uintptr_t JumpPattern = 0;
         if (
             CreateDevMenuStructure_Caller &&
@@ -120,7 +121,8 @@ void ApplyDebugPatches(void)
             ReadCurrentLookIDAddr &&
             ActiveTaskDisplayAddr &&
             DebugPrintAddr &&
-            TextPrintV
+            TextPrintV &&
+            InitProfileMenuAddr
             )
         {
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
@@ -175,9 +177,10 @@ void ApplyDebugPatches(void)
         const unsigned char ret_1_al[] = { 0xb0, 0x01, 0xc3 };
         const unsigned char nop1x[] = { 0x90 };
         const unsigned char ret_0[] = { 0x31, 0xc0, 0xc3 };
-        uint64_t menu_mem_size = 0x840000;
-        uint64_t script_mem_size = 0x800000;
-        uint64_t cpu_mem_size = 0x40e00000;
+        // excessive for < 1.0.4.1
+        uint64_t menu_mem_size = 0x00840000;
+        uint64_t script_mem_size = 0x00800000;
+        uint64_t cpu_mem_size = 0x45000000;
         int32_t OffsetToisDebugMemoryAval = 0;
         uintptr_t ParticlesMenu = FindAndPrintPatternW(Patterns::ParticlesMenu, wstr(Patterns::ParticlesMenu));
         ParticlesMenu = ParticlesMenu + 12;
