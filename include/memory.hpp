@@ -16,7 +16,6 @@ namespace Memory
     // https://github.com/OneshotGH/CSGOSimple-master/blob/master/CSGOSimple/helpers/utils.cpp
     // Unicode Version
     std::uint8_t* PatternScanW(void* module, const wchar_t* signature);
-    std::uint8_t* u64_Scan(void* module, std::uint64_t value, std::size_t size);
     std::string GetVersionString();
     std::vector<int> string_to_ints(const std::string& s, char delimiter);
     std::wstring GetVersionProductName();

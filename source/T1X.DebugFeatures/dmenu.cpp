@@ -454,19 +454,9 @@ bool OnExecuteShowTaskData(DMenu::OnExecuteStructure DMenu, enum DMenu::Message 
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        struct ActiveTaskData
+        if (TaskData.text_buffer[0] != 0)
         {
-            void* unk_callback;
-            size_t buffer_size;
-            size_t formatted_size;
-            char text_buffer[512];
-        };
-        struct ActiveTaskData* pointer;
-        void* addr = (void*)(TaskDataStructure);
-        pointer = (struct ActiveTaskData*)addr;
-        if (pointer->text_buffer[0] != 0)
-        {
-            printf_s("Task callback: 0x%016llx\nBuffer size: %lli\nFormatted size: %lli\nFormatted String: %s\n\n", pointer->unk_callback, pointer->buffer_size, pointer->formatted_size, pointer->text_buffer);
+            printf_s("Task callback: 0x%016llx\nBuffer size: %lli\nFormatted size: %lli\nFormatted String: %s\n", TaskData.unk_callback, TaskData.buffer_size, TaskData.formatted_size, TaskData.text_buffer);
             return DMenu::FunctionReturnCode::Success;
         }
         return DMenu::FunctionReturnCode::Failure;
@@ -725,5 +715,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show task data", (void*)OnExecuteShowTaskData, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_BoolButton(Header_ptr, "Show Hello World message via TextPrintV", nullptr, &TestTextPrintV, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }

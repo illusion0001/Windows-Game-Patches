@@ -191,22 +191,6 @@ namespace Memory
         return nullptr;
     }
 
-    std::uint8_t* u64_Scan(void* module, std::uint64_t value, std::size_t size)
-    {
-        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
-        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
-        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
-        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
-
-        for (std::size_t i = 0; i < sizeOfImage - size; ++i) {
-            auto currentValue = *reinterpret_cast<std::uint64_t*>(&scanBytes[i]);
-            if (currentValue == value) {
-                return &scanBytes[i];
-            }
-        }
-        return nullptr;
-    }
-
     std::string GetVersionString()
     {
         auto hInst = GetModuleHandle(NULL);

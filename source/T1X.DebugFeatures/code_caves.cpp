@@ -377,13 +377,15 @@ void __attribute__((naked)) GetPlayerPtrAddr_CC()
 
 uint64_t ActiveTaskDisplayAddr = 0;
 uint64_t ActiveTaskDisplayReturnAddr = 0;
-char TaskDataStructure[(8 * 3) + 128] = { 0 };
+
+struct TaskManager::ActiveTaskData TaskData{};
+bool TestTextPrintV = false;
 
 void __attribute__((naked)) ActiveTaskDisplay_CC()
 {
     __asm
     {
-        lea    rcx, [TaskDataStructure];
+        lea    rcx, [TaskData];
         lea    rax, [rbp + 0x3c0];
         mov    r8, r14;
         mov    QWORD PTR[rsp + 0x28], rax;
@@ -400,21 +402,15 @@ INIT_FUNCTION_PTR(TextPrintV);
 
 void MyDebugPrintFunction(uintptr_t window_context)
 {
-    struct ActiveTaskData
-    {
-        void* unk_callback;
-        size_t buffer_size;
-        size_t formatted_size;
-        char text_buffer[128];
-    };
-    struct ActiveTaskData* pointer;
-    void* addr = (void*)(TaskDataStructure);
-    pointer = (struct ActiveTaskData*)addr;
-    if (pointer->formatted_size != 0 && pointer->text_buffer[0] != 0)
+    if (TaskData.formatted_size != 0 && TaskData.text_buffer[0] != 0)
     {
         // TextPrintV(window_context, 50., 620., 0.8, 0.8, 0xc0e0e0e0, "Task callback: 0x%016llx\nBuffer size: %lli\nFormatted size: %lli\nFormatted String: %s\n\n", pointer->unk_callback, pointer->buffer_size, pointer->formatted_size, pointer->text_buffer);
-        TextPrintV(window_context, 50., 667., 0.8, 0.8, 0xc0e0e0e0, pointer->text_buffer);
-        memset((void*)pointer, 0, sizeof(ActiveTaskData));
+        TextPrintV(window_context, 50., 667., 0.8, 0.8, 0xc0e0e0e0, TaskData.text_buffer);
+        memset(&TaskData, 0, sizeof(TaskData));
+    }
+    if (TestTextPrintV)
+    {
+        TextPrintV(window_context, 50., 120., 0.8, 0.8, 0xc0e0e0e0, "Hello world!");
     }
     return;
 }

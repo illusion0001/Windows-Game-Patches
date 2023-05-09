@@ -2,6 +2,8 @@
 
 #define MEM_TYPE 0x25 // TODO: Check this heap type
 
+#pragma once
+
 #define FUNCTION_PTR(return_type, func_name, func_addr, ...) \
     typedef return_type (*func_name##_t)(__VA_ARGS__); \
     func_name##_t func_name = (func_name##_t)(func_addr);
@@ -24,10 +26,24 @@ extern uint64_t GivePlayerWeapon_EntryReturn;
 extern uint64_t PlayerPtrAddr;
 extern uint64_t ActiveTaskDisplayAddr;
 extern uint64_t ActiveTaskDisplayReturnAddr;
-extern char TaskDataStructure[(8 * 3) + 128];
 extern uint64_t DebugPrint_WindowContext;
 extern uint64_t DebugPrint_ReturnAddr;
 extern uint64_t DebugPrint_OriginalAddr;
+
+class TaskManager
+{
+public:
+    struct ActiveTaskData
+    {
+        void* unk_callback;
+        size_t buffer_size;
+        size_t formatted_size;
+        char text_buffer[128];
+    };
+};
+
+extern struct TaskManager::ActiveTaskData TaskData;
+extern bool TestTextPrintV;
 
 TYPEDEF_FUNCTION_PTR(void, TextPrintV, uintptr_t WindowContext, float font_x, float font_y, float font_scale_x, float font_scale_y, uint32_t color, const char* fmt, ...);
 
