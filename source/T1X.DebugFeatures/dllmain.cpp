@@ -87,45 +87,42 @@ void ApplyDebugPatches(void)
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, (void*)GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, (void*)GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
         WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, (void*)GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
-        AllocMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocMemoryforStructure, wstr(Patterns::AllocMemoryforStructure));
-        CreateDevMenuStructureAddr = FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
-        AllocDevMenuMemoryforStructureAddr = FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
-        DevMenuCreateHeaderAddr = FindAndPrintPatternW(Patterns::DevMenuCreateHeader, wstr(Patterns::DevMenuCreateHeader));
-        DevMenuCreateEntryAddr = FindAndPrintPatternW(Patterns::DevMenuCreateEntry, wstr(Patterns::DevMenuCreateEntry));
-        DevMenuAddBoolAddr = FindAndPrintPatternW(Patterns::DevMenuAddBool, wstr(Patterns::DevMenuAddBool));
-        DevMenuAddFuncButtonAddr = FindAndPrintPatternW(Patterns::DevMenuAddFuncButton, wstr(Patterns::DevMenuAddFuncButton));
-        DevMenuAddIntSliderAddr = FindAndPrintPatternW(Patterns::DevMenuAddIntSlider, wstr(Patterns::DevMenuAddIntSlider));
+        CreateDevMenuStructure_Caller = (CreateDevMenuStructure_Caller_ptr)FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
+        AllocDevMenuMemoryforStructure_Caller = (AllocDevMenuMemoryforStructure_Caller_ptr)FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
+        DevMenuCreateHeader_Caller = (DevMenuCreateHeader_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateHeader, wstr(Patterns::DevMenuCreateHeader));
+        DevMenuCreateEntry_Caller = (DevMenuCreateEntry_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateEntry, wstr(Patterns::DevMenuCreateEntry));
+        DevMenuAddBool_Caller = (DevMenuAddBool_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuAddBool, wstr(Patterns::DevMenuAddBool));
+        DevMenuAddFuncButton_Caller = (DevMenuAddFuncButton_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuAddFuncButton, wstr(Patterns::DevMenuAddFuncButton));
+        DevMenuAddIntSlider_Caller = (DevMenuAddIntSlider_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuAddIntSlider, wstr(Patterns::DevMenuAddIntSlider));
         uintptr_t MeleeMenuResult = FindAndPrintPatternW(Patterns::MeleeMenuHook, wstr(Patterns::MeleeMenuHook));
-        EntitySpawnerAddr = FindAndPrintPatternW(Patterns::EntitySpawner, wstr(Patterns::EntitySpawner));
-        LoadLevelByNameAddr = FindAndPrintPatternW(Patterns::LoadLevelByName, wstr(Patterns::LoadLevelByName));
-        LoadActorByNameAddr = FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
+        EntitySpawner_Caller = (EntitySpawner_Caller_ptr)FindAndPrintPatternW(Patterns::EntitySpawner, wstr(Patterns::EntitySpawner), -0x34);
+        LoadLevelByName_Caller = (LoadLevelByName_Caller_ptr)FindAndPrintPatternW(Patterns::LoadLevelByName, wstr(Patterns::LoadLevelByName));
+        LoadActorByName_Caller = (LoadActorByName_Caller_ptr)FindAndPrintPatternW(Patterns::LoadActorByName, wstr(Patterns::LoadActorByName));
         uintptr_t PlayerPtrAddrJMP = FindAndPrintPatternW(Patterns::PlayerPtr, wstr(Patterns::PlayerPtr));
         ReadCurrentLookIDAddr = FindAndPrintPatternW(Patterns::ReadCurrentLookID, wstr(Patterns::ReadCurrentLookID));
         ActiveTaskDisplayAddr = FindAndPrintPatternW(Patterns::ActiveTaskDisplay, wstr(Patterns::ActiveTaskDisplay));
         uintptr_t DebugPrintAddr = FindAndPrintPatternW(Patterns::CharPrintText, wstr(Patterns::CharPrintText));
-        TextPrintV_Addr = FindAndPrintPatternW(Patterns::TextPrintV, wstr(Patterns::TextPrintV));
+        TextPrintV = (TextPrintV_ptr)FindAndPrintPatternW(Patterns::TextPrintV, wstr(Patterns::TextPrintV));
         uintptr_t JumpPattern = 0;
         if (
-            AllocMemoryforStructureAddr &&
-            CreateDevMenuStructureAddr &&
-            AllocDevMenuMemoryforStructureAddr &&
-            DevMenuCreateHeaderAddr &&
-            DevMenuCreateEntryAddr &&
-            DevMenuAddBoolAddr &&
-            DevMenuAddFuncButtonAddr &&
-            DevMenuAddIntSliderAddr &&
+            CreateDevMenuStructure_Caller &&
+            AllocDevMenuMemoryforStructure_Caller &&
+            DevMenuCreateHeader_Caller &&
+            DevMenuCreateEntry_Caller &&
+            DevMenuAddBool_Caller &&
+            DevMenuAddFuncButton_Caller &&
+            DevMenuAddIntSlider_Caller &&
             MeleeMenuResult &&
-            EntitySpawnerAddr &&
-            LoadLevelByNameAddr &&
-            LoadActorByNameAddr &&
+            EntitySpawner_Caller &&
+            LoadLevelByName_Caller &&
+            LoadActorByName_Caller &&
             PlayerPtrAddrJMP &&
             ReadCurrentLookIDAddr &&
             ActiveTaskDisplayAddr &&
             DebugPrintAddr &&
-            TextPrintV_Addr
+            TextPrintV
             )
         {
-            EntitySpawnerAddr = EntitySpawnerAddr - 0x34;
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
             WritePatchPattern_Hook(Patterns::MeleeMenuHook, 14, wstr(Patterns::MeleeMenuHook), 0, (void*)MakeMeleeMenu, nullptr);
             PlayerPtrAddrJMP = PlayerPtrAddrJMP + 0x48;
@@ -140,7 +137,7 @@ void ApplyDebugPatches(void)
             Make32to64Hook((void*)DebugPrintAddr, (void*)JumpPattern, (void*)DebugPrint_CC, 5, wstr(DebugPrintAddr), wstr(Patterns::Int3_14bytes), wstr(DebugPrint_CC));
             DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
-        ScriptLookupAddr = FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
+        ScriptManager_LookupClass = (ScriptManager_LookupClass_ptr)FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
         uintptr_t PrintAddr = FindAndPrintPatternW(Patterns::GameWarnScriptPrint, wstr(Patterns::GameWarnScriptPrint));
         if (EvalScriptWarns && PrintAddr)

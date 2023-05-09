@@ -1,19 +1,19 @@
 #include "dmenu.hpp"
 #include "LookId.hpp"
 
-uint64_t AllocMemoryforStructureAddr = 0;
-uint64_t CreateDevMenuStructureAddr = 0;
-uint64_t AllocDevMenuMemoryforStructureAddr = 0;
-uint64_t DevMenuCreateHeaderAddr = 0;
-uint64_t DevMenuCreateEntryAddr = 0;
-uint64_t DevMenuAddBoolAddr = 0;
-uint64_t DevMenuAddFuncButtonAddr = 0;
-uint64_t DevMenuAddIntSliderAddr = 0;
-uint64_t MeleeMenuHook_ReturnAddr = 0;
-uint64_t EntitySpawner_SpawnAddr = 0;
-uint64_t EntitySpawnerAddr = 0;
-uint64_t LoadLevelByNameAddr = 0;
-uint64_t LoadActorByNameAddr = 0;
+INIT_FUNCTION_PTR(ScriptManager_LookupClass);
+INIT_FUNCTION_PTR(LoadLevelByName_Caller);
+INIT_FUNCTION_PTR(EntitySpawner_Caller);
+INIT_FUNCTION_PTR(LoadActorByName_Caller);
+
+INIT_FUNCTION_PTR(AllocDevMenuMemoryforStructure_Caller);
+INIT_FUNCTION_PTR(DevMenuCreateHeader_Caller);
+INIT_FUNCTION_PTR(DevMenuAddBool_Caller);
+INIT_FUNCTION_PTR(DevMenuAddFuncButton_Caller);
+INIT_FUNCTION_PTR(DevMenuCreateEntry_Caller);
+INIT_FUNCTION_PTR(DevMenuAddIntSlider_Caller);
+INIT_FUNCTION_PTR(CreateDevMenuStructure_Caller);
+
 // player look id
 uint64_t ReadCurrentLookIDAddr = 0;
 bool OverrideLookID = false;
@@ -63,7 +63,6 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int);
         printf_s(
             str(DMenu::Message)": %i\n"
@@ -75,24 +74,11 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
         const char* get_spawner_native_name = "get-spawner";
         StringId64 get_spawner_hash = SID(get_spawner_native_name);
         uintptr_t get_spawner_LookupPtr = ScriptManager_LookupClass(get_spawner_hash, 0);
-        if (get_spawner_LookupPtr &&
-            EntitySpawnerAddr &&
-            LoadLevelByNameAddr &&
-            LoadActorByNameAddr)
+        if (get_spawner_LookupPtr)
         {
             get_spawner_LookupPtr = *(uintptr_t*)(get_spawner_LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", get_spawner_hash, get_spawner_native_name, get_spawner_LookupPtr);
             const char* spawner_name = "npc-lab-lower-1";
-            struct spawner_struct
-            {
-                float Spawner_x;
-                float Spawner_y;
-                float Spawner_z;
-                uint8_t unk[0x20];
-                const char* spawner_name;
-                uint8_t unk2[0x49];
-                uint8_t spawner_multi;
-            };
             StringId64 spawner_hash = SID(spawner_name);
             FUNCTION_PTR(void, get_spawner_caller, get_spawner_LookupPtr, spawner_struct**, uint32_t argc, StringId64 * spawnerID);
             uint32_t argc = 1;
@@ -123,7 +109,6 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 printf_s(str(PlayerPtrAddr) " not found\n");
                 return DMenu::FunctionReturnCode::Failure;
             }
-            FUNCTION_PTR(void, LoadLevelByName_Caller, LoadLevelByNameAddr, const char* level_name, uint64_t arg1);
             LoadLevelByName_Caller("lab-lower-floor-ai", 0);
             if (spawner_ptr && PlayerPtrAddr)
             {
@@ -141,7 +126,6 @@ bool SpawnTest_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 spawner_ptr->spawner_multi = 0x10;
                 printf_s("Before %.3f %.3f %.3f 0x%02x %s\n", before_spawn_x, before_spawn_y, before_spawn_z, before_spawner_flag, old_spawner);
                 printf_s("After %.3f %.3f %.3f 0x%02x %s\n", spawner_ptr->Spawner_x, spawner_ptr->Spawner_y, spawner_ptr->Spawner_z, spawner_ptr->spawner_multi, spawner_ptr->spawner_name);
-                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct* arg1, uint64_t* arg2, uint64_t* arg3, bool arg4, uint64_t* arg5);
                 EntitySpawner_Caller(spawner_ptr, nullptr, nullptr, 1, nullptr);
                 spawner_ptr->Spawner_x = before_spawn_x;
                 spawner_ptr->Spawner_y = before_spawn_y;
@@ -164,7 +148,6 @@ bool SetPlayerHealth_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int);
         printf_s(
             str(DMenu::Message)": %i\n"
@@ -202,7 +185,6 @@ bool SpawnPlayer_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Me
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         CurrentOverrideLookID = DMenu.DMENU_ARG;
         printf_s(
             str(DMenu::Message)": %i\n"
@@ -241,7 +223,6 @@ bool OnExecuteShowEntityInfo(DMenu::OnExecuteStructure DMenu, enum DMenu::Messag
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         DMenu.DMENU_ARG = uint64_t(test_int2);
         printf_s(
             str(DMenu::Message)": %i\n"
@@ -280,25 +261,11 @@ bool OnExecuteSpawnNPC(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, ScriptLookupAddr, StringId64 sid, uint32_t unk);
         StringId64 get_spawner_hash = SID("get-spawner");
         uintptr_t get_spawner_LookupPtr = ScriptManager_LookupClass(get_spawner_hash, 0);
-        if (get_spawner_LookupPtr &&
-            EntitySpawnerAddr &&
-            LoadLevelByNameAddr &&
-            LoadActorByNameAddr)
+        if (get_spawner_LookupPtr)
         {
             get_spawner_LookupPtr = *(uintptr_t*)(get_spawner_LookupPtr + 8);
-            struct spawner_struct
-            {
-                float Spawner_x;
-                float Spawner_y;
-                float Spawner_z;
-                uint8_t unk[0x20];
-                const char* spawner_name;
-                uint8_t unk2[0x49];
-                uint8_t spawner_multi;
-            };
             StringId64 spawner_hash = DMenu.DMENU_ARG;
             FUNCTION_PTR(void, get_spawner_caller, get_spawner_LookupPtr, spawner_struct**, uint32_t argc, StringId64 * spawnerID);
             uint32_t argc = 1;
@@ -324,7 +291,6 @@ bool OnExecuteSpawnNPC(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
             {
                 return DMenu::FunctionReturnCode::Failure;
             }
-            FUNCTION_PTR(void, LoadLevelByName_Caller, LoadLevelByNameAddr, const char* level_name, uint64_t arg1);
             LoadLevelByName_Caller("lab-lower-floor-ai", 0);
             if (spawner_ptr && PlayerPtrAddr)
             {
@@ -340,7 +306,6 @@ bool OnExecuteSpawnNPC(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mess
                 spawner_ptr->Spawner_z = player_cord[2];
                 spawner_ptr->spawner_name = new_spawner;
                 spawner_ptr->spawner_multi = 0x10;
-                FUNCTION_PTR(void, EntitySpawner_Caller, EntitySpawnerAddr, spawner_struct* arg1, uint64_t* arg2, uint64_t* arg3, bool arg4, uint64_t* arg5);
                 EntitySpawner_Caller(spawner_ptr, nullptr, nullptr, 1, nullptr);
                 spawner_ptr->Spawner_x = before_spawn_x;
                 spawner_ptr->Spawner_y = before_spawn_y;
@@ -460,7 +425,6 @@ bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mes
 {
     if (Message == DMenu::Message::OnExecute)
     {
-        FUNCTION_PTR(bool, LoadActorByName_Caller, LoadActorByNameAddr, const char* level_name, uint32_t arg1, bool sync_actor);
         if (DMenu.DMENU_ARG == 0)
         {
             for (uint32_t i = 0; i < STRING_SIZEOF(anim_actor_list); i++)
@@ -580,8 +544,6 @@ struct Player {
 
 uintptr_t Create_DMenu_Header(const char* title, const char* source_func, uint32_t source_line, const char* source_file)
 {
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, DevMenuCreateHeader_Caller, DevMenuCreateHeaderAddr, uintptr_t menu_structure_ptr, const char* title, uint32_t unk);
     uintptr_t Header_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, source_func, source_line, source_file);
     uintptr_t SubHeaderPtr = 0;
     if (Header_ptr)
@@ -595,9 +557,6 @@ uintptr_t Create_DMenu_Header(const char* title, const char* source_func, uint32
 
 void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, const char* button_description, bool* bool_button, const char* source_func, uint32_t source_line, const char* source_file)
 {
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
-    FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, DevMenuAddBoolAddr, uintptr_t menu_structure_ptr, const char* bool_name, bool* bool_var, const char* bool_description);
     // Create the bool
     uintptr_t FirstBool_ptr = AllocDevMenuMemoryforStructure_Caller(header_menu_size, 16, source_func, source_line, source_file);
     uintptr_t BoolPtr = 0;
@@ -611,9 +570,6 @@ void Create_DMenu_BoolButton(uintptr_t menu_structure, const char* button_name, 
 
 void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_name, void* function_button, uint64_t arg, const char* source_func, uint32_t source_line, const char* source_file)
 {
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
-    FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, DevMenuAddFuncButtonAddr, uintptr_t menu_structure_ptr, const char* func_name, void* func_target, uint64_t arg, bool* unk_bool);
     uintptr_t FuncButton_ptr = AllocDevMenuMemoryforStructure_Caller(func_button_size, 16, source_func, source_line, source_file);
     uintptr_t funcButton_structure = 0;
     if (FuncButton_ptr)
@@ -626,9 +582,6 @@ void Create_DMenu_FunctionButton(uintptr_t menu_structure, const char* button_na
 
 void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, const char* button_description, int32_t* int_value, DMenu::IntSettings int_args, const char* source_func, uint32_t source_line, const char* source_file)
 {
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, DevMenuAddIntSliderAddr, uintptr_t menu_structure_ptr, const char* int_name, int32_t * int_val, int32_t * step_val, DMenu::IntSettings args, const char* int_description);
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
     uintptr_t IntButton_ptr = AllocDevMenuMemoryforStructure_Caller(int_button_size, 16, source_func, source_line, source_file);
     uintptr_t IntButton_structure = 0;
     if (IntButton_ptr)
@@ -641,9 +594,6 @@ void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, c
 
 void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const char* title, const char* description, const char* source_func, uint32_t source_line, const char* source_file)
 {
-    FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, AllocDevMenuMemoryforStructureAddr, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);
-    FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, CreateDevMenuStructureAddr, uintptr_t menu_structure, uintptr_t last_menu_structure);
-    FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, DevMenuCreateEntryAddr, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
     // Create the entry point
     uintptr_t entry_ptr = AllocDevMenuMemoryforStructure_Caller(entry_menu_size, 16, source_func, source_line, source_file);
     if (entry_ptr)

@@ -377,7 +377,7 @@ void __attribute__((naked)) GetPlayerPtrAddr_CC()
 
 uint64_t ActiveTaskDisplayAddr = 0;
 uint64_t ActiveTaskDisplayReturnAddr = 0;
-char TaskDataStructure[512 + (8 * 3)] = { 0 };
+char TaskDataStructure[(8 * 3) + 128] = { 0 };
 
 void __attribute__((naked)) ActiveTaskDisplay_CC()
 {
@@ -395,7 +395,8 @@ void __attribute__((naked)) ActiveTaskDisplay_CC()
 uint64_t DebugPrint_ReturnAddr = 0;
 uint64_t DebugPrint_WindowContext = 0;
 uint64_t DebugPrint_OriginalAddr = 0;
-uint64_t TextPrintV_Addr = 0;
+
+INIT_FUNCTION_PTR(TextPrintV);
 
 void MyDebugPrintFunction(uintptr_t window_context)
 {
@@ -404,14 +405,13 @@ void MyDebugPrintFunction(uintptr_t window_context)
         void* unk_callback;
         size_t buffer_size;
         size_t formatted_size;
-        char text_buffer[512];
+        char text_buffer[128];
     };
     struct ActiveTaskData* pointer;
     void* addr = (void*)(TaskDataStructure);
     pointer = (struct ActiveTaskData*)addr;
     if (pointer->formatted_size != 0 && pointer->text_buffer[0] != 0)
     {
-        FUNCTION_PTR(void, TextPrintV, TextPrintV_Addr, uintptr_t WindowContext, float font_x, float font_y, float font_scale_x, float font_scale_y, uint32_t color, const char* fmt, ...);
         // TextPrintV(window_context, 50., 620., 0.8, 0.8, 0xc0e0e0e0, "Task callback: 0x%016llx\nBuffer size: %lli\nFormatted size: %lli\nFormatted String: %s\n\n", pointer->unk_callback, pointer->buffer_size, pointer->formatted_size, pointer->text_buffer);
         TextPrintV(window_context, 50., 667., 0.8, 0.8, 0xc0e0e0e0, pointer->text_buffer);
         memset((void*)pointer, 0, sizeof(ActiveTaskData));

@@ -6,6 +6,13 @@
     typedef return_type (*func_name##_t)(__VA_ARGS__); \
     func_name##_t func_name = (func_name##_t)(func_addr);
 
+#define TYPEDEF_FUNCTION_PTR(ret_type, func_name, ...) \
+    typedef ret_type (*func_name##_ptr)(__VA_ARGS__); \
+    extern func_name##_ptr func_name;
+
+#define INIT_FUNCTION_PTR(func_name) \
+    func_name##_ptr func_name = nullptr
+
 #define STRING_SIZEOF(str) sizeof(str) / sizeof(const char*)
 #define CLEAR_MEM(input, size_input) memset(input, 0, size_input)
 
@@ -14,16 +21,15 @@ extern uint64_t Memory_NewHandlerReturnAddr;
 extern uint64_t GivePlayerWeapon_MainReturn;
 extern uint64_t GivePlayerWeapon_SubReturn;
 extern uint64_t GivePlayerWeapon_EntryReturn;
-extern uint64_t Game_SnprintfAddr;
-extern uint64_t ScriptLookupAddr;
 extern uint64_t PlayerPtrAddr;
 extern uint64_t ActiveTaskDisplayAddr;
 extern uint64_t ActiveTaskDisplayReturnAddr;
-extern char TaskDataStructure[(8 * 3) + 512];
+extern char TaskDataStructure[(8 * 3) + 128];
 extern uint64_t DebugPrint_WindowContext;
 extern uint64_t DebugPrint_ReturnAddr;
 extern uint64_t DebugPrint_OriginalAddr;
-extern uint64_t TextPrintV_Addr;
+
+TYPEDEF_FUNCTION_PTR(void, TextPrintV, uintptr_t WindowContext, float font_x, float font_y, float font_scale_x, float font_scale_y, uint32_t color, const char* fmt, ...);
 
 void __attribute__((naked)) Memory_PushAllocator_CC();
 void __attribute__((naked)) Memory_NewHandler_CC();
