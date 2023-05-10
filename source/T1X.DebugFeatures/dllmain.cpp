@@ -71,6 +71,14 @@ FILE* fGame;
 
 void ApplyDebugPatches(void)
 {
+    if (bShowDebugConsole)
+    {
+        AllocConsole();
+        freopen_s(&fGame, "CONOUT$", "w", stdout);
+        freopen_s(&fGame, "CONOUT$", "w", stderr);
+        freopen_s(&fGame, "CONOUT$", "w", stdin);
+        printf_s(BUILD_TIME "\n");
+    }
     if (bDebugMenu)
     {
         if (fDebugMenuSize > 1)
@@ -161,15 +169,6 @@ void ApplyDebugPatches(void)
                 }
             }
         }
-    }
-    if (bShowDebugConsole)
-    {
-        AllocConsole();
-        freopen_s(&fGame, "CONOUT$", "w", stdout);
-        freopen_s(&fGame, "CONOUT$", "w", stderr);
-        freopen_s(&fGame, "CONOUT$", "w", stdin);
-        printf_s(BUILD_TIME "\n");
-        // fprintf_s(fGame, BUILD_TIME "\n");
     }
     if (bExtendedDebugMenu)
     {
