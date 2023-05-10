@@ -38,6 +38,14 @@ namespace Patterns
 	const wchar_t* GivePlayerWeapon_Main = L"49 8b 4f 08 48 8d 54 24 30 41 b0 01 c7 44 24 30 ?? ?? ?? ?? 48 8b 0c 0e e8 ?? ?? ?? ??";
 	const wchar_t* GivePlayerWeapon_SubSection = L"49 8b 4d 08 48 8d 54 24 40 41 b0 01 49 8b 0c 0c e8 ?? ?? ?? ??";
 	const wchar_t* GivePlayerWeapon_Entry = L"49 8b 4e 08 48 8d 54 24 30 41 b0 01 49 8b 0c 0f e8 ?? ?? ?? ??";
+	// New for 1.0.5.0
+	// They ifdef the code to format SID to char*
+	// Now its compiled with inlined `return "#????????????????";`
+	const wchar_t* GivePlayerWeapon_Main1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4c 8b 0c 0e 49 8b cd e8 ?? ?? ??";
+	const wchar_t* GivePlayerWeapon_SubSection1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4e 8b 0c 29 48 8b 4c 24 58";
+	const wchar_t* GivePlayerWeapon_Entry1050 = L"4c 8d 05 ?? ?? ?? ?? 48 8d 15 ?? ?? ?? ?? 48 8d 4d 90 e8 ?? ?? ?? ??";
+	const wchar_t* GivePlayerWeapon_EntryHeader1050 = L"48 8d 15 ?? ?? ?? ?? 49 8b cf e8 ?? ?? ?? ?? 4c 8b e8";
+	//
 	const wchar_t* Assert_LevelDef_LevelManifst = L"c7 44 24 20 f3 04 00 00 4c 8d 05";
 	// thanks to infogram for patches
 	const wchar_t* Memory_PushAllocator = L"48 8d 4c 24 30 89 44 24 30 4d 8b f9 45 8b f0 48 8b ea e8 ?? ?? ?? ??";

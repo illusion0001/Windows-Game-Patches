@@ -73,8 +73,18 @@ void ReadConfig(void)
 
 FILE* fGame;
 
+constexpr const uint32_t GameVer1050 = 3591618;
+
 void ApplyDebugPatches(void)
 {
+    const char* game_ver_text = "BUILD_NUMBER=";
+    size_t game_ver_len = strlen(game_ver_text);
+    uintptr_t version_number = (uintptr_t)Memory::char_Scan(baseModule, game_ver_text, game_ver_len - 1);
+    uint32_t game_ver_int = 0;
+    if (version_number)
+    {
+        game_ver_int = strtol((const char*)version_number + game_ver_len, nullptr, 10);
+    }
     if (bDebugMenu)
     {
         if (fDebugMenuSize > 1)
@@ -88,9 +98,33 @@ void ApplyDebugPatches(void)
         const unsigned char nop1x[] = { 0x90 };
         WritePatchPattern(Patterns::m_onDisc_DevMenu, mov_ecx_0, sizeof(mov_ecx_0), wstr(Patterns::m_onDisc_DevMenu), 0);
         WritePatchPattern(Patterns::Assert_LevelDef_LevelManifst, nop1x, sizeof(nop1x), wstr(Patterns::Assert_LevelDef_LevelManifst), 30);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, (void*)GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, (void*)GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
-        WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, (void*)GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
+        if (game_ver_int > 1 && game_ver_int < GameVer1050)
+        {
+            WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Main, 29, wstr(Patterns::GivePlayerWeapon_Main), 0, (void*)GivePlayerWeapon_MainCC, &GivePlayerWeapon_MainReturn);
+            WritePatchPattern_Hook(Patterns::GivePlayerWeapon_SubSection, 21, wstr(Patterns::GivePlayerWeapon_SubSection), 0, (void*)GivePlayerWeapon_SubCC, &GivePlayerWeapon_SubReturn);
+            WritePatchPattern_Hook(Patterns::GivePlayerWeapon_Entry, 21, wstr(Patterns::GivePlayerWeapon_Entry), 0, (void*)GivePlayerWeapon_EntryCC, &GivePlayerWeapon_EntryReturn);
+            GameVeris1050 = false;
+        }
+        else if (game_ver_int > 1 && game_ver_int >= GameVer1050)
+        {
+            uintptr_t MainAddr = FindAndPrintPatternW(Patterns::GivePlayerWeapon_Main1050, wstr(Patterns::GivePlayerWeapon_Main1050));
+            uintptr_t SubAddr = FindAndPrintPatternW(Patterns::GivePlayerWeapon_SubSection1050, wstr(Patterns::GivePlayerWeapon_SubSection1050));
+            uintptr_t EntryAddr = FindAndPrintPatternW(Patterns::GivePlayerWeapon_Entry1050, wstr(Patterns::GivePlayerWeapon_Entry1050));
+            uintptr_t EntryHeaderAddr = FindAndPrintPatternW(Patterns::GivePlayerWeapon_EntryHeader1050, wstr(Patterns::GivePlayerWeapon_EntryHeader1050));
+            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Make32to64Hook((void*)MainAddr, (void*)JumpPattern, (void*)GivePlayerWeapon_MainCC, 16, wstr(Patterns::GivePlayerWeapon_Main1050), wstr(Patterns::Int3_14bytes), wstr(GivePlayerWeapon_MainCC));
+            JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Make32to64Hook((void*)SubAddr, (void*)JumpPattern, (void*)GivePlayerWeapon_SubCC, 16, wstr(Patterns::GivePlayerWeapon_SubSection1050), wstr(Patterns::Int3_14bytes), wstr(GivePlayerWeapon_SubCC));
+            JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Make32to64Hook((void*)EntryAddr, (void*)JumpPattern, (void*)GivePlayerWeapon_EntryCC, 7, wstr(Patterns::GivePlayerWeapon_Entry1050), wstr(Patterns::Int3_14bytes), wstr(GivePlayerWeapon_EntryCC));
+            JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Make32to64Hook((void*)EntryHeaderAddr, (void*)JumpPattern, (void*)GivePlayerWeapon_EntryHeaderCC, 7, wstr(Patterns::GivePlayerWeapon_EntryHeader1050), wstr(Patterns::Int3_14bytes), wstr(GivePlayerWeapon_EntryHeaderCC));
+            GivePlayerWeapon_MainReturn = MainAddr + 16;
+            GivePlayerWeapon_SubReturn = SubAddr + 16;
+            GivePlayerWeapon_EntryReturn = EntryAddr + 7;
+            GivePlayerWeapon_EntryHeaderReturn = EntryHeaderAddr + 7;
+            GameVeris1050 = true;
+        }
         CreateDevMenuStructure_Caller = (CreateDevMenuStructure_Caller_ptr)FindAndPrintPatternW(Patterns::CreateDevMenuStructure, wstr(Patterns::CreateDevMenuStructure));
         AllocDevMenuMemoryforStructure_Caller = (AllocDevMenuMemoryforStructure_Caller_ptr)FindAndPrintPatternW(Patterns::AllocDevMenuMemoryforStructure, wstr(Patterns::AllocDevMenuMemoryforStructure));
         DevMenuCreateHeader_Caller = (DevMenuCreateHeader_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateHeader, wstr(Patterns::DevMenuCreateHeader));
@@ -158,10 +192,21 @@ void ApplyDebugPatches(void)
         const unsigned char ret_1_al[] = { 0xb0, 0x01, 0xc3 };
         const unsigned char nop1x[] = { 0x90 };
         const unsigned char ret_0[] = { 0x31, 0xc0, 0xc3 };
-        // excessive for < 1.0.4.1
-        uint64_t menu_mem_size = 0x00840000;
-        uint64_t script_mem_size = 0x00800000;
-        uint64_t cpu_mem_size = 0x45000000;
+        uint64_t menu_mem_size = 0;
+        uint64_t script_mem_size = 0;
+        uint64_t cpu_mem_size = 0;
+        if (!GameVeris1050)
+        {
+            menu_mem_size = 0x00840000;
+            script_mem_size = 0x00800000;
+            cpu_mem_size = 0x40e00000;
+        }
+        else
+        {
+            menu_mem_size = 0x00840000;
+            script_mem_size = 0x00800000;
+            cpu_mem_size = 0x45000000;
+        }
         int32_t OffsetToisDebugMemoryAval = 0;
         uintptr_t ParticlesMenu = FindAndPrintPatternW(Patterns::ParticlesMenu, wstr(Patterns::ParticlesMenu));
         ParticlesMenu = ParticlesMenu + 12;

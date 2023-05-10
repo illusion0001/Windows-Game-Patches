@@ -191,6 +191,53 @@ namespace Memory
         return nullptr;
     }
 
+    uint8_t* char_Scan(void* module, const char* value, size_t value_len)
+    {
+        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
+        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+        for (size_t i = 0; i < sizeOfImage - value_len; ++i) {
+            const char* currentValue = reinterpret_cast<const char*>(&scanBytes[i]);
+            if (strncmp(currentValue, value, value_len) == 0) {
+                return &scanBytes[i];
+            }
+        }
+        return nullptr;
+    }
+
+    uint8_t* u32_Scan(void* module, uint32_t value)
+    {
+        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
+        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+
+        for (size_t i = 0; i < sizeOfImage - sizeof(value); ++i) {
+            auto currentValue = *reinterpret_cast<uint32_t*>(&scanBytes[i]);
+            if (currentValue == value) {
+                return &scanBytes[i];
+            }
+        }
+        return nullptr;
+    }
+
+    uint8_t* u64_Scan(void* module, uint64_t value)
+    {
+        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
+        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+
+        for (size_t i = 0; i < sizeOfImage - sizeof(uint64_t); ++i) {
+            auto currentValue = *reinterpret_cast<uint64_t*>(&scanBytes[i]);
+            if (currentValue == value) {
+                return &scanBytes[i];
+            }
+        }
+        return nullptr;
+    }
+
     std::string GetVersionString()
     {
         auto hInst = GetModuleHandle(NULL);

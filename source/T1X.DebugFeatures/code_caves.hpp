@@ -23,12 +23,15 @@ extern uint64_t Memory_NewHandlerReturnAddr;
 extern uint64_t GivePlayerWeapon_MainReturn;
 extern uint64_t GivePlayerWeapon_SubReturn;
 extern uint64_t GivePlayerWeapon_EntryReturn;
+extern uint64_t GivePlayerWeapon_EntryHeaderReturn;
 extern uint64_t PlayerPtrAddr;
 extern uint64_t ActiveTaskDisplayAddr;
 extern uint64_t ActiveTaskDisplayReturnAddr;
 extern uint64_t DebugPrint_WindowContext;
 extern uint64_t DebugPrint_ReturnAddr;
 extern uint64_t DebugPrint_OriginalAddr;
+
+extern bool GameVeris1050;
 
 class TaskManager
 {
@@ -53,6 +56,7 @@ void __attribute__((naked)) Memory_NewHandler_CC();
 void __attribute__((naked)) GivePlayerWeapon_MainCC();
 void __attribute__((naked)) GivePlayerWeapon_SubCC();
 void __attribute__((naked)) GivePlayerWeapon_EntryCC();
+void __attribute__((naked)) GivePlayerWeapon_EntryHeaderCC();
 void __attribute__((naked)) GetPlayerPtrAddr_CC();
 void __attribute__((naked)) ActiveTaskDisplay_CC();
 void __attribute__((naked)) DebugPrint_CC();

@@ -278,15 +278,21 @@ uint64_t GivePlayerWeapon_SubReturn = 0;
 // Entry
 uint32_t GivePlayerWeaponEntry_index_count = 0;
 uint64_t GivePlayerWeapon_EntryReturn = 0;
+uint64_t GivePlayerWeapon_EntryHeaderReturn = 0;
+uint32_t GivePlayerWeaponEntryHeader_index_count = 0;
+
+// 1.0.5.0 and above
+bool GameVeris1050 = false;
 
 // Game funcs
 uint64_t ScriptLookupAddr = 0;
 
 char temp_str[128];
+const char* string_index = nullptr;
 
 const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
 {
-    const char* string_index = nullptr;
+    string_index = nullptr;
     switch (mode) {
     case 1: {
         if (GivePlayerWeapon_index_count == GivePlayerWeapon_ListMax)
@@ -320,33 +326,118 @@ const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
     return temp_str;
 }
 
+const char* GivePlayerWeaponMainSimple(const uint64_t mode)
+{
+    string_index = nullptr;
+    switch (mode) {
+    case 1: {
+        if (GivePlayerWeapon_index_count == GivePlayerWeapon_ListMax)
+            GivePlayerWeapon_index_count = 0;
+        string_index = weapon_list_main[GivePlayerWeapon_index_count];
+        GivePlayerWeapon_index_count++;
+        break;
+    }
+    case 2: {
+        if (GivePlayerWeaponSub_index_count == GivePlayerWeapon_SubListMax)
+            GivePlayerWeaponSub_index_count = 0;
+        string_index = weapon_list_subsection[GivePlayerWeaponSub_index_count];
+        GivePlayerWeaponSub_index_count++;
+        break;
+    }
+    case 3: {
+        if (GivePlayerWeaponEntry_index_count == GivePlayerWeapon_EntryListMax)
+            GivePlayerWeaponEntry_index_count = 0;
+        string_index = weapon_subentry_names[GivePlayerWeaponEntry_index_count];
+        GivePlayerWeaponEntry_index_count++;
+        break;
+    }
+    case 4: {
+        if (GivePlayerWeaponEntryHeader_index_count == GivePlayerWeapon_EntryListMax)
+            GivePlayerWeaponEntryHeader_index_count = 0;
+        string_index = weapon_subentry_names[GivePlayerWeaponEntryHeader_index_count];
+        GivePlayerWeaponEntryHeader_index_count++;
+        break;
+    }
+    default: {
+        CLEAR_MEM((void*)temp_str, sizeof(temp_str));
+        return temp_str;
+    }
+    }
+    return string_index;
+}
+
+uint64_t temp_reg1 = 0;
+
 void __attribute__((naked)) GivePlayerWeapon_MainCC() {
     __asm {
-        mov rcx, [r15 + 0x8]
-        mov rcx, [rsi + rcx * 1]
-        mov edx, 1
-        call [GivePlayerWeaponMain]
-        jmp [GivePlayerWeapon_MainReturn]
+        cmp byte ptr[GameVeris1050], 1;
+        jz case_1050;
+        mov rcx, [r15 + 0x8];
+        mov rcx, [rsi + rcx * 1];
+        mov edx, 1;
+        call GivePlayerWeaponMain;
+        jmp code_exit;
+    case_1050:;
+        mov qword ptr[temp_reg1], 0;
+        mov rcx, qword ptr[RSI + RCX];
+        mov qword ptr[temp_reg1], rcx;
+        mov rcx, 1;
+        call GivePlayerWeaponMainSimple;
+        mov rdx, rax;
+        mov byte ptr[rsp + 0x20], 0;
+        mov r9, qword ptr[temp_reg1];
+    code_exit:;
+        jmp[GivePlayerWeapon_MainReturn];
     }
 }
 
 void __attribute__((naked)) GivePlayerWeapon_SubCC() {
     __asm {
-        mov rcx, [r13 + 0x8]
-        mov rcx, [r12 + rcx * 1]
-        mov edx, 2
-        call [GivePlayerWeaponMain]
-        jmp [GivePlayerWeapon_SubReturn]
+        cmp byte ptr[GameVeris1050], 1;
+        jz case_1050;
+        mov rcx, [r13 + 0x8];
+        mov rcx, [r12 + rcx * 1];
+        mov edx, 2;
+        call GivePlayerWeaponMain;
+        jmp code_exit;
+    case_1050:;
+        mov qword ptr[temp_reg1], 0;
+        mov rcx, qword ptr[RCX + R13 * 0x1];
+        mov qword ptr[temp_reg1], rcx;
+        mov rcx, 2;
+        call GivePlayerWeaponMainSimple;
+        mov rdx, rax;
+        mov byte ptr[rsp + 0x20], 0;
+        mov r9, qword ptr[temp_reg1];
+    code_exit:;
+        jmp[GivePlayerWeapon_SubReturn];
     }
 }
 
 void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
     __asm {
-        mov rcx, [r14 + 0x8]
-        mov rcx, [r15 + rcx * 1]
-        mov edx, 3
-        call [GivePlayerWeaponMain]
-        jmp [GivePlayerWeapon_EntryReturn]
+        cmp byte ptr[GameVeris1050], 1;
+        jz case_1050;
+        mov rcx, [r14 + 0x8];
+        mov rcx, [r15 + rcx * 1];
+        mov edx, 3;
+        call GivePlayerWeaponMain;
+        jmp code_exit;
+    case_1050:;
+        mov rcx, 3;
+        call GivePlayerWeaponMainSimple;
+        mov r8, rax;
+    code_exit:;
+        jmp[GivePlayerWeapon_EntryReturn];
+    }
+}
+
+void __attribute__((naked)) GivePlayerWeapon_EntryHeaderCC() {
+    __asm {
+        mov rcx, 4;
+        call GivePlayerWeaponMainSimple;
+        mov rdx, rax;
+        jmp[GivePlayerWeapon_EntryHeaderReturn];
     }
 }
 
