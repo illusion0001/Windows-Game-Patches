@@ -1,6 +1,6 @@
 #include "helper.hpp"
 
-#define MEM_TYPE 0x25 // TODO: Check this heap type
+#define MEM_TYPE 0x25 // "Script Data" Memory Context
 
 #pragma once
 
