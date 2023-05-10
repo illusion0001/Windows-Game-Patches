@@ -75,17 +75,6 @@ FILE* fGame;
 
 void ApplyDebugPatches(void)
 {
-    if (bShowDebugConsole)
-    {
-        AllocConsole();
-        freopen_s(&fGame, "CONOUT$", "w", stdout);
-        freopen_s(&fGame, "CONOUT$", "w", stderr);
-        freopen_s(&fGame, "CONOUT$", "w", stdin);
-        printf_s(GIT_COMMIT "\n");
-        printf_s(GIT_VER "\n");
-        printf_s(GIT_NUM "\n");
-        printf_s(BUILD_TIME "\n");
-    }
     if (bDebugMenu)
     {
         if (fDebugMenuSize > 1)
@@ -162,28 +151,6 @@ void ApplyDebugPatches(void)
             Make32to64Hook((void*)DebugPrintAddr, (void*)JumpPattern, (void*)DebugPrint_CC, 5, wstr(DebugPrintAddr), wstr(Patterns::Int3_14bytes), wstr(DebugPrint_CC));
             DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
-        ScriptManager_LookupClass = (ScriptManager_LookupClass_ptr)FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
-        uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
-        uintptr_t PrintAddr = FindAndPrintPatternW(Patterns::GameWarnScriptPrint, wstr(Patterns::GameWarnScriptPrint));
-        if (EvalScriptWarns && PrintAddr)
-        {
-            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
-            Make32to64Hook((void*)PrintAddr, (void*)JumpPattern, (void*)ScriptPrintWarn_CC, 6, wstr(PrintAddr), wstr(Patterns::Int3_14bytes), wstr(ScriptPrintWarn_CC));
-            WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
-            for (uint32_t i = 0; i < 2; i++)
-            {
-                uintptr_t DoutPrintfAddr = FindAndPrintPatternW(Patterns::DoutPrintf, wstr(Patterns::DoutPrintf));
-                uintptr_t DebugOutputString1Addr = FindAndPrintPatternW(Patterns::DebugOutputString1, wstr(Patterns::DebugOutputString1));
-                if (DoutPrintfAddr)
-                {
-                    Memory::DetourFunction64((void*)DoutPrintfAddr, (void*)printf_s, 14);
-                }
-                if (DebugOutputString1Addr)
-                {
-                    Memory::DetourFunction64((void*)DebugOutputString1Addr, (void*)printf_s, 14);
-                }
-            }
-        }
     }
     if (bExtendedDebugMenu)
     {
@@ -211,6 +178,39 @@ void ApplyDebugPatches(void)
         WritePatchPattern(Patterns::Assert_UpdateSelectRegionByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectRegionByNameMenu), 0);
         WritePatchPattern(Patterns::Assert_UpdateSelectIgcByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectIgcByNameMenu), 0);
         WritePatchPattern(Patterns::Assert_UpdateSelectSpawnerByNameMenu, nop1x, sizeof(nop1x), wstr(Patterns::Assert_UpdateSelectSpawnerByNameMenu), 0);
+    }
+    if (bShowDebugConsole)
+    {
+        ScriptManager_LookupClass = (ScriptManager_LookupClass_ptr)FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
+        uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
+        uintptr_t PrintAddr = FindAndPrintPatternW(Patterns::GameWarnScriptPrint, wstr(Patterns::GameWarnScriptPrint));
+        if (EvalScriptWarns && PrintAddr)
+        {
+            uintptr_t JumpPattern = FindAndPrintPatternW(Patterns::Int3_14bytes, wstr(Patterns::Int3_14bytes));
+            Make32to64Hook((void*)PrintAddr, (void*)JumpPattern, (void*)ScriptPrintWarn_CC, 6, wstr(PrintAddr), wstr(Patterns::Int3_14bytes), wstr(ScriptPrintWarn_CC));
+            WritePatchPattern_Hook(Patterns::DoutMemPrint, 14, wstr(Patterns::DoutMemPrint), 0, (void*)ScriptPrintWarn_CC, nullptr);
+            for (uint32_t i = 0; i < 2; i++)
+            {
+                uintptr_t DoutPrintfAddr = FindAndPrintPatternW(Patterns::DoutPrintf, wstr(Patterns::DoutPrintf));
+                uintptr_t DebugOutputString1Addr = FindAndPrintPatternW(Patterns::DebugOutputString1, wstr(Patterns::DebugOutputString1));
+                if (DoutPrintfAddr)
+                {
+                    Memory::DetourFunction64((void*)DoutPrintfAddr, (void*)printf_s, 14);
+                }
+                if (DebugOutputString1Addr)
+                {
+                    Memory::DetourFunction64((void*)DebugOutputString1Addr, (void*)printf_s, 14);
+                }
+            }
+        }
+        AllocConsole();
+        freopen_s(&fGame, "CONOUT$", "w", stdout);
+        freopen_s(&fGame, "CONOUT$", "w", stderr);
+        freopen_s(&fGame, "CONOUT$", "w", stdin);
+        printf_s(GIT_COMMIT "\n");
+        printf_s(GIT_VER "\n");
+        printf_s(GIT_NUM "\n");
+        printf_s(BUILD_TIME "\n");
     }
 }
 
