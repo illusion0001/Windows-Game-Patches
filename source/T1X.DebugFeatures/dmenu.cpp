@@ -16,6 +16,8 @@ INIT_FUNCTION_PTR(DevMenuAddIntSlider_Caller);
 INIT_FUNCTION_PTR(DevMenuCreateSeparationLine_Caller);
 INIT_FUNCTION_PTR(DevMenuCreateCyanSubText_Caller);
 INIT_FUNCTION_PTR(CreateDevMenuStructure_Caller);
+INIT_FUNCTION_PTR(DevMenuCreateSelection_Caller);
+INIT_FUNCTION_PTR(DevMenuSelectionCallback_Caller);
 
 uint64_t InitProfileMenuAddr = 0;
 
@@ -740,6 +742,19 @@ void Create_DMenu_CyanSubText(uintptr_t menu_structure, const char* title, const
     CreateDevMenuStructure_Caller(menu_structure, title_ptr);
 }
 
+void Create_DMenu_Selection(uintptr_t menu_structure, const char* title, void* SelectionStruct, void* SelectionCallback, uint64_t* selection_var, void* unk1, void* unk2, void* unk3, void* unk4, const char* source_func, uint32_t source_line, const char* source_file)
+{
+    // Create the entry point
+    constexpr uint32_t selection_menu_size = 232;
+    uintptr_t title_ptr = AllocDevMenuMemoryforStructure_Caller(selection_menu_size, 16, source_func, source_line, source_file);
+    if (title_ptr)
+    {
+        CLEAR_MEM((void*)title_ptr, selection_menu_size);
+        DevMenuCreateSelection_Caller(title_ptr, title, SelectionStruct, SelectionCallback, selection_var, unk1, unk2, unk3, unk4);
+    }
+    CreateDevMenuStructure_Caller(menu_structure, title_ptr);
+}
+
 void Create_DMenu_TextLineWrapper(uintptr_t menu_structure, const char* title, const char* source_func, uint32_t source_line, const char* source_file)
 {
     Create_DMenu_Line(menu_structure, source_func, source_line, source_file);
@@ -757,6 +772,20 @@ void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const 
     }
     CreateDevMenuStructure_Caller(menu_structure, entry_ptr);
 }
+
+struct test_selection
+{
+    const char* selection_1_title;
+    uint64_t selection_1_var;
+    const char* selection_2_title;
+    uint64_t selection_2_var;
+    const char* selection_3_title;
+    uint64_t selection_3_var;
+};
+
+struct test_selection test_1;
+
+uint64_t test_selection_var = 0;
 
 void MakeMeleeMenu(uintptr_t menu_structure)
 {
@@ -885,5 +914,14 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Show Hello World message via TextPrintV", nullptr, &TestTextPrintV, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Reload after loading actors", nullptr, &reload_after_actor, __FUNCSIG__, __LINE__, __FILE__);
+#if 0
+    test_1.selection_1_title = "Selection 1";
+    test_1.selection_2_title = "Selection 2";
+    test_1.selection_3_title = "Selection 3";
+    test_1.selection_1_var = 0;
+    test_1.selection_2_var = 1;
+    test_1.selection_3_var = 2;
+    Create_DMenu_Selection(Header_ptr, "Test Selection", (void*)&test_1, (void*)DevMenuSelectionCallback_Caller, &test_selection_var, nullptr, nullptr, nullptr, nullptr, __FUNCSIG__, __LINE__, __FILE__);
+#endif
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }

@@ -74,3 +74,5 @@ TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, uintptr_t menu_struc
 TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateSeparationLine_Caller, uintptr_t menu_structure_ptr);
 TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateCyanSubText_Caller, uintptr_t menu_structure_ptr, const char* subtext_title);
 TYPEDEF_FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, uintptr_t menu_structure, uintptr_t last_menu_structure);
+TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateSelection_Caller, uintptr_t menu_structure, const char* title, void* SelectionStruct, void* SelectionCallback, uint64_t* selection_var, void*, void*, void*, void*);
+TYPEDEF_FUNCTION_PTR(bool, DevMenuSelectionCallback_Caller, uintptr_t menu_structure, DMenu::Message Message);

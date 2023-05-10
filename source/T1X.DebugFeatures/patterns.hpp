@@ -32,6 +32,8 @@ namespace Patterns
 	const wchar_t* DevMenuCreateCyanSubText = L"48 89 5c 24 08 57 48 83 ec 20 48 8b da 48 8b f9 e8 ?? ?? ?? ?? 33 c0 48 89 9f b0 00 00 00 48 8b 5c 24 30 48 89 87 a0 00 00 00 48 89 47 60 48 89 87 80 00 00 00";
 	const wchar_t* MeleeMenuHook = L"48 89 5c 24 10 56 48 83 ec 30 48 8b f1 e8 ?? ?? ?? ?? 48 8b d8 48 85 c0 74 ?? b9 c8 00 00 00";
 	const wchar_t* InitProfileMenu = L"40 55 57 48 8d 6c 24 b1 48 81 ec a8 00 00 00 48 8b f9 33 c9 e8 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 48 89 9c 24 c0 00 00 00 4c 8d 0d ?? ?? ?? ?? 48 89 b4 24 d8 00 00 00 48 8d 15 ?? ?? ?? ??";
+	const wchar_t* DevMenuCreateSelection = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f8 48 8b f1 e8 ?? ?? ?? ?? 8b 44 24 68 33 c9 89 86 a0 00 00 00 48 8b 44 24 70 48 89 86 80 00 00 00";
+	const wchar_t* DevMenuSelectionCallback = L"48 89 5c 24 08 57 48 83 ec 20 48 8b 59 60 83 ea 05 74 ?? 83 ea 02 74 ?? 83 fa 01 75 ?? 48 8b 0d ?? ?? ?? ?? 8b 3b 48 85 c9";
 	// Give Player Weapons
 	const wchar_t* GivePlayerWeapon_Main = L"49 8b 4f 08 48 8d 54 24 30 41 b0 01 c7 44 24 30 ?? ?? ?? ?? 48 8b 0c 0e e8 ?? ?? ?? ??";
 	const wchar_t* GivePlayerWeapon_SubSection = L"49 8b 4d 08 48 8d 54 24 40 41 b0 01 49 8b 0c 0c e8 ?? ?? ?? ??";

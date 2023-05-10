@@ -115,6 +115,8 @@ void ApplyDebugPatches(void)
         DevMenuCreateSeparationLine_Caller = (DevMenuCreateSeparationLine_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateSeparationLine, wstr(Patterns::DevMenuCreateSeparationLine));
         DevMenuCreateCyanSubText_Caller = (DevMenuCreateCyanSubText_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateCyanSubText, wstr(Patterns::DevMenuCreateCyanSubText));
         RestartCheckpointInternal_Caller = (RestartCheckpointInternal_Caller_ptr)FindAndPrintPatternW(Patterns::RestartCheckpointInternal, wstr(Patterns::RestartCheckpointInternal));
+        DevMenuCreateSelection_Caller = (DevMenuCreateSelection_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateSelection, wstr(Patterns::DevMenuCreateSelection));
+        DevMenuSelectionCallback_Caller = (DevMenuSelectionCallback_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuSelectionCallback, wstr(Patterns::DevMenuSelectionCallback));
         uintptr_t JumpPattern = 0;
         if (
             CreateDevMenuStructure_Caller &&
