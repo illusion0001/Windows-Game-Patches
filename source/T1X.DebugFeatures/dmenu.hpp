@@ -62,6 +62,7 @@ TYPEDEF_FUNCTION_PTR(uintptr_t, ScriptManager_LookupClass, StringId64 sid, uint3
 TYPEDEF_FUNCTION_PTR(void, LoadLevelByName_Caller, const char* level_name, uint64_t arg1);
 TYPEDEF_FUNCTION_PTR(void, EntitySpawner_Caller, spawner_struct* arg1, uint64_t* arg2, uint64_t* arg3, bool arg4, uint64_t* arg5);
 TYPEDEF_FUNCTION_PTR(bool, LoadActorByName_Caller, const char* level_name, uint32_t arg1, bool sync_actor);
+TYPEDEF_FUNCTION_PTR(bool, RestartCheckpointInternal_Caller, bool, bool);
 
 // DMenu
 TYPEDEF_FUNCTION_PTR(uintptr_t, AllocDevMenuMemoryforStructure_Caller, uint32_t menu_size, uint32_t alignment, const char* source_func, uint32_t source_line, const char* source_file);

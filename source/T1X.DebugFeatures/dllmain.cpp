@@ -114,6 +114,7 @@ void ApplyDebugPatches(void)
         InitProfileMenuAddr = FindAndPrintPatternW(Patterns::InitProfileMenu, wstr(Patterns::InitProfileMenu));
         DevMenuCreateSeparationLine_Caller = (DevMenuCreateSeparationLine_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateSeparationLine, wstr(Patterns::DevMenuCreateSeparationLine));
         DevMenuCreateCyanSubText_Caller = (DevMenuCreateCyanSubText_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateCyanSubText, wstr(Patterns::DevMenuCreateCyanSubText));
+        RestartCheckpointInternal_Caller = (RestartCheckpointInternal_Caller_ptr)FindAndPrintPatternW(Patterns::RestartCheckpointInternal, wstr(Patterns::RestartCheckpointInternal));
         uintptr_t JumpPattern = 0;
         if (
             CreateDevMenuStructure_Caller &&
@@ -134,7 +135,8 @@ void ApplyDebugPatches(void)
             TextPrintV &&
             InitProfileMenuAddr &&
             DevMenuCreateSeparationLine_Caller &&
-            DevMenuCreateCyanSubText_Caller
+            DevMenuCreateCyanSubText_Caller &&
+            RestartCheckpointInternal_Caller
             )
         {
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));

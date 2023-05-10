@@ -18,6 +18,7 @@ namespace Patterns
 	const wchar_t* ActiveTaskDisplay = L"48 8d 4d a0 48 8d 85 c0 03 00 00 4d 8b c6 48 89 44 24 28 48 89 74 24 20";
 	const wchar_t* CharPrintText = L"48 8b 8b f8 2f 00 00 48 8d 55 d7 48 8b 01 ff 90 e8 01 00 00 48 8d 4d d7";
 	const wchar_t* TextPrintV = L"4c 8b dc 48 83 ec 58 c5 fa 10 84 24 80 00 00 00 49 8d 43 40 49 89 43 f0 49 8b 43 38 49 89 43 e8 83 64 24 38 00 83 64 24 30 00 8b 84 24 88 00 00 00 89 44 24 28 c5 fa 11 44 24 20";
+	const wchar_t* RestartCheckpointInternal = L"48 8b c4 48 89 58 08 48 89 70 10 48 89 78 18 4c 89 60 20 55 41 56 41 57 48 8d 68 a1 48 81 ec b0 00 00 00 48 8b 05 ?? ?? ?? ?? 48 33 c4 48 89 45 37 44 8a f1 40 8a fa 48 8d 0d ?? ?? ?? ?? e8 ?? ?? ?? ??";
 	// Dev Menu
 	const wchar_t* AllocMemoryforStructure = L"48 83 ec ?? 45 33 c9 4c 8d 05 ?? ?? ?? ?? 4c 89 44 24 ?? 41 8d 51 ?? e8 ?? ?? ?? ?? 48 83 c4 38 c3";
 	const wchar_t* CreateDevMenuStructure = L"40 53 48 83 ec ?? 48 8b 81 b0 00 00 00 48 8b da 48 85 c0 74 22 66 66 66 0f 1f 84 00 00 00 00 00 48 8b d0 48 8b 40 40 48 85 c0 75 f4 48 85 d2 74 06 48 89 5a 40 eb 07 48 89 99 b0 00 00 00 48 8b d3 48 c7 43 40 00 00 00 00 48 89 4b 38 e8 ?? ?? ?? ?? 48 8b c3 48 83 c4 20 5b c3";

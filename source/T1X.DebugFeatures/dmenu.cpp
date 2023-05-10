@@ -5,6 +5,7 @@ INIT_FUNCTION_PTR(ScriptManager_LookupClass);
 INIT_FUNCTION_PTR(LoadLevelByName_Caller);
 INIT_FUNCTION_PTR(EntitySpawner_Caller);
 INIT_FUNCTION_PTR(LoadActorByName_Caller);
+INIT_FUNCTION_PTR(RestartCheckpointInternal_Caller);
 
 INIT_FUNCTION_PTR(AllocDevMenuMemoryforStructure_Caller);
 INIT_FUNCTION_PTR(DevMenuCreateHeader_Caller);
@@ -200,7 +201,7 @@ bool SpawnPlayer_OnClick(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Me
         const char* spawn_player_native_name = "spawn-player";
         StringId64 spawn_player_native_hash = SID(spawn_player_native_name);
         uintptr_t spawn_player_LookupPtr = ScriptManager_LookupClass(spawn_player_native_hash, 1);
-        if (spawn_player_LookupPtr)
+        if (spawn_player_LookupPtr && PlayerPtrAddr)
         {
             spawn_player_LookupPtr = *(uintptr_t*)(spawn_player_LookupPtr + 8);
             printf_s("#%.16llx (%s) found at 0x%016llx\n", spawn_player_native_hash, spawn_player_native_name, spawn_player_LookupPtr);
@@ -388,6 +389,39 @@ const char* anim_actor_list[] = {
     "t1x-anim-tess-gestures",
     "t1x-anim-tess-ladder",
     "t1x-tess-anim-wade",
+    // test
+    "t1x-anim-ellie",
+    "t1x-anim-ellie-player",
+    "t1x-anim-ellie-player-gun",
+    "t1x-anim-ellie-player-scavenge",
+    "t1x-anim-ellie-v-david-melee",
+    "t1x-anim-ellie-v-inf-dlc-melee",
+    "t1x-anim-ellie-v-inf-melee",
+    "anim-ellie-lose-balance",
+    "anim-ellie-player-backpack",
+    "anim-ellie-player-balance",
+    "anim-ellie-player-bindpose",
+    "anim-ellie-player-hands",
+    "anim-ellie-player-horse-backpack",
+    "anim-ellie-player-ladder-carry",
+    "anim-ellie-player-ladder",
+    "anim-ellie-player-ledge-walk",
+    "anim-ellie-player-mm-aim",
+    "anim-ellie-player-mm-cover",
+    "anim-ellie-player-mm-crouch",
+    "anim-ellie-player-mm-explore",
+    "anim-ellie-player-mm-melee",
+    "anim-ellie-player-mm-tense-shared",
+    "anim-ellie-player-mm-tense",
+    "anim-ellie-player-mm-uneasy",
+    "anim-ellie-player-movement-combat",
+    "anim-ellie-player-movement",
+    "anim-ellie-player-pickups",
+    "anim-ellie-player-throw",
+    "anim-ellie-player-traversal",
+    "anim-ellie-t1x-facial",
+    "abby-longgun-jiggle-colliders",
+    "anim-ellie-player-throw",
 };
 
 const char* anim_actor_list_infected[] = {
@@ -424,6 +458,7 @@ const char* anim_actor_list_infected[] = {
 };
 
 bool sync_actor = false;
+bool reload_after_actor = false;
 
 bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
 {
@@ -446,6 +481,12 @@ bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mes
                 bool load_ret = LoadActorByName_Caller(anim_actor_list_infected[i], 0, sync_actor);
                 printf_s("LoadActor Returned: 0x%02x\n", load_ret);
             }
+        }
+        if (reload_after_actor)
+        {
+            bool test_1 = false;
+            bool test_2 = true;
+            RestartCheckpointInternal_Caller(test_1, test_2);
         }
         return DMenu::FunctionReturnCode::Success;
     }
@@ -815,5 +856,6 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_BoolButton(Header_ptr, "Print Player Position", nullptr, &ShowPlayerPos, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Show Hello World message via TextPrintV", nullptr, &TestTextPrintV, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_BoolButton(Header_ptr, "Reload after loading actors", nullptr, &reload_after_actor, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
 }
