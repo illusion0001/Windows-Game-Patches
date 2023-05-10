@@ -484,9 +484,36 @@ bool OnExecuteLoadActor(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Mes
         }
         if (reload_after_actor)
         {
-            bool test_1 = false;
-            bool test_2 = true;
-            RestartCheckpointInternal_Caller(test_1, test_2);
+            RestartCheckpointInternal_Caller(false, false);
+        }
+        return DMenu::FunctionReturnCode::Success;
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
+constexpr uint32_t MAX_ACTOR_NAME_LEN = 128;
+
+bool OnExecuteLoadActorFile(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        FILE* fp;
+        if (fopen_s(&fp, "actors.txt", "r") != 0)
+        {
+            return DMenu::FunctionReturnCode::Failure;
+        }
+
+        char actor[MAX_ACTOR_NAME_LEN];
+        while (fscanf_s(fp, " actor %127s", actor, MAX_ACTOR_NAME_LEN) == 1)
+        {
+            printf_s("Actor open: %s Sync mode: %i\n", actor, sync_actor);
+            LoadActorByName_Caller(actor, 0, sync_actor);
+            // printf_s("LoadActor Returned: 0x%02x\n", load_ret);
+        }
+        fclose(fp);
+        if (reload_after_actor)
+        {
+            RestartCheckpointInternal_Caller(false, false);
         }
         return DMenu::FunctionReturnCode::Success;
     }
@@ -846,6 +873,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Spawn Test", (void*)SpawnTest_OnClick, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show Entity Info", (void*)OnExecuteShowEntityInfo, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Sync actor after load", nullptr, &sync_actor, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Try to load animations from file (actors.txt)", (void*)OnExecuteLoadActorFile, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load animations", (void*)OnExecuteLoadActor, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show task data", (void*)OnExecuteShowTaskData, 0, __FUNCSIG__, __LINE__, __FILE__);
