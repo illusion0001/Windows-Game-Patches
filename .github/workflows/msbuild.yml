@@ -36,7 +36,7 @@ jobs:
     - name: Setup environment variables
       run: |
         $cmdOutput = Split-Path -Path $pwd -Leaf
-        $_ver = "1.0.$(git rev-list HEAD --count)"
+        $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)"
         echo "project_name=$cmdOutput" >> $Env:GITHUB_ENV
         echo "commit_ver=$_ver" >> $Env:GITHUB_ENV
         echo "zip_name=$cmdOutput-$_ver" >> $Env:GITHUB_ENV
