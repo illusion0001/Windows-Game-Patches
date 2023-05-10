@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
+#include "git_ver.h"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
@@ -19,6 +20,9 @@ void ReadConfig(void)
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
     LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
+    LOG(L"" GIT_COMMIT "\n");
+    LOG(L"" GIT_VER "\n");
+    LOG(L"" GIT_NUM "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
 
