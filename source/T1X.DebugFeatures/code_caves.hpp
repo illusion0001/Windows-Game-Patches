@@ -44,6 +44,7 @@ public:
 
 extern struct TaskManager::ActiveTaskData TaskData;
 extern bool TestTextPrintV;
+extern bool ShowPlayerPos;
 
 TYPEDEF_FUNCTION_PTR(void, TextPrintV, uintptr_t WindowContext, float font_x, float font_y, float font_scale_x, float font_scale_y, uint32_t color, const char* fmt, ...);
 

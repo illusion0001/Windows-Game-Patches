@@ -777,6 +777,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Save Player Position", (void*)OnExecute_SaveLoadPlayerPos, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Load Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Clear Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 2, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_BoolButton(Header_ptr, "Print Player Position", nullptr, &ShowPlayerPos, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Show Hello World message via TextPrintV", nullptr, &TestTextPrintV, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);

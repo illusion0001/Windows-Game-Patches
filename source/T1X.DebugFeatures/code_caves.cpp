@@ -380,6 +380,7 @@ uint64_t ActiveTaskDisplayReturnAddr = 0;
 
 struct TaskManager::ActiveTaskData TaskData{};
 bool TestTextPrintV = false;
+bool ShowPlayerPos = false;
 
 void __attribute__((naked)) ActiveTaskDisplay_CC()
 {
@@ -411,6 +412,19 @@ void MyDebugPrintFunction(uintptr_t window_context)
     if (TestTextPrintV)
     {
         TextPrintV(window_context, 50., 120., 0.8, 0.8, 0xc0e0e0e0, "Hello world!");
+    }
+    if (ShowPlayerPos && PlayerPtrAddr)
+    {
+        struct player_cord_struct
+        {
+            float world_x;
+            float world_y;
+            float world_z;
+        };
+        struct player_cord_struct* pointer;
+        void* addr = (void*)(PlayerPtrAddr + 0x1b0);
+        pointer = (struct player_cord_struct*)addr;
+        TextPrintV(window_context, 50., 120., 0.8, 0.8, 0xc0e0e0e0, "Player Position: %.2f %.2f %.2f", pointer->world_x, pointer->world_y, pointer->world_z);
     }
     return;
 }
