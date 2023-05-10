@@ -464,6 +464,66 @@ bool OnExecuteShowTaskData(DMenu::OnExecuteStructure DMenu, enum DMenu::Message 
     return DMenu::FunctionReturnCode::NoAction;
 }
 
+float save_player_cord[3] = { 0 };
+
+bool OnExecute_SaveLoadPlayerPos(DMenu::OnExecuteStructure DMenu, enum DMenu::Message Message)
+{
+    if (Message == DMenu::Message::OnExecute)
+    {
+        struct player_cord_struct
+        {
+            float world_x;
+            float world_y;
+            float world_z;
+        };
+        if (PlayerPtrAddr)
+        {
+            struct player_cord_struct* pointer;
+            void* addr = (void*)(PlayerPtrAddr + 0x1b0);
+            pointer = (struct player_cord_struct*)addr;
+            switch (DMenu.DMENU_ARG)
+            {
+            case 0:
+            {
+                save_player_cord[0] = pointer->world_x;
+                save_player_cord[1] = pointer->world_y;
+                save_player_cord[2] = pointer->world_z;
+                break;
+            }
+            case 1:
+            {
+                if (save_player_cord[0] != 0 &&
+                    save_player_cord[1] != 0 &&
+                    save_player_cord[2] != 0)
+                {
+                    pointer->world_x = save_player_cord[0];
+                    pointer->world_y = save_player_cord[1];
+                    pointer->world_z = save_player_cord[2];
+                }
+                else
+                {
+                    printf_s("player not set\n");
+                    return DMenu::FunctionReturnCode::Failure;
+                }
+                break;
+            }
+            case 2:
+            {
+                memset(&save_player_cord, 0, sizeof(save_player_cord));
+                break;
+            }
+            }
+            return DMenu::FunctionReturnCode::Success;
+        }
+        else
+        {
+            printf_s("cannot find player\n");
+            return DMenu::FunctionReturnCode::Failure;
+        }
+    }
+    return DMenu::FunctionReturnCode::NoAction;
+}
+
 const char* npc_list1[] = {
     "npc-lab-lower-1",
     "npc-lab-lower-2",
@@ -714,6 +774,9 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Try to load animations", (void*)OnExecuteLoadActor, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show task data", (void*)OnExecuteShowTaskData, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Save Player Position", (void*)OnExecute_SaveLoadPlayerPos, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Load Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 1, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_FunctionButton(Header_ptr, "Clear Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 2, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Experimental LookID Override", "Enable for DC Spawn", &OverrideLookID, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_BoolButton(Header_ptr, "Show Hello World message via TextPrintV", nullptr, &TestTextPrintV, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_Entry(menu_structure, Header_ptr, "Custom Menu", BuildVer, __FUNCSIG__, __LINE__, __FILE__);
