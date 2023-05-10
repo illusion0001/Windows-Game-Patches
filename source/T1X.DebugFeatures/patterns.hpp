@@ -27,6 +27,8 @@ namespace Patterns
 	const wchar_t* DevMenuAddBool = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f8 48 8b f1 e8 ?? ?? ?? ?? 33 c9 48 89 9e 80 00 00 00 48 8b 5c 24 30 48 8d 05 ?? ?? ?? ?? 48 89 06 48 8d 05 ?? ?? ?? ?? 48 89 86 b0 00 00 00 48 89 8e a0 00 00 00 48 89 4e 60 c7 86 a8 00 00 00 03 00 00 00 0f b6 07 88 86 b8 00 00 00 48 8b c6 48 89 7e 60 48 89 4e 58 c7 86 a0 00 00 00 01 00 00 00 48 8b 74 24 38 48 83 c4 20 5f c3";
 	const wchar_t* DevMenuAddFuncButton = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f8 48 8b f1 e8 ?? ?? ?? ?? 33 c9 48 89 5e 60 48 8b 5c 24 30 48 8d 05 ?? ?? ?? ?? 48 89 06 0f b6 44 24 50 88 86 c1 00 00 00 48 8b c6 48 89 8e a0 00 00 00 c7 86 a8 00 00 00 05 00 00 00";
 	const wchar_t* DevMenuAddIntSlider = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b f9 49 8b d8 48 8b f1 e8 ?? ?? ?? ?? 48 8b 44 24 58 33 c9 66 c7 86 b0 00 00 00 00 07";
+	const wchar_t* DevMenuCreateSeparationLine = L"33 c0 c7 41 68 c8 c8 c8 ff 48 89 41 30 89 41 4e 48 89 41 38 48 89 41 40 89 41 48";
+	const wchar_t* DevMenuCreateCyanSubText = L"48 89 5c 24 08 57 48 83 ec 20 48 8b da 48 8b f9 e8 ?? ?? ?? ?? 33 c0 48 89 9f b0 00 00 00 48 8b 5c 24 30 48 89 87 a0 00 00 00 48 89 47 60 48 89 87 80 00 00 00";
 	const wchar_t* MeleeMenuHook = L"48 89 5c 24 10 56 48 83 ec 30 48 8b f1 e8 ?? ?? ?? ?? 48 8b d8 48 85 c0 74 ?? b9 c8 00 00 00";
 	const wchar_t* InitProfileMenu = L"40 55 57 48 8d 6c 24 b1 48 81 ec a8 00 00 00 48 8b f9 33 c9 e8 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 48 89 9c 24 c0 00 00 00 4c 8d 0d ?? ?? ?? ?? 48 89 b4 24 d8 00 00 00 48 8d 15 ?? ?? ?? ??";
 	// Give Player Weapons

@@ -70,4 +70,6 @@ TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuAddBool_Caller, uintptr_t menu_structure_
 TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuAddFuncButton_Caller, uintptr_t menu_structure_ptr, const char* func_name, void* ptrarget, uint64_t arg, bool* unk_bool);
 TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateEntry_Caller, uintptr_t menu_structure_ptr, const char* name, uintptr_t last_menu_structure_ptr, uint32_t unk, uint32_t unk2, const char* entry_description);
 TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuAddIntSlider_Caller, uintptr_t menu_structure_ptr, const char* int_name, int32_t* int_val, int32_t* step_val, DMenu::IntSettings args, const char* int_description);
+TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateSeparationLine_Caller, uintptr_t menu_structure_ptr);
+TYPEDEF_FUNCTION_PTR(uintptr_t, DevMenuCreateCyanSubText_Caller, uintptr_t menu_structure_ptr, const char* subtext_title);
 TYPEDEF_FUNCTION_PTR(uintptr_t, CreateDevMenuStructure_Caller, uintptr_t menu_structure, uintptr_t last_menu_structure);

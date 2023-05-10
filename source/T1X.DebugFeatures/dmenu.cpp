@@ -12,6 +12,8 @@ INIT_FUNCTION_PTR(DevMenuAddBool_Caller);
 INIT_FUNCTION_PTR(DevMenuAddFuncButton_Caller);
 INIT_FUNCTION_PTR(DevMenuCreateEntry_Caller);
 INIT_FUNCTION_PTR(DevMenuAddIntSlider_Caller);
+INIT_FUNCTION_PTR(DevMenuCreateSeparationLine_Caller);
+INIT_FUNCTION_PTR(DevMenuCreateCyanSubText_Caller);
 INIT_FUNCTION_PTR(CreateDevMenuStructure_Caller);
 
 uint64_t InitProfileMenuAddr = 0;
@@ -542,6 +544,8 @@ constexpr uint32_t num_npc_list = sizeof(npc_list1) / sizeof(npc_list1[0]);
 constexpr uint32_t bool_menu_size = 192;
 constexpr uint32_t entry_menu_size = 200;
 constexpr uint32_t func_button_size = 200;
+constexpr uint32_t subtext_menu_size = 184;
+constexpr uint32_t line_menu_size = 180;
 constexpr uint32_t header_menu_size = 224;
 constexpr uint32_t int_button_size = 368;
 
@@ -642,6 +646,36 @@ void Create_DMenu_IntSlider(uintptr_t menu_structure, const char* button_name, c
         IntButton_structure = DevMenuAddIntSlider_Caller(IntButton_ptr, button_name, int_value, &int_args.min_val, int_args, button_description);
     }
     CreateDevMenuStructure_Caller(menu_structure, IntButton_structure);
+}
+
+void Create_DMenu_Line(uintptr_t menu_structure, const char* source_func, uint32_t source_line, const char* source_file)
+{
+    // Create the entry point
+    uintptr_t line_ptr = AllocDevMenuMemoryforStructure_Caller(line_menu_size, 16, source_func, source_line, source_file);
+    if (line_ptr)
+    {
+        CLEAR_MEM((void*)line_ptr, line_menu_size);
+        DevMenuCreateSeparationLine_Caller(line_ptr);
+    }
+    CreateDevMenuStructure_Caller(menu_structure, line_ptr);
+}
+
+void Create_DMenu_CyanSubText(uintptr_t menu_structure, const char* title, const char* source_func, uint32_t source_line, const char* source_file)
+{
+    // Create the entry point
+    uintptr_t title_ptr = AllocDevMenuMemoryforStructure_Caller(subtext_menu_size, 16, source_func, source_line, source_file);
+    if (title_ptr)
+    {
+        CLEAR_MEM((void*)title_ptr, subtext_menu_size);
+        DevMenuCreateCyanSubText_Caller(title_ptr, title);
+    }
+    CreateDevMenuStructure_Caller(menu_structure, title_ptr);
+}
+
+void Create_DMenu_TextLineWrapper(uintptr_t menu_structure, const char* title, const char* source_func, uint32_t source_line, const char* source_file)
+{
+    Create_DMenu_Line(menu_structure, source_func, source_line, source_file);
+    Create_DMenu_CyanSubText(menu_structure, title, source_func, source_line, source_file);
 }
 
 void Create_DMenu_Entry(uintptr_t menu_structure, uintptr_t SubHeaderPtr, const char* title, const char* description, const char* source_func, uint32_t source_line, const char* source_file)
@@ -774,6 +808,7 @@ void MakeMeleeMenu(uintptr_t menu_structure)
     Create_DMenu_FunctionButton(Header_ptr, "Try to load animations", (void*)OnExecuteLoadActor, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Try to load infected animations data", (void*)OnExecuteLoadActor, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Show task data", (void*)OnExecuteShowTaskData, 0, __FUNCSIG__, __LINE__, __FILE__);
+    Create_DMenu_TextLineWrapper(Header_ptr, "Player Related", __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Save Player Position", (void*)OnExecute_SaveLoadPlayerPos, 0, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Load Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 1, __FUNCSIG__, __LINE__, __FILE__);
     Create_DMenu_FunctionButton(Header_ptr, "Clear Saved Player Position", (void*)OnExecute_SaveLoadPlayerPos, 2, __FUNCSIG__, __LINE__, __FILE__);

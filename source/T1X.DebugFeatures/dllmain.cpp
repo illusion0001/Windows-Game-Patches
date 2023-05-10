@@ -112,6 +112,8 @@ void ApplyDebugPatches(void)
         uintptr_t DebugPrintAddr = FindAndPrintPatternW(Patterns::CharPrintText, wstr(Patterns::CharPrintText));
         TextPrintV = (TextPrintV_ptr)FindAndPrintPatternW(Patterns::TextPrintV, wstr(Patterns::TextPrintV));
         InitProfileMenuAddr = FindAndPrintPatternW(Patterns::InitProfileMenu, wstr(Patterns::InitProfileMenu));
+        DevMenuCreateSeparationLine_Caller = (DevMenuCreateSeparationLine_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateSeparationLine, wstr(Patterns::DevMenuCreateSeparationLine));
+        DevMenuCreateCyanSubText_Caller = (DevMenuCreateCyanSubText_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateCyanSubText, wstr(Patterns::DevMenuCreateCyanSubText));
         uintptr_t JumpPattern = 0;
         if (
             CreateDevMenuStructure_Caller &&
@@ -130,7 +132,9 @@ void ApplyDebugPatches(void)
             ActiveTaskDisplayAddr &&
             DebugPrintAddr &&
             TextPrintV &&
-            InitProfileMenuAddr
+            InitProfileMenuAddr &&
+            DevMenuCreateSeparationLine_Caller &&
+            DevMenuCreateCyanSubText_Caller
             )
         {
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
