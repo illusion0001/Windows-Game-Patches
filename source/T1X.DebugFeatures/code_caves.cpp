@@ -326,7 +326,7 @@ const char* GivePlayerWeaponMain(const StringId64 Sid, const int32_t mode)
     return temp_str;
 }
 
-const char* GivePlayerWeaponMainSimple(const uint64_t mode)
+const char* GivePlayerWeaponMainSimple(const uint32_t mode)
 {
     string_index = nullptr;
     switch (mode) {
@@ -362,6 +362,8 @@ const char* GivePlayerWeaponMainSimple(const uint64_t mode)
         CLEAR_MEM((void*)temp_str, sizeof(temp_str));
         return temp_str;
     }
+    if (string_index[0] == '\0')
+        string_index = "(null)";
     }
     return string_index;
 }
@@ -381,7 +383,7 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC() {
         mov qword ptr[temp_reg1], 0;
         mov rcx, qword ptr[RSI + RCX];
         mov qword ptr[temp_reg1], rcx;
-        mov rcx, 1;
+        mov ecx, 1;
         call GivePlayerWeaponMainSimple;
         mov rdx, rax;
         mov byte ptr[rsp + 0x20], 0;
@@ -404,7 +406,7 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC() {
         mov qword ptr[temp_reg1], 0;
         mov rcx, qword ptr[RCX + R13 * 0x1];
         mov qword ptr[temp_reg1], rcx;
-        mov rcx, 2;
+        mov ecx, 2;
         call GivePlayerWeaponMainSimple;
         mov rdx, rax;
         mov byte ptr[rsp + 0x20], 0;
@@ -424,7 +426,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
         call GivePlayerWeaponMain;
         jmp code_exit;
     case_1050:;
-        mov rcx, 3;
+        mov ecx, 3;
         call GivePlayerWeaponMainSimple;
         mov r8, rax;
     code_exit:;
@@ -434,7 +436,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
 
 void __attribute__((naked)) GivePlayerWeapon_EntryHeaderCC() {
     __asm {
-        mov rcx, 4;
+        mov ecx, 4;
         call GivePlayerWeaponMainSimple;
         mov rdx, rax;
         jmp[GivePlayerWeapon_EntryHeaderReturn];
