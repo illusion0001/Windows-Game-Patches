@@ -192,14 +192,18 @@ void ApplyDebugPatches(void)
         const unsigned char ret_1_al[] = { 0xb0, 0x01, 0xc3 };
         const unsigned char nop1x[] = { 0x90 };
         const unsigned char ret_0[] = { 0x31, 0xc0, 0xc3 };
-        constexpr uint64_t menu_mem_size = (uint64_t)8 * 1048576;
-        constexpr uint64_t script_mem_size = (uint64_t)8 * 1048576;
-        uint64_t cpu_mem_size = 0;
         constexpr uint64_t size_mb = 1048576;
+        constexpr uint64_t menu_mem_size = (uint64_t)8 * size_mb;
+        constexpr uint64_t script_mem_size = (uint64_t)8 * size_mb;
+        uint64_t cpu_mem_size = 0;
         if (!GameVeris1050)
+        {
             cpu_mem_size = (uint64_t)1040 * size_mb;
+        }
         else
+        {
             cpu_mem_size = (uint64_t)1152 * size_mb;
+        }
         int32_t OffsetToisDebugMemoryAval = 0;
         uintptr_t ParticlesMenu = FindAndPrintPatternW(Patterns::ParticlesMenu, wstr(Patterns::ParticlesMenu));
         ParticlesMenu = ParticlesMenu + 12;
