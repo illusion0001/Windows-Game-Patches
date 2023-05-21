@@ -6,6 +6,19 @@
 
 # Patches
 
+### **Battlefield V**
+  - Disable TAA
+  - Custom Internal AA Options.
+    - PostProcessAAMode_None: `0`
+    - PostProcessAAMode_FxaaLow: `1`
+    - PostProcessAAMode_FxaaMedium: `2`
+    - PostProcessAAMode_FxaaHigh: `3`
+    - PostProcessAAMode_FxaaCompute: `4`
+    - PostProcessAAMode_FxaaComputeExtreme: `5`
+    - PostProcessAAMode_Smaa1x: `6`
+    - PostProcessAAMode_SmaaT2x: `7`
+    - PostProcessAAMode_TemporalAA: `8`
+
 ### **Bright Memory: Infinite**
   - Disable TAA
   - Disable Sharpness
