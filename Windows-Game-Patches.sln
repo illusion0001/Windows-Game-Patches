@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "T1X.DebugFeatures", "source
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BFV.NoTAA", "source\BFV.NoTAA\BFV.NoTAA.vcxproj", "{FAC97ED2-0898-4796-8608-5AA4B22AD75D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LiesOfP.NoTAA", "source\LiesOfP.NoTAA\LiesOfP.NoTAA.vcxproj", "{1F44305C-7C31-47AC-8707-02F22D32814A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -61,6 +63,14 @@ Global
 		{FAC97ED2-0898-4796-8608-5AA4B22AD75D}.Release|x64.Build.0 = Release|x64
 		{FAC97ED2-0898-4796-8608-5AA4B22AD75D}.Release|x86.ActiveCfg = Release|Win32
 		{FAC97ED2-0898-4796-8608-5AA4B22AD75D}.Release|x86.Build.0 = Release|Win32
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Debug|x64.ActiveCfg = Debug|x64
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Debug|x64.Build.0 = Debug|x64
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Debug|x86.ActiveCfg = Debug|Win32
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Debug|x86.Build.0 = Debug|Win32
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Release|x64.ActiveCfg = Release|x64
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Release|x64.Build.0 = Release|x64
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Release|x86.ActiveCfg = Release|Win32
+		{1F44305C-7C31-47AC-8707-02F22D32814A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
