@@ -41,9 +41,9 @@ void __attribute__((naked)) Memory_NewHandler_CC()
         mov eax, MEM_TYPE;
         mov[rdx], eax;
     ret_loc:;
-        mov rbp, rcx;
-        lea rcx, [r11 + 0x20];
-        mov[rsp + 0x58], eax;
+        mov rdi, rcx;
+        lea rcx, [rsp + 0x60];
+        mov[rsp + 0x60], eax;
         mov rbx, r8;
         jmp[Memory_NewHandlerReturnAddr];
     }

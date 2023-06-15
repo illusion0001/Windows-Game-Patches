@@ -17,12 +17,12 @@ namespace Patterns
 	const wchar_t* DebugOutputString1 = L"48 8b c4 48 89 48 08 48 89 50 10 4c 89 40 18 4c 89 48 20 48 83 ec 28 48 8d 50 10";
 	const wchar_t* ActiveTaskDisplay = L"48 8d 4d a0 48 8d 85 c0 03 00 00 4d 8b c6 48 89 44 24 28 48 89 74 24 20";
 	const wchar_t* CharPrintText = L"48 8b 8b f8 2f 00 00 48 8d 55 d7 48 8b 01 ff 90 e8 01 00 00 48 8d 4d d7";
-	const wchar_t* TextPrintV = L"4c 8b dc 48 83 ec 58 c5 fa 10 84 24 80 00 00 00 49 8d 43 40 49 89 43 f0 49 8b 43 38 49 89 43 e8 83 64 24 38 00 83 64 24 30 00 8b 84 24 88 00 00 00 89 44 24 28 c5 fa 11 44 24 20";
+	const wchar_t* TextPrintV = L"4c 8b dc 48 83 ec 58 c5 fa 10 84 24 80 00 00 00 49 8d 43 40 49 89 43 f0 49 8b 43 38 49 89 43 e8 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 8b 84 24 88 00 00 00 89 44 24 28 c5 fa 11 44 24 20";
 	const wchar_t* RestartCheckpointInternal = L"48 8b c4 48 89 58 08 48 89 70 10 48 89 78 18 4c 89 60 20 55 41 56 41 57 48 8d 68 a1 48 81 ec b0 00 00 00 48 8b 05 ?? ?? ?? ?? 48 33 c4 48 89 45 37 44 8a f1 40 8a fa 48 8d 0d ?? ?? ?? ?? e8 ?? ?? ?? ??";
 	// Dev Menu
 	const wchar_t* AllocMemoryforStructure = L"48 83 ec ?? 45 33 c9 4c 8d 05 ?? ?? ?? ?? 4c 89 44 24 ?? 41 8d 51 ?? e8 ?? ?? ?? ?? 48 83 c4 38 c3";
 	const wchar_t* CreateDevMenuStructure = L"40 53 48 83 ec ?? 48 8b 81 b0 00 00 00 48 8b da 48 85 c0 74 22 66 66 66 0f 1f 84 00 00 00 00 00 48 8b d0 48 8b 40 40 48 85 c0 75 f4 48 85 d2 74 06 48 89 5a 40 eb 07 48 89 99 b0 00 00 00 48 8b d3 48 c7 43 40 00 00 00 00 48 89 4b 38 e8 ?? ?? ?? ?? 48 8b c3 48 83 c4 20 5b c3";
-	const wchar_t* AllocDevMenuMemoryforStructure = L"48 89 5c 24 10 48 89 6c 24 18 48 89 74 24 20 57 48 83 ec 30 48 85 c9 bf 01 00 00 00 41 8b f1 49 8b e8 48 0f 45 f9 48 8b da";
+	const wchar_t* AllocDevMenuMemoryforStructure = L"48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 48 85 C9 BF 01 00 00 00 41 8B F1 49 8B E8 48 0F 45 F9 48 8B DA E8 ?? ?? 00 00 84 C0 ??";
 	const wchar_t* DevMenuCreateHeader = L"48 89 5c 24 08 57 48 83 ec 20 41 8b d8 48 8b f9 e8 ?? ?? ?? ?? 48 8d 05 ?? ?? ?? ?? 89 9f b8 00 00 00 48 8b 5c 24 30 48 89 07 33 c0 48 89 87 a0 00 00 00 89 87 a8 00 00 00 48 89 87 b0 00 00 00 88 87 bc 00 00 00 48 89 87 c0 00 00 00 48 89 87 c8 00 00 00 48 89 87 d0 00 00 00 89 87 d8 00 00 00 48 8b c7 c6 87 ac 00 00 00 01 48 83 c4 20 5f c3";
 	const wchar_t* DevMenuCreateEntry = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f0 48 8b f9 e8 ?? ?? ?? ?? 48 8b 44 24 50 33 c9 48 89 47 60 48 8b 44 24 58";
 	const wchar_t* DevMenuAddBool = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f8 48 8b f1 e8 ?? ?? ?? ?? 33 c9 48 89 9e 80 00 00 00 48 8b 5c 24 30 48 8d 05 ?? ?? ?? ?? 48 89 06 48 8d 05 ?? ?? ?? ?? 48 89 86 b0 00 00 00 48 89 8e a0 00 00 00 48 89 4e 60 c7 86 a8 00 00 00 03 00 00 00 0f b6 07 88 86 b8 00 00 00 48 8b c6 48 89 7e 60 48 89 4e 58 c7 86 a0 00 00 00 01 00 00 00 48 8b 74 24 38 48 83 c4 20 5f c3";
@@ -49,7 +49,7 @@ namespace Patterns
 	const wchar_t* Assert_LevelDef_LevelManifst = L"c7 44 24 20 f3 04 00 00 4c 8d 05";
 	// thanks to infogram for patches
 	const wchar_t* Memory_PushAllocator = L"48 8d 4c 24 30 89 44 24 30 4d 8b f9 45 8b f0 48 8b ea e8 ?? ?? ?? ??";
-	const wchar_t* Memory_NewHandler = L"8b 02 48 8b e9 49 8d 4b 20 89 44 24 58 49 8b d8 e8 ?? ?? ?? ??";
+	const wchar_t* Memory_NewHandler = L"8B 02 48 8B F9 48 8D 4C 24 60 89 44 24 60 49 8B D8 ?? ?? ?? ?? ??";
 	const wchar_t* DebugDrawStaticContext = L"e8 ?? ?? ?? ?? 33 d2 33 c9 e8 ?? ?? ?? ?? 80 b8 3d 3f 00 00 00 75 ??";
 	const wchar_t* ParticlesMenu = L"40 56 48 83 ec 30 48 8b f1 33 c9 e8 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 48 89 5c 24 40 4c 8d 0d ?? ?? ?? ??";
 	const wchar_t* Memory_ValidateContext = L"c7 44 24 20 27 00 00 00 48 8d 15";
