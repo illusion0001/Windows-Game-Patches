@@ -22,7 +22,7 @@ namespace Patterns
 	// Dev Menu
 	const wchar_t* AllocMemoryforStructure = L"48 83 ec ?? 45 33 c9 4c 8d 05 ?? ?? ?? ?? 4c 89 44 24 ?? 41 8d 51 ?? e8 ?? ?? ?? ?? 48 83 c4 38 c3";
 	const wchar_t* CreateDevMenuStructure = L"40 53 48 83 ec ?? 48 8b 81 b0 00 00 00 48 8b da 48 85 c0 74 22 66 66 66 0f 1f 84 00 00 00 00 00 48 8b d0 48 8b 40 40 48 85 c0 75 f4 48 85 d2 74 06 48 89 5a 40 eb 07 48 89 99 b0 00 00 00 48 8b d3 48 c7 43 40 00 00 00 00 48 89 4b 38 e8 ?? ?? ?? ?? 48 8b c3 48 83 c4 20 5b c3";
-	const wchar_t* AllocDevMenuMemoryforStructure = L"48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 30 48 85 C9 BF 01 00 00 00 41 8B F1 49 8B E8 48 0F 45 F9 48 8B DA E8 ?? ?? 00 00 84 C0 ??";
+	const wchar_t* AllocDevMenuMemoryforStructure = L"48 89 5c 24 ?? 48 89 6c 24 ?? 48 89 74 24 ?? 57 48 83 ec 30 48 85 c9 bf 01 00 00 00 41 8b f1 49 8b e8 48 0f 45 f9 48 8b da e8 ?? ?? 00 00 84 c0 ??";
 	const wchar_t* DevMenuCreateHeader = L"48 89 5c 24 08 57 48 83 ec 20 41 8b d8 48 8b f9 e8 ?? ?? ?? ?? 48 8d 05 ?? ?? ?? ?? 89 9f b8 00 00 00 48 8b 5c 24 30 48 89 07 33 c0 48 89 87 a0 00 00 00 89 87 a8 00 00 00 48 89 87 b0 00 00 00 88 87 bc 00 00 00 48 89 87 c0 00 00 00 48 89 87 c8 00 00 00 48 89 87 d0 00 00 00 89 87 d8 00 00 00 48 8b c7 c6 87 ac 00 00 00 01 48 83 c4 20 5f c3";
 	const wchar_t* DevMenuCreateEntry = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f0 48 8b f9 e8 ?? ?? ?? ?? 48 8b 44 24 50 33 c9 48 89 47 60 48 8b 44 24 58";
 	const wchar_t* DevMenuAddBool = L"48 89 5c 24 08 48 89 74 24 10 57 48 83 ec 20 49 8b d9 49 8b f8 48 8b f1 e8 ?? ?? ?? ?? 33 c9 48 89 9e 80 00 00 00 48 8b 5c 24 30 48 8d 05 ?? ?? ?? ?? 48 89 06 48 8d 05 ?? ?? ?? ?? 48 89 86 b0 00 00 00 48 89 8e a0 00 00 00 48 89 4e 60 c7 86 a8 00 00 00 03 00 00 00 0f b6 07 88 86 b8 00 00 00 48 8b c6 48 89 7e 60 48 89 4e 58 c7 86 a0 00 00 00 01 00 00 00 48 8b 74 24 38 48 83 c4 20 5f c3";
@@ -43,13 +43,13 @@ namespace Patterns
 	// Now its compiled with inlined `return "#????????????????";`
 	const wchar_t* GivePlayerWeapon_Main1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4c 8b 0c 0e 49 8b cd e8 ?? ?? ??";
 	const wchar_t* GivePlayerWeapon_SubSection1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4e 8b 0c 29 48 8b 4c 24 58";
-	const wchar_t* GivePlayerWeapon_Entry1050 = L"4c 8d 05 ?? ?? ?? 01 48 8d 15 ?? ?? ?? 01 48 8d 4d 90 e8 ?? ?? 99 FF 48 89 7C"; 
+	const wchar_t* GivePlayerWeapon_Entry1050 = L"4c 8d 05 ?? ?? ?? ?? 48 8d 15 ?? ?? ?? ?? 48 8d 4d 90 e8 ?? ?? 99 ff"; 
 	const wchar_t* GivePlayerWeapon_EntryHeader1050 = L"48 8d 15 ?? ?? ?? ?? 49 8b cf e8 ?? ?? ?? ?? 4c 8b e8";
 	//
 	const wchar_t* Assert_LevelDef_LevelManifst = L"c7 44 24 20 f3 04 00 00 4c 8d 05";
 	// thanks to infogram for patches
 	const wchar_t* Memory_PushAllocator = L"48 8d 4c 24 30 89 44 24 30 4d 8b f9 45 8b f0 48 8b ea e8 ?? ?? ?? ??";
-	const wchar_t* Memory_NewHandler = L"8B 02 48 8B F9 48 8D 4C 24 60 89 44 24 60 49 8B D8 ?? ?? ?? ?? ??";
+	const wchar_t* Memory_NewHandler = L"8b 02 48 8b f9 48 8d 4c 24 60 89 44 24 60 49 8b d8 ?? ?? ?? ?? ??";
 	const wchar_t* DebugDrawStaticContext = L"e8 ?? ?? ?? ?? 33 d2 33 c9 e8 ?? ?? ?? ?? 80 b8 3d 3f 00 00 00 75 ??";
 	const wchar_t* ParticlesMenu = L"40 56 48 83 ec 30 48 8b f1 33 c9 e8 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 48 89 5c 24 40 4c 8d 0d ?? ?? ?? ??";
 	const wchar_t* Memory_ValidateContext = L"c7 44 24 20 27 00 00 00 48 8d 15";
