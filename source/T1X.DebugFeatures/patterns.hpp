@@ -43,19 +43,21 @@ namespace Patterns
 	// Now its compiled with inlined `return "#????????????????";`
 	const wchar_t* GivePlayerWeapon_Main1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4c 8b 0c 0e 49 8b cd e8 ?? ?? ??";
 	const wchar_t* GivePlayerWeapon_SubSection1050 = L"48 8d 15 ?? ?? ?? ?? 40 88 7c 24 20 4e 8b 0c 29 48 8b 4c 24 58";
-	const wchar_t* GivePlayerWeapon_Entry1050 = L"4c 8d 05 ?? ?? ?? ?? 48 8d 15 ?? ?? ?? ?? 48 8d 4d 90 e8 ?? ?? 99 ff"; 
+	const wchar_t* GivePlayerWeapon_Entry1050 = L"4c 8d 05 ?? ?? ?? ?? 48 8d 15 ?? ?? ?? ?? 48 8d 4d 90 e8 ?? ?? ?? ?? 48 89 7c 24 28 45 33 c9 4d 8b c5 48 89 7c 24 20 49 8b cf 48 8d 50 18"; 
 	const wchar_t* GivePlayerWeapon_EntryHeader1050 = L"48 8d 15 ?? ?? ?? ?? 49 8b cf e8 ?? ?? ?? ?? 4c 8b e8";
 	//
 	const wchar_t* Assert_LevelDef_LevelManifst = L"c7 44 24 20 f3 04 00 00 4c 8d 05";
 	// thanks to infogram for patches
 	const wchar_t* Memory_PushAllocator = L"48 8d 4c 24 30 89 44 24 30 4d 8b f9 45 8b f0 48 8b ea e8 ?? ?? ?? ??";
-	const wchar_t* Memory_NewHandler = L"8b 02 48 8b f9 48 8d 4c 24 60 89 44 24 60 49 8b d8 ?? ?? ?? ?? ??";
+	const wchar_t* Memory_NewHandler = L"8b 02 48 8b e9 49 8d 4b 20 89 44 24 58 49 8b d8 e8 ?? ?? ?? ??";
 	const wchar_t* DebugDrawStaticContext = L"e8 ?? ?? ?? ?? 33 d2 33 c9 e8 ?? ?? ?? ?? 80 b8 3d 3f 00 00 00 75 ??";
 	const wchar_t* ParticlesMenu = L"40 56 48 83 ec 30 48 8b f1 33 c9 e8 ?? ?? ?? ?? 84 c0 0f 84 ?? ?? ?? ?? 48 89 5c 24 40 4c 8d 0d ?? ?? ?? ??";
 	const wchar_t* Memory_ValidateContext = L"c7 44 24 20 27 00 00 00 48 8d 15";
 	const wchar_t* MenuHeap_UsableMemorySize = L"5e 00 00 00 05 00 00 00 00 00 ?? 00 00 00 00 00 00 40 00 00"; // ALLOCATION_MENU_HEAP
 	const wchar_t* ScriptHeap_UsableMemorySize = L"80 00 00 00 05 00 00 00 00 00 ?? 00 00 00 00 00 00 40 00 00"; // ALLOCATION_SCRIPT_HEAP
 	const wchar_t* CPUHeap_UsableMemorySize = L"03 00 00 00 02 00 00 00 00 00 ?? ?? 00 00 00 00 00 00 10 00"; // ALLOCATION_CPU_MEMORY
+	// New for 1.1.0.0
+	const wchar_t* Memory_NewHandler1100 = L"8b 02 48 8b f9 48 8d 4c 24 60 89 44 24 60 49 8b d8 ?? ?? ?? ??";
 	// inline asserts
 	// based on source lines
 	const wchar_t* Assert_UpdateSelectRegionByNameMenu = L"cc 48 85 db 74 ?? 33 c9 ff d3 48 8d 05 ?? ?? ?? ?? c7 44 24 ?? 10 00 00 00 41 b9 8e 00 00 00";
