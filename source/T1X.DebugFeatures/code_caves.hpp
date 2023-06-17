@@ -32,6 +32,7 @@ extern uint64_t DebugPrint_ReturnAddr;
 extern uint64_t DebugPrint_OriginalAddr;
 
 extern bool GameVeris1050;
+extern bool GameVeris1100;
 
 class TaskManager
 {

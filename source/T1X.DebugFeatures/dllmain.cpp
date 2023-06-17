@@ -74,6 +74,7 @@ void ReadConfig(void)
 FILE* fGame;
 
 constexpr const uint32_t GameVer1050 = 3591618;
+constexpr const uint32_t GameVer1100 = 3613846;
 
 void ApplyDebugPatches(void)
 {
@@ -210,7 +211,16 @@ void ApplyDebugPatches(void)
         OffsetToisDebugMemoryAval = *(uint32_t*)(ParticlesMenu);
         WritePatchAddress(ParticlesMenu + OffsetToisDebugMemoryAval + 4, ret_1_al, sizeof(ret_1_al), wstr(Patterns::Memory_isDebugMemoryAval), 0);
         WritePatchPattern_Hook(Patterns::Memory_PushAllocator, 15, wstr(Patterns::Memory_PushAllocator), 0, (void*)Memory_PushAllocator_CC, &Memory_PushAllocatorReturnAddr);
-        WritePatchPattern_Hook(Patterns::Memory_NewHandler, 17, wstr(Patterns::Memory_NewHandler), 0, (void*)Memory_NewHandler_CC, &Memory_NewHandlerReturnAddr);
+        if(game_ver_int > 1 && game_ver_int < GameVer1100)
+        {
+            WritePatchPattern_Hook(Patterns::Memory_NewHandler, 16, wstr(Patterns::Memory_NewHandler), 0, (void*)Memory_NewHandler_CC, &Memory_NewHandlerReturnAddr);
+            GameVeris1100 = false;
+        }
+        else if (game_ver_int > 1 && game_ver_int >= GameVer1100)
+        {
+            WritePatchPattern_Hook(Patterns::Memory_NewHandler1100, 17, wstr(Patterns::Memory_NewHandler1100), 0, (void*)Memory_NewHandler_CC, &Memory_NewHandlerReturnAddr);
+            GameVeris1100 = true;
+        }
         WritePatchPattern(Patterns::DebugDrawStaticContext, nop5x, sizeof(nop5x), wstr(Patterns::DebugDrawStaticContext), 0);
         WritePatchPattern(Patterns::ParticlesMenu, ret_0, sizeof(ret_0), wstr(Patterns::ParticlesMenu), 0);
         WritePatchPattern_Int(sizeof(menu_mem_size), Patterns::MenuHeap_UsableMemorySize, (void*)menu_mem_size, wstr(Patterns::MenuHeap_UsableMemorySize), 8);

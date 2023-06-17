@@ -41,9 +41,17 @@ void __attribute__((naked)) Memory_NewHandler_CC()
         mov eax, MEM_TYPE;
         mov[rdx], eax;
     ret_loc:;
+        cmp byte ptr[GameVeris1100], 1;
+        jz case_1100;
+        mov rbp, rcx;
+        lea rcx, [r11 + 0x20];
+        mov[rsp + 0x58], eax;
+        jmp code_exit;
+    case_1100:;
         mov rdi, rcx;
         lea rcx, [rsp + 0x60];
         mov[rsp + 0x60], eax;
+    code_exit:;
         mov rbx, r8;
         jmp[Memory_NewHandlerReturnAddr];
     }
@@ -283,6 +291,8 @@ uint32_t GivePlayerWeaponEntryHeader_index_count = 0;
 
 // 1.0.5.0 and above
 bool GameVeris1050 = false;
+// 1.1.0.0 and above
+bool GameVeris1100 = false;
 
 // Game funcs
 uint64_t ScriptLookupAddr = 0;
