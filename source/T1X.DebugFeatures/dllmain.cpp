@@ -148,6 +148,7 @@ void ApplyDebugPatches(void)
         RestartCheckpointInternal_Caller = (RestartCheckpointInternal_Caller_ptr)FindAndPrintPatternW(Patterns::RestartCheckpointInternal, wstr(Patterns::RestartCheckpointInternal));
         DevMenuCreateSelection_Caller = (DevMenuCreateSelection_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuCreateSelection, wstr(Patterns::DevMenuCreateSelection));
         DevMenuSelectionCallback_Caller = (DevMenuSelectionCallback_Caller_ptr)FindAndPrintPatternW(Patterns::DevMenuSelectionCallback, wstr(Patterns::DevMenuSelectionCallback));
+        ScriptManager_LookupClass = (ScriptManager_LookupClass_ptr)FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t JumpPattern = 0;
         if (
             CreateDevMenuStructure_Caller &&
@@ -169,7 +170,8 @@ void ApplyDebugPatches(void)
             InitProfileMenuAddr &&
             DevMenuCreateSeparationLine_Caller &&
             DevMenuCreateCyanSubText_Caller &&
-            RestartCheckpointInternal_Caller
+            RestartCheckpointInternal_Caller &&
+            ScriptManager_LookupClass
             )
         {
             strncpy_s(BuildVer, sizeof(BuildVer), BUILD_TIME, sizeof(BuildVer));
@@ -233,7 +235,6 @@ void ApplyDebugPatches(void)
     }
     if (bShowDebugConsole)
     {
-        ScriptManager_LookupClass = (ScriptManager_LookupClass_ptr)FindAndPrintPatternW(Patterns::ScriptManager_LookupClass, wstr(Patterns::ScriptManager_LookupClass));
         uintptr_t EvalScriptWarns = FindAndPrintPatternW(Patterns::GameWarnScriptPrint2, wstr(Patterns::GameWarnScriptPrint2));
         uintptr_t PrintAddr = FindAndPrintPatternW(Patterns::GameWarnScriptPrint, wstr(Patterns::GameWarnScriptPrint));
         if (EvalScriptWarns && PrintAddr)
