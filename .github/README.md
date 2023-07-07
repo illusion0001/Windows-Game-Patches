@@ -19,21 +19,65 @@
     - PostProcessAAMode_SmaaT2x: `7`
     - PostProcessAAMode_TemporalAA: `8`
 
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+- ***This has not been tested online, use at your own risk!***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - Rename `dinput8.dll` to `winmm.dll`
+  - `BFV.NoTAA.asi`
+
 ### **Bright Memory: Infinite**
   - Disable TAA
   - Disable Sharpness
 
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the Win64 folder. (`BrightMemoryInfinite\Binaries\Win64\`).
+  - Rename `dinput8.dll` to `winmm.dll`
+  - `BrightMemoryInfinite.NoTAA.asi`
+
 ### **Resident Evil 4 Remake Demo**
   - Remove Forced Sharpening
 
-### **The Last of Us: Part 1**
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - `dinput8.dll`
+  - `RE4.Sharpness.asi`
+
+### **Lies of P Demo**
+  - Disable TAA
+  - Disable Depth of Field
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the Win64 folder. (`Lies of P Demo\LiesofP\Binaries\Win64\`).
+  - Rename `dinput8.dll` to `winmm.dll`
+  - `LiesOfP.NoTAA.asi`
+
+ ### **The Last of Us: Part 1**
   - Debug Menu
   - Custom Debug Menu (Work in Progress)
   - Restored Active Task Display
   - Extended Debug Menu by [infogram](https://web.archive.org/web/20230413143249/https://cs.rin.ru/forum/viewtopic.php?p=2806625)
+    - `1.0.85-44a951ca` now supports game version `1.0.5.0` and newer.
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+
+  - Rename `dinput8.dll` to `winmm.dll`
+  - Copy `winmm.dll` and `T1X.DebugFeatures.asi` into the root folder of the game.
 
 ### **Wo Long: Fallen Dynasty**
   - Remove 30FPS Limit for Cutscenes
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - Rename `dinput8.dll` to `winmm.dll`
+  - `WoLong.Fix.asi`
 
 # Credits
 - [Lyall](https://github.com/Lyall) for Project Template.
