@@ -63,8 +63,8 @@ DWORD __stdcall Main(void*)
     bDisableTAA = false;
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
-    _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
-    LoggingInit(_PROJECT_NAME, LogPath);
+    _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, L"" _PROJECT_LOG_PATH);
+    LoggingInit(L"" _PROJECT_NAME, LogPath);
     ReadConfig();
     if (bDisableTAA)
         DisableTAA();
