@@ -146,6 +146,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>copy  $(ProjectDir)d3d11.ini $(OutDirFullPath)$(ProjectName)_d3d11.ini</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -174,6 +177,9 @@
     <PreBuildEvent>
       <Command>call $(MSBuildStartupDirectory)\set_git_ver.cmd</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy  $(ProjectDir)d3d11.ini $(OutDirFullPath)$(ProjectName)_d3d11.ini</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\helper.cpp" />

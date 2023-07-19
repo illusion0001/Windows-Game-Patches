@@ -78,25 +78,22 @@ jobs:
             Copy-Item $sourceFile $destFile -Force
         }
 
-        $compress = @{
-            Path             = ".\*.pdb", ".\*.asi"
-            CompressionLevel = "Optimal"
-            DestinationPath  = ".\pdb.zip"
-        }
-
-        Compress-Archive @compress
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.zip_name }}
-        path: ${{ env.BUILD_CONFIGURATION }}/dist/
+        path: |
+          ${{ env.BUILD_CONFIGURATION }}/dist/*
+          ${{ env.BUILD_CONFIGURATION }}/*.ini
 
     - name: Upload Artifact (pdb)
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.zip_name }}-pdb
-        path: ${{ env.BUILD_CONFIGURATION }}/pdb.zip
+        path: |
+          ${{ env.BUILD_CONFIGURATION }}/dist/**/*.asi
+          ${{ env.BUILD_CONFIGURATION }}/*.pdb
+          ${{ env.BUILD_CONFIGURATION }}/*.ini
 
     - name: Create Release
       if: |
