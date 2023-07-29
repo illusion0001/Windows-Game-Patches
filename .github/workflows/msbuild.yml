@@ -103,15 +103,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $hashMarkdown = @'
+        {0}
+
         <details>
         <summary>ASI Plugin Hashes (Click to Expand)</summary>
         
         ```yaml
-        {0}
+        {1}
         ```
         
         </details>
-        '@ -f (Get-Content ".\${{ env.BUILD_CONFIGURATION }}\dist\hashes.txt" | Out-String)
+        '@ -f (Get-Content ".\.github\README.md" | Out-String), (Get-Content ".\${{ env.BUILD_CONFIGURATION }}\dist\hashes.txt" | Out-String)
         $hashMarkdown | Out-File -Encoding utf8 -FilePath hash.md
         Get-Content hash.md
         
