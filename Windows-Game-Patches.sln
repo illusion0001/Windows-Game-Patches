@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LiesOfP.NoTAA", "source\Lie
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlanetOfLana.NoTAA", "source\PlanetOfLana.NoTAA\PlanetOfLana.NoTAA.vcxproj", "{69D04390-9547-4976-A79E-A4518B9DC923}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Remnant2.NoTAA", "source\Remnant2.NoTAA\Remnant2.NoTAA.vcxproj", "{F56FB0DE-76BA-4227-A9D2-863A36AAD495}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -81,6 +83,14 @@ Global
 		{69D04390-9547-4976-A79E-A4518B9DC923}.Release|x64.Build.0 = Release|x64
 		{69D04390-9547-4976-A79E-A4518B9DC923}.Release|x86.ActiveCfg = Release|Win32
 		{69D04390-9547-4976-A79E-A4518B9DC923}.Release|x86.Build.0 = Release|Win32
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Debug|x64.ActiveCfg = Debug|x64
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Debug|x64.Build.0 = Debug|x64
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Debug|x86.ActiveCfg = Debug|Win32
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Debug|x86.Build.0 = Debug|Win32
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x64.ActiveCfg = Release|x64
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x64.Build.0 = Release|x64
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x86.ActiveCfg = Release|Win32
+		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
