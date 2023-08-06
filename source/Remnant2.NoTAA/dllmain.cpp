@@ -14,7 +14,7 @@ wchar_t exePath[_MAX_PATH] = { 0 };
 
 // INI Variables
 bool bDisableTAA;
-bool bDisableSharpness;
+float fSharpness;
 
 void ReadConfig(void)
 {
@@ -37,23 +37,23 @@ void ReadConfig(void)
         LOG(L"Failed to load config file.\n");
         std::wstring ini_defaults = L"[Settings]\n"
                                     wstr(bDisableTAA)" = true\n"
-                                    wstr(bDisableSharpness)" = true\n";
+                                    wstr(fSharpness)" = 0.0\n";
         std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
         bDisableTAA = true;
-        bDisableSharpness = true;
+        fSharpness = 0;
         LOG(L"Created default config file.\n");
     }
     else
     {
         ini.parse(iniFile);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableTAA), bDisableTAA);
-        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableSharpness), bDisableSharpness);
+        inipp::get_value(ini.sections[L"Settings"], wstr(fSharpness), fSharpness);
     }
 
     // Log config parse
     LOG(L"%s: %s (%i)\n", wstr(bDisableTAA), GetBoolStr(bDisableTAA) , bDisableTAA);
-    LOG(L"%s: %s (%i)\n", wstr(bDisableSharpness), GetBoolStr(bDisableSharpness), bDisableSharpness);
+    LOG(L"%s: %.1f\n", wstr(fSharpness), fSharpness);
 }
 
 void DisableTAA(void)
@@ -70,29 +70,40 @@ void DisableTAA(void)
     WritePatchPattern(L"EB 02 33 C0 8B 04 38 85 C0 79 04", patch, sizeof(patch), L"Disable TAA", 0);    //sets r.Mobile.AntiAliasing=0 (not required, but the sub body is the same)
 }
 
-void DisableSharpness(void)
+DWORD64 SetCustomSharpnessReturnAddress;
+void __attribute__((naked)) SetCustomSharpnessAsm()
 {
-    const unsigned char patch[] = {0x45, 0x0F, 0x57, 0xED, 0x90, 0x90 }; 
-    // F3440F106804 | movss xmm13,dword ptr ds:[rax+4]  --> 450F57ED | xorps xmm13, xmm13
-    //                                                      90       | nop
-    //                                                      90       | nop
-    // 440F2FEF     | comiss xmm13, xmm7
-    WritePatchPattern(L"F3 44 0F 10 68 04 44 0F 2F EF", patch, sizeof(patch), L"Disable Sharpness", 0); //sets r.ToneMapper.Sharpen=0
+    __asm
+    {
+        modified_code:
+            movss xmm13, [fSharpness]     // modified from: movss xmm13, dword ptr ds : [rax + 0x4]
+        original_code:
+            comiss xmm13, xmm7
+            mov qword ptr ss : [rbp+0x60], rbx
+
+        jmp [SetCustomSharpnessReturnAddress]
+    }
+}
+
+void SetCustomSharpness(void)
+{
+    WritePatchPattern_Hook(L"F3 44 0F 10 68 04 44 0F 2F EF 48 89 5d 60", 14, L"Set Custom Sharpness", 0, SetCustomSharpnessAsm, &SetCustomSharpnessReturnAddress);
 }
 
 DWORD __stdcall Main(void*)
 {
     bLoggingEnabled = false;
-    bDisableTAA = false;
+
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, L"" _PROJECT_LOG_PATH);
     LoggingInit(L"" _PROJECT_NAME, LogPath);
     ReadConfig();
+
     if (bDisableTAA)
         DisableTAA();
-    if (bDisableSharpness)
-        DisableSharpness();
+    SetCustomSharpness();
+
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
     fclose(fp_log);
     return true;
