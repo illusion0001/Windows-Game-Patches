@@ -50,31 +50,40 @@ jobs:
           $asiFiles = Get-ChildItem "$rootPath" -Filter "*.asi" -File
           foreach ($file in $asiFiles) {
             $folderName = Join-Path $rootPath ($file.BaseName)
-            if (-not (Test-Path $folderName)) {
+            if (-not (Test-Path "dist\$folderName")) {
               mkdir "dist\$folderName"
             }
             $destFile = Join-Path "dist\$folderName" $file.Name
             Move-Item $file.FullName "$destFile" -Force
+
+            # Copy additional files
+            $otherFiles = Get-ChildItem "$rootPath" -Filter ($file.BaseName + "_*.*") -File
+            foreach ($otherFile in $otherFiles) {
+              # Strip game name
+              $destOtherFile = Join-Path "dist\$folderName" $otherFile.Name.Replace(($file.BaseName + "_"), "")
+              if ($otherFile.Extension -ne ".dll") {
+                # Move the additional file
+                Move-Item $otherFile.FullName "$destOtherFile" -Force
+              } else {
+                # Copy and rename dinput8 and remove the dummy file
+                Copy-Item "dinput8.dll" "$destOtherFile" -Force
+                Remove-Item $otherFile.FullName
+              }
+            }
+
             $hash = Get-FileHash -Path "$destFile" -Algorithm SHA512 | Format-List
             $hash | Out-File -Append -FilePath "dist\hashes.txt"
           #  Add-Content -Path $hashFilePath -Value $hashString
           }
 
-          # Copy the dinput8.dll file to each subfolder
-          $sourceFile = "dinput8.dll"
-          $subFolders = Get-ChildItem $rootPath -Directory
-
-          foreach ($folder in $subFolders) {
-            $destFile = Join-Path $folder.FullName "dinput8.dll"
-            Copy-Item $sourceFile $destFile -Force
-          }
+          # Remove downloaded dinput8.dll
+          Remove-Item "dinput8.dll"
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.zip_name }}
           path: |
             ${{ env.BUILD_CONFIGURATION }}/dist/*
-            ${{ env.BUILD_CONFIGURATION }}/*.ini
           if-no-files-found: error
       - name: Upload Artifact (pdb)
         uses: actions/upload-artifact@v3
@@ -83,7 +92,6 @@ jobs:
           path: |
             ${{ env.BUILD_CONFIGURATION }}/dist/**/*.asi
             ${{ env.BUILD_CONFIGURATION }}/*.pdb
-            ${{ env.BUILD_CONFIGURATION }}/*.ini
           if-no-files-found: error
       - name: Create Release
         if: |
@@ -108,7 +116,7 @@ jobs:
           Get-Content hash.md
 
           $compress = @{
-            Path             = "${{ env.BUILD_CONFIGURATION }}\dist\*", "${{ env.BUILD_CONFIGURATION }}\*.pdb", "${{ env.BUILD_CONFIGURATION }}\*.ini"
+            Path             = "${{ env.BUILD_CONFIGURATION }}\dist\*", "${{ env.BUILD_CONFIGURATION }}\*.pdb"
             DestinationPath  = "${{ env.zip_name }}.zip"
           }
           Compress-Archive @compress
