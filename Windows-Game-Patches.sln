@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Remnant2.NoTAA", "source\Re
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EldenRing.NoTAA", "source\EldenRing.NoTAA\EldenRing.NoTAA.vcxproj", "{0A040A3E-FA06-4978-A089-298177D4F133}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeathStranding.Fix", "source\DeathStranding.Fix\DeathStranding.Fix.vcxproj", "{978C20F5-8939-458B-B124-B48BB16CCB98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -101,6 +103,14 @@ Global
 		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x64.Build.0 = Release|x64
 		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x86.ActiveCfg = Release|Win32
 		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x86.Build.0 = Release|Win32
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Debug|x64.ActiveCfg = Debug|x64
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Debug|x64.Build.0 = Debug|x64
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Debug|x86.ActiveCfg = Debug|Win32
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Debug|x86.Build.0 = Debug|Win32
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Release|x64.ActiveCfg = Release|x64
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Release|x64.Build.0 = Release|x64
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Release|x86.ActiveCfg = Release|Win32
+		{978C20F5-8939-458B-B124-B48BB16CCB98}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

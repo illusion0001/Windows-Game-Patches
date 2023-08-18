@@ -37,6 +37,18 @@
   - `winmm.dll`
   - `BrightMemoryInfinite.NoTAA.asi`
 
+### **Death Stranding (original and Director's Cut)**
+  - Force AA mode (None, FXAA or TAA)
+  - Skip savegame checks (for savegame transfer between different versions/profiles)
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - `version.dll`
+  - `version.ini`
+  - `DeathStranding.Fix.asi`
+
 ### **Elden Ring**
   - Force TAA off
   - Disable Chromatic Aberration (thanks to [techiew](https://github.com/techiew/EldenRingMods) for the original fix)
