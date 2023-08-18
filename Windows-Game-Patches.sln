@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlanetOfLana.NoTAA", "sourc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Remnant2.NoTAA", "source\Remnant2.NoTAA\Remnant2.NoTAA.vcxproj", "{F56FB0DE-76BA-4227-A9D2-863A36AAD495}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EldenRing.NoTAA", "source\EldenRing.NoTAA\EldenRing.NoTAA.vcxproj", "{0A040A3E-FA06-4978-A089-298177D4F133}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -91,6 +93,14 @@ Global
 		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x64.Build.0 = Release|x64
 		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x86.ActiveCfg = Release|Win32
 		{F56FB0DE-76BA-4227-A9D2-863A36AAD495}.Release|x86.Build.0 = Release|Win32
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Debug|x64.ActiveCfg = Debug|x64
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Debug|x64.Build.0 = Debug|x64
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Debug|x86.ActiveCfg = Debug|Win32
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Debug|x86.Build.0 = Debug|Win32
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x64.ActiveCfg = Release|x64
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x64.Build.0 = Release|x64
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x86.ActiveCfg = Release|Win32
+		{0A040A3E-FA06-4978-A089-298177D4F133}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
