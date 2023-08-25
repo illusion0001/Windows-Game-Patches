@@ -78,8 +78,8 @@ constexpr const uint32_t GameVer1100 = 3613846;
 
 void ApplyDebugPatches(void)
 {
-    const char* game_ver_text = "BUILD_NUMBER=";
-    size_t game_ver_len = strlen(game_ver_text);
+    constexpr const char* game_ver_text = "BUILD_NUMBER=";
+    constexpr const size_t game_ver_len = strlen(game_ver_text);
     uintptr_t version_number = (uintptr_t)Memory::char_Scan(baseModule, game_ver_text, game_ver_len - 1);
     uint32_t game_ver_int = 0;
     if (version_number)
