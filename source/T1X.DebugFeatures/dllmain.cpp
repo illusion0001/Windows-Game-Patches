@@ -189,7 +189,7 @@ void ApplyDebugPatches(void)
             DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
     }
-    if (bExtendedDebugMenu)
+    if (bDebugMenu && bExtendedDebugMenu)
     {
         const unsigned char nop5x[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
         const unsigned char ret_1_al[] = { 0xb0, 0x01, 0xc3 };
