@@ -13,14 +13,14 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 #define BUILD_TIME PROJECT_NAME " Built: " __DATE__ " @ " __TIME__
 
-wchar_t exePath[_MAX_PATH] = { 0 };
+wchar_t exePath[_MAX_PATH]{};
 
 // INI Variables
-bool bDebugMenu;
-bool bShowDebugConsole;
-float fDebugMenuSize;
-bool bExtendedDebugMenu;
-bool bTestMode;
+bool bDebugMenu{};
+bool bShowDebugConsole{};
+float fDebugMenuSize{};
+bool bExtendedDebugMenu{};
+bool bTestMode{};
 
 void ReadConfig(void)
 {
@@ -275,7 +275,7 @@ void __stdcall Main()
     bExtendedDebugMenu = false;
     bTestMode = false;
     fDebugMenuSize = 0.6;
-    wchar_t LogPath[_MAX_PATH] = { 0 };
+    wchar_t LogPath[_MAX_PATH]{};
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, L"" PROJECT_LOG_PATH);
     LoggingInit(L"" PROJECT_NAME, LogPath);
