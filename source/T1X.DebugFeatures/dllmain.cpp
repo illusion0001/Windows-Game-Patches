@@ -13,14 +13,14 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 #define BUILD_TIME PROJECT_NAME " Built: " __DATE__ " @ " __TIME__
 
-wchar_t exePath[_MAX_PATH] = { 0 };
+wchar_t exePath[_MAX_PATH]{};
 
 // INI Variables
-bool bDebugMenu;
-bool bShowDebugConsole;
-float fDebugMenuSize;
-bool bExtendedDebugMenu;
-bool bTestMode;
+bool bDebugMenu{};
+bool bShowDebugConsole{};
+float fDebugMenuSize{};
+bool bExtendedDebugMenu{};
+bool bTestMode{};
 
 void ReadConfig(void)
 {
@@ -79,7 +79,7 @@ constexpr const uint32_t GameVer1100 = 3613846;
 void ApplyDebugPatches(void)
 {
     const char* game_ver_text = "BUILD_NUMBER=";
-    size_t game_ver_len = strlen(game_ver_text);
+    const size_t game_ver_len = strlen(game_ver_text);
     uintptr_t version_number = (uintptr_t)Memory::char_Scan(baseModule, game_ver_text, game_ver_len - 1);
     uint32_t game_ver_int = 0;
     if (version_number)
@@ -189,7 +189,7 @@ void ApplyDebugPatches(void)
             DebugPrint_ReturnAddr = DebugPrintAddr + 5;
         }
     }
-    if (bExtendedDebugMenu)
+    if (bDebugMenu && bExtendedDebugMenu)
     {
         const unsigned char nop5x[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
         const unsigned char ret_1_al[] = { 0xb0, 0x01, 0xc3 };
@@ -275,7 +275,7 @@ void __stdcall Main()
     bExtendedDebugMenu = false;
     bTestMode = false;
     fDebugMenuSize = 0.6;
-    wchar_t LogPath[_MAX_PATH] = { 0 };
+    wchar_t LogPath[_MAX_PATH]{};
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, L"" PROJECT_LOG_PATH);
     LoggingInit(L"" PROJECT_NAME, LogPath);
