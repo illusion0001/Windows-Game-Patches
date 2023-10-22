@@ -124,6 +124,14 @@
   - `winmm.dll`
   - `WoLong.Fix.asi`
 
+### **NieR Replicant ver.1.22474487139**
+  - Remove FPS Limit
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - `winmm.dll`
+  - `NierReplicant.Fix.asi`
+
 # Credits
 - [Lyall](https://github.com/Lyall) for Project Template.
 - [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading.

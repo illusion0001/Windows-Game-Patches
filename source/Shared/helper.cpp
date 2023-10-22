@@ -172,6 +172,22 @@ void WritePatchAddress(uint64_t Patch_Address, const unsigned char* Patch_Bytes,
     ShowPatchInfo(Patch_Size, Patch_Address_Offset, Patch_Name, 0);
 }
 
+void WritePatchAddressFloat32(uint64_t Patch_Address, const float* Patch_Bytes, const wchar_t* Patch_Name, uint64_t Patch_Offset)
+{
+    uint64_t Patch_Address_Offset = Patch_Address + Patch_Offset;
+    Memory::PatchBytes(Patch_Address_Offset, (const unsigned char*)Patch_Bytes, sizeof(float));
+    LOG("Write %f to 0x%llx\n", *Patch_Bytes, Patch_Address_Offset);
+    ShowPatchInfo(sizeof(float), Patch_Address_Offset, Patch_Name, 0);
+}
+
+void WritePatchAddressFloat64(uint64_t Patch_Address, const double* Patch_Bytes, const wchar_t* Patch_Name, uint64_t Patch_Offset)
+{
+    uint64_t Patch_Address_Offset = Patch_Address + Patch_Offset;
+    Memory::PatchBytes(Patch_Address_Offset, (const unsigned char*)Patch_Bytes, sizeof(double));
+    LOG("Write %llf to 0x%llx\n", Patch_Bytes, Patch_Address_Offset);
+    ShowPatchInfo(sizeof(double), Patch_Address_Offset, Patch_Name, 0);
+}
+
 wchar_t* GetRunningPath(wchar_t* output)
 {
     GetModuleFileNameW(nullptr, output, MAX_PATH);
