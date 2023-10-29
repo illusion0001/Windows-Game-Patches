@@ -6,6 +6,17 @@
 
 # Patches
 
+### **Assassin's Creed Mirage**
+  - Disable TAA
+  - Disable CA
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the Win64 folder.
+  - `winmm.dll`
+  - `ACMirage.NoTAA.asi`
+
 ### **Battlefield V**
   - Disable TAA
   - Custom Internal AA Options.
@@ -71,6 +82,14 @@
   - `winmm.dll`
   - `LiesOfP.NoTAA.asi`
 
+### **NieR Replicant ver.1.22474487139**
+  - Remove FPS Limit
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - `winmm.dll`
+  - `NierReplicant.Fix.asi`
+
 ### **Planet of Lana**
   - Disable TAA
 
@@ -123,14 +142,6 @@
   - Extract the following contents of the release zip in to the the game root folder.
   - `winmm.dll`
   - `WoLong.Fix.asi`
-
-### **NieR Replicant ver.1.22474487139**
-  - Remove FPS Limit
-#### Installation
-- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
-  - `winmm.dll`
-  - `NierReplicant.Fix.asi`
 
 # Credits
 - [Lyall](https://github.com/Lyall) for Project Template.
