@@ -148,3 +148,4 @@
 - [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading.
 - [inipp](https://github.com/mcmtroffaes/inipp) for ini reading.
 - [length-disassembler](https://github.com/Nomade040/length-disassembler) for length disassembly.
+- [tl431](https://github.com/TL431/) for game fixes.
