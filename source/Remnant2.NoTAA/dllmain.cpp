@@ -75,11 +75,12 @@ void __attribute__((naked)) SetCustomSharpnessAsm()
 {
     __asm
     {
-        modified_code:
-            movss xmm13, [fSharpness]     // modified from: movss xmm13, dword ptr ds : [rax + 0x4]
-        original_code:
-            comiss xmm13, xmm7
-            mov qword ptr ss : [rbp+0x60], rbx
+        movss xmm13, [fSharpness]    
+        // original code: 
+        // 00007FF77E427D52 | 73 06                | jae remnant2-win64-shipping.7FF77E427D5A     | if xmm13 < 0
+        // 00007FF77E427D54 | 45:0F57ED            | xorps xmm13, xmm13                           | xmm13 = 0  
+        // 00007FF77E427D58 | EB 09                | jmp remnant2 - win64 - shipping.7FF77E427D63 | else
+        // 00007FF77E427D5A | F344:0F5D2D B1E78402 | minss xmm13, dword ptr ds : [7FF780C76514]   | xmm13 = min(xmm13, 10.0)
 
         jmp [SetCustomSharpnessReturnAddress]
     }
@@ -87,7 +88,7 @@ void __attribute__((naked)) SetCustomSharpnessAsm()
 
 void SetCustomSharpness(void)
 {
-    WritePatchPattern_Hook(L"F3 44 0F 10 68 04 44 0F 2F EF 48 89 5d 60", 14, L"Set Custom Sharpness", 0, SetCustomSharpnessAsm, &SetCustomSharpnessReturnAddress);
+    WritePatchPattern_Hook(L"73 06 45 0F 57 ED EB 09 F3 44 0F 5D 2D ?? ?? ?? ??", 17, L"Set Custom Sharpness", 0, SetCustomSharpnessAsm, &SetCustomSharpnessReturnAddress);
 }
 
 DWORD __stdcall Main(void*)
