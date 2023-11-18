@@ -17,7 +17,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the Win64 folder.
+  - Extract the following contents of the release zip into the Win64 folder.
   - `winmm.dll`
   - `ACMirage.NoTAA.asi`
 </details>
@@ -41,7 +41,7 @@
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
 - ***This has not been tested online, use at your own risk!***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `winmm.dll`
   - `BFV.NoTAA.asi`
 </details>
@@ -56,7 +56,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the Win64 folder. (`BrightMemoryInfinite\Binaries\Win64\`).
+  - Extract the following contents of the release zip into the Win64 folder. (`BrightMemoryInfinite\Binaries\Win64\`).
   - `winmm.dll`
   - `BrightMemoryInfinite.NoTAA.asi`
 </details>
@@ -71,7 +71,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `version.dll`
   - `version.ini`
   - `DeathStranding.Fix.asi`
@@ -87,7 +87,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the Game folder. (`ELDEN RING\Game\`).
+  - Extract the following contents of the release zip into the game folder. (`ELDEN RING\Game\`).
   - `dinput8.dll`
   - `EldenRing.NoTAA.asi`
 </details>
@@ -102,7 +102,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the Win64 folder. (`Lies of P Demo\LiesofP\Binaries\Win64\`).
+  - Extract the following contents of the release zip into the Win64 folder. (`Lies of P Demo\LiesofP\Binaries\Win64\`).
   - `winmm.dll`
   - `LiesOfP.NoTAA.asi`
 </details>
@@ -114,7 +114,7 @@
   - Remove FPS Limit
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `winmm.dll`
   - `NierReplicant.Fix.asi`
 </details>
@@ -128,7 +128,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `d3d11.dll`
   - `PlanetOfLana.NoTAA.asi`
   - `d3d11.ini`
@@ -144,22 +144,21 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the Win64 folder. (`Remnant 2\Remnant2\Binaries\Win64\`).
+  - Extract the following contents of the release zip into the Win64 folder. (`Remnant 2\Remnant2\Binaries\Win64\`).
   - `winmm.dll`
   - `Remnant2.NoTAA.asi`
 </details>
 <details><summary>
   
-### Resident Evil 4 Remake Demo
+### Resident Evil 4 Remake
 </summary>
 
   - Remove Forced Sharpening
 
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
-  - `dinput8.dll`
-  - `RE4.Sharpness.asi`
+  - Download [REFramework](https://github.com/praydog/REFramework) and extract `dinput8.dll` into the game root folder.
+  - Extract `RE4.Sharpness.asi` from the release zip in the folder `RESIDENT EVIL 4  BIOHAZARD RE4\reframework\plugins` and rename it into `RE4.Sharpness.dll`.
 </details>
 <details><summary>
   
@@ -177,7 +176,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `winmm.dll`
   - `Uncharted4TLL.NoTAA.asi`
 </details>
@@ -195,7 +194,7 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `winmm.dll`
   - `T1X.DebugFeatures.asi`
 </details>
@@ -207,7 +206,7 @@
   - Remove 30FPS Limit for Cutscenes
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip in to the the game root folder.
+  - Extract the following contents of the release zip into the game root folder.
   - `winmm.dll`
   - `WoLong.Fix.asi`
 </details>
