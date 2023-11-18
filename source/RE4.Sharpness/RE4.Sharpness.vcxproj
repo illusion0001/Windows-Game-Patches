@@ -174,7 +174,8 @@
       <Command>call $(MSBuildStartupDirectory)\set_git_ver.cmd</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy  NUL $(OutDirFullPath)$(ProjectName)_dinput8.dll</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

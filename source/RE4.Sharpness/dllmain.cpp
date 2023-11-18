@@ -13,7 +13,7 @@ HMODULE baseModule = GetModuleHandle(NULL);
 wchar_t exePath[_MAX_PATH] = { 0 };
 
 // INI Variables
-bool bRemoveSharpness;
+bool bDisableSharpness;
 
 void ReadConfig(void)
 {
@@ -34,42 +34,40 @@ void ReadConfig(void)
         // no ini, lets generate one.
         LOG(L"Failed to load config file.\n");
         std::wstring ini_defaults = L"[Settings]\n"
-                                    wstr(bRemoveSharpness)" = true\n";
+                                    wstr(bDisableSharpness)" = true\n";
         std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
-        bRemoveSharpness = true;
+        bDisableSharpness = true;
         LOG(L"Created default config file.\n");
     }
     else
     {
         ini.parse(iniFile);
-        inipp::get_value(ini.sections[L"Settings"], wstr(bRemoveSharpness), bRemoveSharpness);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableSharpness), bDisableSharpness);
     }
 
     // Log config parse
-    LOG(L"%s: %s (%i)\n", wstr(bRemoveSharpness), GetBoolStr(bRemoveSharpness) , bRemoveSharpness);
+    LOG(L"%s: %s (%i)\n", wstr(bDisableSharpness), GetBoolStr(bDisableSharpness) , bDisableSharpness);
 }
 
-void RemoveSharpness(void)
+void DisableSharpness(void)
 {
-    const unsigned char patch1[] = { 0x31, 0xd2, 0x90 };
-    const unsigned char patch2[] = { 0x0F, 0x57, 0xC0, 0x90, 0x90 };
-    WritePatchPattern(L"8B 56 28 48 8B CB E8 ?? ?? ?? ??", patch1, sizeof(patch1), L"TAA Flag", 0);
-    WritePatchPattern(L"F3 0F 10 46 3C 48 8B CB 0F 5A C0 66 0F 5A C8 E8 ?? ?? ?? ??", patch2, sizeof(patch2), L"Sharpness", 0);
+    const unsigned char patch[] = { 0xC6, 0x80, 0xB3, 0x01, 0x00, 0x00, 0x01, 0x90, 0x90 };
+    WritePatchPattern(L"80 B8 B3 01 00 00 00 75 49", patch, sizeof(patch), L"Disable Sharpness", 0);
 }
 
 DWORD __stdcall Main(void*)
 {
-    Sleep(5 * 1000); // Bypass the checksum protection
     bLoggingEnabled = false;
-    bRemoveSharpness = false;
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
     LoggingInit(_PROJECT_NAME, LogPath);
     ReadConfig();
-    if (bRemoveSharpness)
-        RemoveSharpness();
+
+    if (bDisableSharpness)
+        DisableSharpness();
+
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
     fclose(fp_log);
     return true;
