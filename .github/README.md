@@ -6,7 +6,11 @@
 
 # Patches
 
-### **Assassin's Creed Mirage**
+<details><summary>
+  
+  ### Assassin's Creed Mirage
+</summary>
+  
   - Disable TAA
   - Disable CA
 
@@ -16,8 +20,12 @@
   - Extract the following contents of the release zip in to the the Win64 folder.
   - `winmm.dll`
   - `ACMirage.NoTAA.asi`
+</details>
+<details><summary>
+  
+  ### Battlefield V
+</summary>
 
-### **Battlefield V**
   - Disable TAA
   - Custom Internal AA Options.
     - PostProcessAAMode_None: `0`
@@ -36,8 +44,12 @@
   - Extract the following contents of the release zip in to the the game root folder.
   - `winmm.dll`
   - `BFV.NoTAA.asi`
+</details>
+<details><summary>
+  
+  ### Bright Memory: Infinite
+</summary>
 
-### **Bright Memory: Infinite**
   - Disable TAA
   - Disable Sharpness
 
@@ -47,8 +59,12 @@
   - Extract the following contents of the release zip in to the the Win64 folder. (`BrightMemoryInfinite\Binaries\Win64\`).
   - `winmm.dll`
   - `BrightMemoryInfinite.NoTAA.asi`
+</details>
+<details><summary>
+  
+### Death Stranding (original and Director's Cut)
+</summary>
 
-### **Death Stranding (original and Director's Cut)**
   - Force AA mode (None, FXAA or TAA)
   - Skip savegame checks (for savegame transfer between different versions/profiles)
 
@@ -59,8 +75,12 @@
   - `version.dll`
   - `version.ini`
   - `DeathStranding.Fix.asi`
+</details>
+<details><summary>
+  
+### Elden Ring
+</summary>
 
-### **Elden Ring**
   - Force TAA off
   - Disable Chromatic Aberration (thanks to [techiew](https://github.com/techiew/EldenRingMods) for the original fix)
 
@@ -70,8 +90,12 @@
   - Extract the following contents of the release zip in to the the Game folder. (`ELDEN RING\Game\`).
   - `dinput8.dll`
   - `EldenRing.NoTAA.asi`
+</details>
+<details><summary>
+  
+### Lies of P Demo
+</summary>
 
-### **Lies of P Demo**
   - Disable TAA
   - Disable Depth of Field
 
@@ -81,16 +105,24 @@
   - Extract the following contents of the release zip in to the the Win64 folder. (`Lies of P Demo\LiesofP\Binaries\Win64\`).
   - `winmm.dll`
   - `LiesOfP.NoTAA.asi`
+</details>
+<details><summary>
+  
+### NieR Replicant ver.1.22474487139
+</summary>
 
-### **NieR Replicant ver.1.22474487139**
   - Remove FPS Limit
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip in to the the game root folder.
   - `winmm.dll`
   - `NierReplicant.Fix.asi`
+</details>
+<details><summary>
+  
+### Planet of Lana
+</summary>
 
-### **Planet of Lana**
   - Disable TAA
 
 #### Installation
@@ -100,8 +132,12 @@
   - `d3d11.dll`
   - `PlanetOfLana.NoTAA.asi`
   - `d3d11.ini`
+</details>
+<details><summary>
+  
+### Remnant II
+</summary>
 
-### **Remnant II**
   - Disable TAA
   - Disable Sharpness
 
@@ -111,8 +147,12 @@
   - Extract the following contents of the release zip in to the the Win64 folder. (`Remnant 2\Remnant2\Binaries\Win64\`).
   - `winmm.dll`
   - `Remnant2.NoTAA.asi`
+</details>
+<details><summary>
+  
+### Resident Evil 4 Remake Demo
+</summary>
 
-### **Resident Evil 4 Remake Demo**
   - Remove Forced Sharpening
 
 #### Installation
@@ -120,8 +160,32 @@
   - Extract the following contents of the release zip in to the the game root folder.
   - `dinput8.dll`
   - `RE4.Sharpness.asi`
+</details>
+<details><summary>
+  
+### Uncharted 4 & The Lost Legacy
+</summary>
 
- ### **The Last of Us: Part 1**
+  - Disable TAA
+  - Disable Sharpness
+  - Disable Barrel Distortion
+  - Disable Screen Zoom
+  - Disable Chromatic Aberration
+  - Disable Depth of Field
+  - Disable Vignette
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip in to the the game root folder.
+  - `winmm.dll`
+  - `Uncharted4TLL.NoTAA.asi`
+</details>
+<details><summary>
+  
+### The Last of Us: Part 1
+</summary>
+
   - Debug Menu
   - Custom Debug Menu (Work in Progress)
   - Restored Active Task Display
@@ -134,15 +198,20 @@
   - Extract the following contents of the release zip in to the the game root folder.
   - `winmm.dll`
   - `T1X.DebugFeatures.asi`
+</details>
+<details><summary>
+  
+### Wo Long: Fallen Dynasty
+</summary>
 
-### **Wo Long: Fallen Dynasty**
   - Remove 30FPS Limit for Cutscenes
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip in to the the game root folder.
   - `winmm.dll`
   - `WoLong.Fix.asi`
-
+</details>
+  
 # Credits
 - [Lyall](https://github.com/Lyall) for Project Template.
 - [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading.
