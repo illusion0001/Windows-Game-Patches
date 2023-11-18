@@ -27,6 +27,7 @@ void WritePatchAddress(uint64_t Patch_Address, const unsigned char* Patch_Bytes,
 void WritePatchAddressFloat32(uint64_t Patch_Address, const float* Patch_Bytes, const wchar_t* Patch_Name, uint64_t Patch_Offset);
 void WritePatchAddressFloat64(uint64_t Patch_Address, const double* Patch_Bytes, const wchar_t* Patch_Name, uint64_t Patch_Offset);
 wchar_t* GetRunningPath(wchar_t* output);
+wchar_t* GetModuleName(wchar_t* output);
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
 void Make32to64Hook(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name);
 

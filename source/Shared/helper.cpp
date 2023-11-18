@@ -195,6 +195,13 @@ wchar_t* GetRunningPath(wchar_t* output)
     return output;
 }
 
+wchar_t* GetModuleName(wchar_t* output)
+{
+    GetModuleFileNameW(nullptr, output, MAX_PATH);
+    output = PathFindFileNameW(output);
+    return output;
+}
+
 wchar_t* ConvertToWideChar(const char* input)
 {
     int length = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
