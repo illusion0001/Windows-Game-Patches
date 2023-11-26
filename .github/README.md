@@ -93,6 +93,21 @@
 </details>
 <details><summary>
   
+### HITMAN 3
+</summary>
+
+  - Disable TAA
+  - Disable Sharpness
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game folder. (`HITMAN3\Retail\`).
+  - `dinput8.dll`
+  - `Hitman3.NoTAA.asi`
+</details>
+<details><summary>
+
 ### Lies of P Demo
 </summary>
 
