@@ -2,8 +2,10 @@
 #include "helper.hpp"
 #include "memory.hpp"
 #include "git_ver.h"
+#include "code_caves.hpp"
+#include "patterns.hpp"
 
-HMODULE baseModule = GetModuleHandle(NULL);
+HMODULE baseModule{};
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
@@ -17,13 +19,15 @@ wchar_t tll_exe[] = { L"tll.exe" };
 wchar_t tll_l_exe[] = { L"tll-l.exe" };
 
 // INI Variables
-bool bDisableTAA;
-bool bDisableSharpening;
-bool bDisableBarrelDistortion;
-bool bDisableScreenZoom;
-bool bDisableChromaticAberration;
-bool bDisableDoF;
-bool bDisableVignette;
+bool bDebugMenu{};
+bool bSkipIntroLogos{};
+bool bDisableTAA{};
+bool bDisableSharpening{};
+bool bDisableBarrelDistortion{};
+bool bDisableScreenZoom{};
+bool bDisableChromaticAberration{};
+bool bDisableDoF{};
+bool bDisableVignette{};
 
 void ReadConfig(void)
 {
@@ -44,16 +48,23 @@ void ReadConfig(void)
     {
         // no ini, lets generate one.
         LOG(L"Failed to load config file.\n");
-        std::wstring ini_defaults = L"[Settings]\n"
-                                    wstr(bDisableTAA)" = true\n"
-                                    wstr(bDisableSharpening)" = true\n"
-                                    wstr(bDisableBarrelDistortion)" = true\n"
-                                    wstr(bDisableScreenZoom)" = true\n"
-                                    wstr(bDisableChromaticAberration)" = true\n"
-                                    wstr(bDisableDoF)" = true\n"
-                                    wstr(bDisableVignette)" = true\n";
+        std::wstring ini_defaults = L""
+            "[Settings]\n"
+            "; Debug Menu by SunBeam\n"
+            wstr(bDebugMenu)" = false\n"
+            "; Skip Startup Logo Videos\n"
+            wstr(bSkipIntroLogos)" = true\n"
+            wstr(bDisableTAA)" = true\n"
+            wstr(bDisableSharpening)" = true\n"
+            wstr(bDisableBarrelDistortion)" = true\n"
+            wstr(bDisableScreenZoom)" = true\n"
+            wstr(bDisableChromaticAberration)" = true\n"
+            wstr(bDisableDoF)" = true\n"
+            wstr(bDisableVignette)" = true\n";
         std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
+        bDebugMenu = false;
+        bSkipIntroLogos = true;
         bDisableTAA = true;
         bDisableSharpening = true;
         bDisableBarrelDistortion = true;
@@ -67,6 +78,8 @@ void ReadConfig(void)
     else
     {
         ini.parse(iniFile);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDebugMenu),                   bDebugMenu);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bSkipIntroLogos),              bSkipIntroLogos);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableTAA),                  bDisableTAA);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableSharpening),           bDisableSharpening);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableBarrelDistortion),     bDisableBarrelDistortion);
@@ -77,6 +90,8 @@ void ReadConfig(void)
     }
 
     // Log config parse
+    LOG(L"%s: %s (%i)\n", wstr(bDebugMenu),                     GetBoolStr(bDebugMenu),                     bDebugMenu);
+    LOG(L"%s: %s (%i)\n", wstr(bSkipIntroLogos),                GetBoolStr(bSkipIntroLogos),                bSkipIntroLogos);
     LOG(L"%s: %s (%i)\n", wstr(bDisableTAA),                    GetBoolStr(bDisableTAA),                    bDisableTAA); 
     LOG(L"%s: %s (%i)\n", wstr(bDisableSharpening),             GetBoolStr(bDisableSharpening),             bDisableSharpening);
     LOG(L"%s: %s (%i)\n", wstr(bDisableBarrelDistortion),       GetBoolStr(bDisableBarrelDistortion),       bDisableBarrelDistortion);
@@ -207,16 +222,47 @@ void DisableVignette(wchar_t* exeName)
     }
 }
 
-DWORD __stdcall Main(void*)
+void EnbaleDebugMenu()
 {
+    CodeCave::DMenu_Addr = ReadLEA32(Patterns::DMenu_Ptr, wstr(Patterns::DMenu_Ptr), 0, 3, 7);
+    CodeCave::DebugDraw_UpdateLoopAddr = FindAndPrintPatternW(Patterns::DebugDraw_UpdateLoop, wstr(Pattern::DebugDraw_UpdateLoop));
+    CodeCave::DMenu_Update = FindAndPrintPatternW(Patterns::DMenu_Update, wstr(Pattern::DMenu_Update));
+    if (CodeCave::DMenu_Addr && CodeCave::DebugDraw_UpdateLoop && CodeCave::DMenu_Update)
+    {
+        WritePatchPattern_Hook(Patterns::DebugDraw_UpdateLoop, 22, wstr(Patterns::DebugDraw_UpdateLoop), 0, (void*)CodeCave::DebugDraw_UpdateLoop, nullptr);
+        CodeCave::DebugDraw_UpdateLoopReturnAddr = CodeCave::DebugDraw_UpdateLoopAddr + 22;
+    }
+}
+
+void SkipIntroLogos()
+{
+    uintptr_t skiplogos_clargAddr = FindAndPrintPatternW(Patterns::skiplogos_clarg, wstr(Patterns::skiplogos_clarg));
+    if (skiplogos_clargAddr)
+    {
+        const uint8_t long_jmp[] = { 0x48, 0xe9 };
+        Memory::PatchBytes(skiplogos_clargAddr + 9, long_jmp, sizeof(long_jmp));
+    }
+}
+
+void KillPrintf()
+{
+    const uint8_t ret_0[] = { 0x31, 0xc0, 0xc3 };
+    WritePatchPattern(Patterns::GamePrintf, ret_0, sizeof(ret_0), wstr(Patterns::GamePrintf), 0);
+}
+
+DWORD __stdcall Main()
+{
+    baseModule = GetModuleHandle(NULL);
     bLoggingEnabled = false;
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
     LoggingInit(_PROJECT_NAME, LogPath);
+    LOG(L"GetModuleHandle: 0x%p\n", baseModule);
     ReadConfig();
 
     wchar_t* exeName = GetModuleName(exePath);
+    KillPrintf();
     if (bDisableTAA)
         DisableTAA(exeName);
     if (bDisableSharpening)
@@ -231,27 +277,30 @@ DWORD __stdcall Main(void*)
         DisableDoF(exeName);
     if (bDisableVignette)
         DisableVignette(exeName);
-
+    if (bDebugMenu)
+        EnbaleDebugMenu();
+    if (bSkipIntroLogos)
+        SkipIntroLogos();
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
     fclose(fp_log);
     return true;
 }
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
 {
     switch (ul_reason_for_call)
     {
-    case DLL_PROCESS_ATTACH:
-    {
-        CreateThread(NULL, 0, Main, 0, NULL, 0);
-    }
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
+        case DLL_PROCESS_ATTACH:
+            {
+                Main();
+            }
+        case DLL_THREAD_ATTACH:
+        case DLL_THREAD_DETACH:
+        case DLL_PROCESS_DETACH:
+            break;
     }
     return TRUE;
 }

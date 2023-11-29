@@ -177,9 +177,23 @@
 </details>
 <details><summary>
   
-### Uncharted 4 & The Lost Legacy
+### Uncharted 4 + The Lost Legacy
 </summary>
 
+  - Debug Menu (by SunBeam)
+    - Controls:
+      - Joypad:
+        - `L3 + X`: Open Quick Menu
+        - `L3 + Circle`: Open Dev Menu
+        - `L3 + Square`: Debug Pause
+        - `Circle`: Back submenu
+        - `X`: Enter\Select Dev Menu Entry
+      - Keyboard:
+        - `Alt + Tilde`: Open Dev Menu
+        - `Tilde + 1`: Open Quick Menu
+        - `Tilde`: Back submenu
+        - `Enter`: Enter\Select Dev Menu Entry
+  - Skip Intro Logo Videos
   - Disable TAA
   - Disable Sharpness
   - Disable Barrel Distortion
