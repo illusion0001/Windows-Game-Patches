@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{D9DB74DD-4579-4244-BA7A-4236CF585026}</ProjectGuid>
-    <RootNamespace>RE4Sharpness</RootNamespace>
+    <ProjectGuid>{F2F2A0BD-8F71-4290-95E5-950639D9397C}</ProjectGuid>
+    <RootNamespace>RE8NoTAA</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -51,7 +51,7 @@
 </summary>
 
   - Disable TAA
-  - Disable Sharpness
+  - Disable Forced Sharpening
 
 #### Installation
 
@@ -97,7 +97,7 @@
 </summary>
 
   - Disable TAA
-  - Disable Sharpness
+  - Disable Forced Sharpening
 
 #### Installation
 
@@ -154,7 +154,7 @@
 </summary>
 
   - Disable TAA
-  - Disable Sharpness
+  - Disable Forced Sharpening
 
 #### Installation
 
@@ -168,12 +168,25 @@
 ### Resident Evil 4 Remake
 </summary>
 
-  - Remove Forced Sharpening
+  - Disable Forced Sharpening
 
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Download [REFramework](https://github.com/praydog/REFramework) and extract `dinput8.dll` into the game root folder.
   - Extract `RE4.Sharpness.asi` from the release zip in the folder `RESIDENT EVIL 4  BIOHAZARD RE4\reframework\plugins` and rename it into `RE4.Sharpness.dll`.
+</details>
+<details><summary>
+
+### Resident Evil Village
+</summary>
+
+  - Disable TAA and Forced Sharpening
+  - Disable Forced Sharpening only
+
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Download [REFramework](https://github.com/praydog/REFramework) and extract `dinput8.dll` into the game root folder.
+  - Extract `RE8.NoTAA.asi` from the release zip in the folder `Resident Evil Village BIOHAZARD VILLAGE\reframework\plugins` and rename it into `RE8.NoTAA.dll`.
 </details>
 <details><summary>
   
@@ -195,7 +208,7 @@
         - `Enter`: Enter\Select Dev Menu Entry
   - Skip Intro Logo Videos
   - Disable TAA
-  - Disable Sharpness
+  - Disable Forced Sharpening
   - Disable Barrel Distortion
   - Disable Screen Zoom
   - Disable Chromatic Aberration

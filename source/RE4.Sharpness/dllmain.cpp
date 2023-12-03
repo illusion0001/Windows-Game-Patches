@@ -52,7 +52,7 @@ void ReadConfig(void)
 
 void DisableSharpness(void)
 {
-    const unsigned char patch[] = { 0xC6, 0x80, 0xB3, 0x01, 0x00, 0x00, 0x01, 0x90, 0x90 };
+    const unsigned char patch[] = { 0xC6, 0x80, 0xB3, 0x01, 0x00, 0x00, 0x01, 0xEB, 0x49 };
     WritePatchPattern(L"80 B8 B3 01 00 00 00 75 49", patch, sizeof(patch), L"Disable Sharpness", 0);
 }
 
