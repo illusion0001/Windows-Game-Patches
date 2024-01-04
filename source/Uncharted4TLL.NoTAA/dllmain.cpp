@@ -207,13 +207,13 @@ void DisableVignette(wchar_t* exeName)
 {
     if (!StrCmpW(exeName, u4_exe))
     {
-        const unsigned char patchVignette[] = { 0x0F, 0x57, 0xC0, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
-        WritePatchPattern(L"C4 C1 7A 10 86 18 0D 00 00", patchVignette, sizeof(patchVignette), L"Disable Vignette", 0);
+        const unsigned char patchVignette[] = { 0x50, 0xB8, 0x00, 0x00, 0x80, 0x7F, 0x66, 0x0F, 0x6E, 0xD0, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+        WritePatchPattern(L"C4 C1 7A 10 86 1C 0D 00 00", patchVignette, sizeof(patchVignette), L"Disable Vignette", 0);
     }
     else if (!StrCmpW(exeName, u4_l_exe))
     {
-        const unsigned char patchVignette[] = { 0x0F, 0x57, 0xC9, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
-        WritePatchPattern(L"C4 C1 7A 10 8E 18 0D 00 00", patchVignette, sizeof(patchVignette), L"Disable Vignette", 0);
+        const unsigned char patchVignette[] = { 0x50, 0xB8, 0x00, 0x00, 0x80, 0x7F, 0x66, 0x0F, 0x6E, 0xC8, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+        WritePatchPattern(L"C4 C1 7A 10 86 1C 0D 00 00", patchVignette, sizeof(patchVignette), L"Disable Vignette", 0);
     }
     else if (!StrCmpW(exeName, tll_exe) || !StrCmpW(exeName, tll_l_exe))
     {
