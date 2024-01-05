@@ -123,6 +123,20 @@
 </details>
 <details><summary>
   
+### Marvel's Guardians of the Galaxy
+</summary>
+
+  - Disable TAA
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game folder. (`Marvel's Guardians of the Galaxy\bin`).
+  - `dinput8.dll`
+  - `GotG.NoTAA.asi`
+</details>
+<details><summary>
+
 ### NieR Replicant ver.1.22474487139
 </summary>
 
