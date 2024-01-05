@@ -33,6 +33,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hitman3.NoTAA", "source\Hit
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RE8.NoTAA", "source\RE8.NoTAA\RE8.NoTAA.vcxproj", "{F2F2A0BD-8F71-4290-95E5-950639D9397C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GotG.NoTAA", "source\GotG.NoTAA\GotG.NoTAA.vcxproj", "{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -161,6 +163,14 @@ Global
 		{F2F2A0BD-8F71-4290-95E5-950639D9397C}.Release|x64.Build.0 = Release|x64
 		{F2F2A0BD-8F71-4290-95E5-950639D9397C}.Release|x86.ActiveCfg = Release|Win32
 		{F2F2A0BD-8F71-4290-95E5-950639D9397C}.Release|x86.Build.0 = Release|Win32
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Debug|x64.ActiveCfg = Debug|x64
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Debug|x64.Build.0 = Debug|x64
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Debug|x86.ActiveCfg = Debug|Win32
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Debug|x86.Build.0 = Debug|Win32
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Release|x64.ActiveCfg = Release|x64
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Release|x64.Build.0 = Release|x64
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Release|x86.ActiveCfg = Release|Win32
+		{F3F9FEC3-9C11-429F-9F12-72FD578C6D41}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
