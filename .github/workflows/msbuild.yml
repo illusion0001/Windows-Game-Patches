@@ -38,8 +38,10 @@ jobs:
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@main
-      - name: Build
+      - name: Build x64
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 Windows-Game-Patches.sln
+      - name: Build Win32
+        run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=Win32 .\source\BF3.Patches\BF3.Patches.vcxproj
       - name: Add ASI Loader to archive
         working-directory: ${{ env.BUILD_CONFIGURATION }}
         run: |
