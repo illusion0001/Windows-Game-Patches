@@ -35,5 +35,5 @@
 /**/.vs
 /**/Debug
 /**/Release
-
+*.user
 /**/git_ver.h
