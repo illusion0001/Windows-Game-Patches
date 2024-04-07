@@ -26,7 +26,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@main
         with:
           submodules: recursive
           fetch-depth: 0
@@ -79,14 +79,14 @@ jobs:
           # Remove downloaded dinput8.dll
           Remove-Item "dinput8.dll"
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}
           path: |
             ${{ env.BUILD_CONFIGURATION }}/dist/*
           if-no-files-found: error
       - name: Upload Artifact (pdb)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}-pdb
           path: |
