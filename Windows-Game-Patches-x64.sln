@@ -37,8 +37,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GotG.NoTAA", "source\GotG.N
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GoW.NoTAA", "source\GoW.NoTAA\GoW.NoTAA.vcxproj", "{F39007E3-30A2-4E4B-95A0-F82857979ACC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BF3.Patches", "source\BF3.Patches\BF3.Patches.vcxproj", "{980E7486-8340-40E0-99D8-105EDA678123}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -253,17 +251,6 @@ Global
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x64.Build.0 = Release|x64
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x86.ActiveCfg = Release|x64
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x86.Build.0 = Release|x64
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|Win32.ActiveCfg = Debug|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|Win32.Build.0 = Debug|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|x64.ActiveCfg = Debug|x64
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|x64.Build.0 = Debug|x64
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|x86.ActiveCfg = Debug|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Debug|x86.Build.0 = Debug|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Release|Win32.ActiveCfg = Release|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Release|Win32.Build.0 = Release|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Release|x64.ActiveCfg = Release|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Release|x86.ActiveCfg = Release|Win32
-		{980E7486-8340-40E0-99D8-105EDA678123}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
