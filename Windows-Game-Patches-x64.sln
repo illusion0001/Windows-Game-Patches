@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GotG.NoTAA", "source\GotG.N
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GoW.NoTAA", "source\GoW.NoTAA\GoW.NoTAA.vcxproj", "{F39007E3-30A2-4E4B-95A0-F82857979ACC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "APT2.Patches", "source\APT2.Patches\APT2.Patches.vcxproj", "{D61350A5-44AE-4D3C-8B12-EEE55406623F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -251,6 +253,18 @@ Global
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x64.Build.0 = Release|x64
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x86.ActiveCfg = Release|x64
 		{F39007E3-30A2-4E4B-95A0-F82857979ACC}.Release|x86.Build.0 = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|Win32.ActiveCfg = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|Win32.Build.0 = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|x64.ActiveCfg = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|x64.Build.0 = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|x86.ActiveCfg = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Debug|x86.Build.0 = Debug|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|Win32.ActiveCfg = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|Win32.Build.0 = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|x64.ActiveCfg = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|x64.Build.0 = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|x86.ActiveCfg = Release|x64
+		{D61350A5-44AE-4D3C-8B12-EEE55406623F}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
