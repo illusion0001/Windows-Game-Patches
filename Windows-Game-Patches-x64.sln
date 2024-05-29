@@ -43,6 +43,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Control.Patches", "source\C
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpiderMan.MilesMorales.Patches", "source\SpiderMan.MilesMorales.Patches\SpiderMan.MilesMorales.Patches.vcxproj", "{AEE76C38-3C12-4C64-A603-3B68E56FE686}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RDR3.Patches", "source\RDR3.Patches\RDR3.Patches.vcxproj", "{B16DFB29-6876-41F5-961F-E67E1C2E9764}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -293,6 +295,18 @@ Global
 		{AEE76C38-3C12-4C64-A603-3B68E56FE686}.Release|x64.Build.0 = Release|x64
 		{AEE76C38-3C12-4C64-A603-3B68E56FE686}.Release|x86.ActiveCfg = Release|x64
 		{AEE76C38-3C12-4C64-A603-3B68E56FE686}.Release|x86.Build.0 = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|Win32.ActiveCfg = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|Win32.Build.0 = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|x64.ActiveCfg = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|x64.Build.0 = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|x86.ActiveCfg = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Debug|x86.Build.0 = Debug|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|Win32.ActiveCfg = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|Win32.Build.0 = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|x64.ActiveCfg = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|x64.Build.0 = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|x86.ActiveCfg = Release|x64
+		{B16DFB29-6876-41F5-961F-E67E1C2E9764}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
