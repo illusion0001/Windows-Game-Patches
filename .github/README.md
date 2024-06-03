@@ -18,7 +18,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the Win64 folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `ACMirage.NoTAA.asi`
 </details>
 <details><summary>
@@ -42,7 +42,7 @@
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
 - ***This has not been tested online, use at your own risk!***.
   - Extract the following contents of the release zip into the game root folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `BFV.NoTAA.asi`
 </details>
 <details><summary>
@@ -57,7 +57,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the Win64 folder. (`BrightMemoryInfinite\Binaries\Win64\`).
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `BrightMemoryInfinite.NoTAA.asi`
 </details>
 <details><summary>
@@ -72,7 +72,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `version.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `version.dll` and copy to game folder.
   - `version.ini`
   - `DeathStranding.Fix.asi`
 </details>
@@ -88,7 +88,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game folder. (`ELDEN RING\Game\`).
-  - `dinput8.dll`
+  - Copy `dinput8.dll` from folder `!ASI_Loader_x64` to game folder.
   - `EldenRing.NoTAA.asi`
 </details>
 <details><summary>
@@ -105,7 +105,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game folder.
-  - `winnmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `GoW.NoTAA.asi`
 </details>
 <details><summary>
@@ -120,7 +120,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game folder. (`HITMAN3\Retail\`).
-  - `dinput8.dll`
+  - Copy `dinput8.dll` from folder `!ASI_Loader_x64` to game folder.
   - `Hitman3.NoTAA.asi`
 </details>
 <details><summary>
@@ -135,7 +135,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the Win64 folder. (`Lies of P Demo\LiesofP\Binaries\Win64\`).
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `LiesOfP.NoTAA.asi`
 </details>
 <details><summary>
@@ -149,7 +149,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game folder. (`Marvel's Guardians of the Galaxy\bin`).
-  - `dinput8.dll`
+  - Copy `dinput8.dll` from folder `!ASI_Loader_x64` to game folder.
   - `GotG.NoTAA.asi`
 </details>
 <details><summary>
@@ -161,7 +161,7 @@
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `NierReplicant.Fix.asi`
 </details>
 <details><summary>
@@ -175,12 +175,35 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `d3d11.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `d3d11.dll` and copy to game folder.
   - `PlanetOfLana.NoTAA.asi`
   - `d3d11.ini`
 </details>
 <details><summary>
-  
+
+### Red Dead Redemption 2
+</summary>
+
+  - Skip Legal and Logo videos
+  - Load directly into benchmark mode (5th index, Saint Denis benchmark)
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game root folder. (next to where `RDR2.exe` is located).
+  - Copy `dinput8.dll` from folder `!ASI_Loader_x64` to game folder.
+  - `RDR3.Patches.asi`
+  - `ScriptHookRDR2.dll`
+
+#### Credits
+
+This patch uses following work:
+- [ScriptHook SDK for RDR2](http://www.dev-c.com/rdr2/scripthookrdr2/)
+- [Main and Legal Menu Skip Mod](https://www.rdr2mods.com/downloads/rdr2/other/304-main-and-legal-menu-skip/)
+
+</details>
+<details><summary>
+
 ### Remnant II
 </summary>
 
@@ -191,7 +214,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the Win64 folder. (`Remnant 2\Remnant2\Binaries\Win64\`).
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `Remnant2.NoTAA.asi`
 </details>
 <details><summary>
@@ -250,7 +273,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `Uncharted4TLL.NoTAA.asi`
 </details>
 <details><summary>
@@ -268,7 +291,7 @@
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `T1X.DebugFeatures.asi`
 </details>
 <details><summary>
@@ -276,11 +299,11 @@
 ### Wo Long: Fallen Dynasty
 </summary>
 
-  - Remove 30FPS Limit for Cutscenes
+  - Remove 30FPS Limit for Cutscenes (Experimental)
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
   - Extract the following contents of the release zip into the game root folder.
-  - `winmm.dll`
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `WoLong.Fix.asi`
 </details>
   
@@ -289,4 +312,4 @@
 - [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader) for ASI loading.
 - [inipp](https://github.com/mcmtroffaes/inipp) for ini reading.
 - [length-disassembler](https://github.com/Nomade040/length-disassembler) for length disassembly.
-- [tl431](https://github.com/TL431/) for game fixes.
+- [tl431](https://github.com/TL431/) for additional game fixes.

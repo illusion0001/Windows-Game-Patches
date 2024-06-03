@@ -51,13 +51,37 @@ jobs:
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 -maxcpucount:1 Windows-Game-Patches-x64.sln
       - name: Build Win32
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x86 -maxcpucount:1 Windows-Game-Patches-Win32.sln
+      - name: Bundle loaders
+        run: |
+          $ScriptHookZip = "ScriptHookRDR2_1.0.1491.17.zip"
+          $ASI_win32 = "Ultimate-ASI-Loader.zip"
+          $ASI_x64 = "Ultimate-ASI-Loader_x64.zip"
+          curl -fLJO https://github.com/illusion0001/ScriptHook-Mirrors/releases/download/mirrors/$ScriptHookZip
+          curl -fLJO https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest/download/$ASI_x64
+          curl -fLJO https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest/download/$ASI_win32
+          7z x $ScriptHookZip
+          7z x $ASI_x64 -o"${{ env.BUILD_CONFIGURATION }}/x64/!ASI_Loader_x64"
+          7z x $ASI_win32 -o"${{ env.BUILD_CONFIGURATION }}/Win32/!ASI_Loader_Win32"
+          Copy-Item bin/ScriptHookRDR2.dll ${{ env.BUILD_CONFIGURATION }}/x64/RDR3.Patches/
+          Copy-Item -Recurse -Force data/*/ ${{ env.BUILD_CONFIGURATION }}/
+      - name: Generate Hash file
+        working-directory: ${{ env.BUILD_CONFIGURATION }}
+        run: |
+          $asiFiles = Get-ChildItem -Path "." -Filter "*.asi" -Recurse
+          foreach ($file in $asiFiles) {
+            $hash = Get-FileHash -Path "$file" -Algorithm SHA512 | Format-List
+            $hash | Out-File -Append -FilePath "hashes.txt"
+            echo $hash
+          }
       - name: Upload artifact
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}
           path: |
             ${{ env.BUILD_CONFIGURATION }}/**/*.asi
+            ${{ env.BUILD_CONFIGURATION }}/**/*.dll
             ${{ env.BUILD_CONFIGURATION }}/**/*.ini
+            ${{ env.BUILD_CONFIGURATION }}/hashes.txt
       - name: Upload artifact
         uses: actions/upload-artifact@main
         with:
@@ -66,3 +90,33 @@ jobs:
             ${{ env.BUILD_CONFIGURATION }}/**/*.asi
             ${{ env.BUILD_CONFIGURATION }}/**/*.ini
             ${{ env.BUILD_CONFIGURATION }}/**/*.pdb
+            ${{ env.BUILD_CONFIGURATION }}/hashes.txt
+
+      - name: Create Release
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          github.repository == 'illusion0001/Windows-Game-Patches'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $hashMarkdown = @'
+          {0}
+
+          <details>
+          <summary>ASI Plugin Hashes (Click to Expand)</summary>
+
+          ```yaml
+          {1}
+          ```
+
+          </details>
+          '@ -f (Get-Content ".github\README.md" | Out-String), (Get-Content "${{ env.BUILD_CONFIGURATION }}\hashes.txt" | Out-String)
+          $hashMarkdown | Out-File -FilePath hash.md
+          Get-Content hash.md
+
+          $compress = @{
+            Path             = "${{ env.BUILD_CONFIGURATION }}\*"
+            DestinationPath  = "${{ env.zip_name }}.zip"
+          }
+          Compress-Archive @compress
+          gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md # --draft --prerelease

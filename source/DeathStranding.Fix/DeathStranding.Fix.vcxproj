@@ -47,13 +47,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>\..\include\;$(IncludePath)</IncludePath>
     <TargetExt>.asi</TargetExt>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>\..\include\;$(IncludePath)</IncludePath>
     <TargetExt>.asi</TargetExt>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,10 +103,6 @@
     <PreBuildEvent>
       <Command>call $(MSBuildStartupDirectory)\set_git_ver.cmd</Command>
     </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>copy  NUL $(OutDirFullPath)$(ProjectName)_version.dll
-copy  $(ProjectDir)version.ini $(OutDirFullPath)$(ProjectName)_version.ini</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\helper.cpp" />
