@@ -38,35 +38,31 @@ jobs:
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@main
+      - name: Setup ScriptHook SDK
+        working-directory: source/RDR3.Patches/scripthook_sdk
+        run: |
+          $ScriptHookZip = "ScriptHookRDR2_SDK_1.0.1207.73.zip"
+          # Curl cannot download from this url
+          # So upload it ourselves
+          # curl -fLJO http://www.dev-c.com/files/$ScriptHookZip
+          curl -fLJO https://github.com/illusion0001/ScriptHook-Mirrors/releases/download/mirrors/$ScriptHookZip
+          7z x $ScriptHookZip
       - name: Build x64
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 -maxcpucount:1 Windows-Game-Patches-x64.sln
       - name: Build Win32
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x86 -maxcpucount:1 Windows-Game-Patches-Win32.sln
-      - name: Create Release
-        if: |
-          github.event_name == 'workflow_dispatch' &&
-          github.repository == 'illusion0001/Windows-Game-Patches'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $hashMarkdown = @'
-          {0}
-
-          <details>
-          <summary>ASI Plugin Hashes (Click to Expand)</summary>
-
-          ```yaml
-          {1}
-          ```
-
-          </details>
-          '@ -f (Get-Content ".github\README.md" | Out-String), (Get-Content "${{ env.BUILD_CONFIGURATION }}\dist\hashes.txt" | Out-String)
-          $hashMarkdown | Out-File -FilePath hash.md
-          Get-Content hash.md
-
-          $compress = @{
-            Path             = "${{ env.BUILD_CONFIGURATION }}\dist\*", "${{ env.BUILD_CONFIGURATION }}\*.pdb"
-            DestinationPath  = "${{ env.zip_name }}.zip"
-          }
-          Compress-Archive @compress
-          gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md # --draft --prerelease
+      - name: Upload artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.zip_name }}
+          path: |
+            ${{ env.BUILD_CONFIGURATION }}/**/*.asi
+            ${{ env.BUILD_CONFIGURATION }}/**/*.ini
+      - name: Upload artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.zip_name }}-pdb
+          path: |
+            ${{ env.BUILD_CONFIGURATION }}/**/*.asi
+            ${{ env.BUILD_CONFIGURATION }}/**/*.ini
+            ${{ env.BUILD_CONFIGURATION }}/**/*.pdb

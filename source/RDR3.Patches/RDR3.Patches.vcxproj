@@ -74,6 +74,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>scripthook_sdk\lib\ScriptHookRDR2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -99,12 +100,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>scripthook_sdk\lib\ScriptHookRDR2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>call $(MSBuildStartupDirectory)\set_git_ver.cmd</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy  NUL $(OutDirFullPath)$(ProjectName)_winmm.dll</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -112,11 +115,14 @@
     <ClCompile Include="..\Shared\memory.cpp" />
     <ClCompile Include="..\Shared\stdafx.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="install_mod.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\helper.hpp" />
     <ClInclude Include="..\..\include\memory.hpp" />
     <ClInclude Include="..\..\include\stdafx.h" />
+    <ClInclude Include="mod_data.hpp" />
+    <ClInclude Include="mod_enum.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

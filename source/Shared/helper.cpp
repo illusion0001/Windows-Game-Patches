@@ -313,3 +313,29 @@ uintptr_t ReadLEA32(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, s
     }
     return 0;
 }
+
+uintptr_t ReadLEA32(uintptr_t Address, const wchar_t* Pattern_Name, size_t offset, size_t lea_size, size_t lea_opcode_size)
+{
+    uintptr_t Address_Result = Address;
+    uintptr_t Patch_Address = 0;
+    int32_t lea_offset = 0;
+    uintptr_t New_Offset = 0;
+    if (Address_Result)
+    {
+        if (offset)
+        {
+            Patch_Address = offset + Address_Result;
+            lea_offset = *(int32_t*)(lea_size + Address_Result);
+            New_Offset = Patch_Address + lea_offset + lea_opcode_size;
+        }
+        else
+        {
+            Patch_Address = Address_Result;
+            lea_offset = *(int32_t*)(lea_size + Address_Result);
+            New_Offset = Patch_Address + lea_offset + lea_opcode_size;
+        }
+        LOG(L"%s: 0x%016llx -> 0x%016llx\n", Pattern_Name, Address_Result, New_Offset);
+        return New_Offset;
+    }
+    return 0;
+}
