@@ -2,6 +2,9 @@
 #include "helper.hpp"
 #include "memory.hpp"
 #include "git_ver.h"
+#include "main.h"
+#include "nativeCaller.h"
+#include "natives.h"
 
 #include "mod_enum.h"
 
@@ -101,9 +104,7 @@ INIT_FUNCTION_PTR(makeHash_);
 
 typedef struct ScriptFuncArgs_
 {
-    const char* CScriptName;
-    uint32_t stackSize;
-    uint8_t padding[4];
+    uint64_t arg[32];
 }ScriptFuncArgs;
 
 typedef struct CScriptFuncArgs_
@@ -113,9 +114,9 @@ typedef struct CScriptFuncArgs_
     ScriptFuncArgs* Arg;
 }CScriptFuncArgs;
 
-TYPEDEF_FUNCTION_PTR(void, CScript_RequestScript, CScriptFuncArgs arg);
-TYPEDEF_FUNCTION_PTR(void, CScript_HasScriptLoaded, CScriptFuncArgs arg);
-TYPEDEF_FUNCTION_PTR(void, CScript_StartNewScript, CScriptFuncArgs arg);
+TYPEDEF_FUNCTION_PTR(void, CScript_RequestScript, CScriptFuncArgs* arg);
+TYPEDEF_FUNCTION_PTR(void, CScript_HasScriptLoaded, CScriptFuncArgs* arg);
+TYPEDEF_FUNCTION_PTR(void, CScript_StartNewScript, CScriptFuncArgs* arg);
 
 INIT_FUNCTION_PTR(CScript_RequestScript);
 INIT_FUNCTION_PTR(CScript_HasScriptLoaded);
@@ -132,9 +133,9 @@ namespace SCRIPTS
         if (CScript_RequestScript)
         {
             static uint64_t ret{};
-            static ScriptFuncArgs script_arg{ scriptName };
+            static ScriptFuncArgs script_arg{ (uint64_t)scriptName };
             static CScriptFuncArgs arg{ &ret, 1, &script_arg };
-            CScript_RequestScript(arg);
+            CScript_RequestScript(&arg);
         }
     }
     bool HAS_SCRIPT_LOADED(const char* scriptName) // 0xE97BD36574F8B0A6 0x5D67F751 b1207
@@ -146,9 +147,9 @@ namespace SCRIPTS
         if (CScript_HasScriptLoaded)
         {
             static uint64_t ret{};
-            static ScriptFuncArgs script_arg{ scriptName };
+            static ScriptFuncArgs script_arg{ (uint64_t)scriptName };
             static CScriptFuncArgs arg{ &ret, 1, &script_arg };
-            CScript_HasScriptLoaded(arg);
+            CScript_HasScriptLoaded(&arg);
             return (bool)arg.return_value[0];
         }
         return false;
@@ -162,9 +163,9 @@ namespace SCRIPTS
         if (CScript_StartNewScript)
         {
             static uint64_t ret{};
-            static ScriptFuncArgs script_arg{ scriptName, stackSize };
+            static ScriptFuncArgs script_arg{ (uint64_t)scriptName, (uint64_t)stackSize };
             static CScriptFuncArgs arg{ &ret, 2, &script_arg };
-            CScript_StartNewScript(arg);
+            CScript_StartNewScript(&arg);
             return (int)arg.return_value[0];
         }
         return 0;
@@ -178,7 +179,20 @@ uint32_t makeHash(const char* str)
 
 static uint32_t* AfterLoadScreenHook1(void* arg1, uint32_t* arg2)
 {
-    *arg2 = 0; // not valid flow
+#ifdef _DEBUG
+    AllocConsole();
+    SetConsoleTitleA(PROJECT_NAME " - Debug Console");
+    freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
+    freopen_s(reinterpret_cast<FILE**>(stdout), "conout$", "w", stdout);
+    freopen_s(reinterpret_cast<FILE**>(stderr), "conout$", "w", stderr);
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hConsole, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hConsole, dwMode);
+#endif
+    * arg2 = 0; // not valid flow
     return arg2;
 }
 bool breakLoop = false;
@@ -192,6 +206,67 @@ static uint32_t* AfterLoadScreenHook2(void* arg1, uint32_t* arg2)
 
 void Install_NoLogo_MainMenu_Patch(int mode);
 
+uintptr_t CScript_DoScreenFadeInReturn = 0;
+uintptr_t CScript_DoScreenFadeOutReturn = 0;
+
+static void __attribute__((naked)) CScript_DoScreenFadeInAsm(CScriptFuncArgs* arg)
+{
+    __asm
+    {
+        MOV RAX, qword ptr[RCX + 0x10];
+        MOV ECX, dword ptr[RAX];
+        jmp[rip + CScript_DoScreenFadeInReturn];
+    }
+}
+
+static void __attribute__((naked)) CScript_DoScreenFadeOutAsm(CScriptFuncArgs* arg)
+{
+    __asm
+    {
+        MOV RAX, qword ptr[RCX + 0x10];
+        MOV DL, 0x1;
+        jmp[rip + CScript_DoScreenFadeOutReturn];
+    }
+}
+
+static void SendInputWrapper(WORD inputKey)
+{
+    INPUT inputs[2]{};
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = inputKey;
+    inputs[1].type = INPUT_KEYBOARD;
+    inputs[1].ki.wVk = inputKey;
+    inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+    SendInput((sizeof(inputs) / sizeof(inputs[0])), inputs, sizeof(INPUT));
+}
+
+bool quitProgramAfterCapture = false;
+
+static void DO_SCREEN_FADE_IN_Hook(CScriptFuncArgs* arg)
+{
+    // https://github.com/Halen84/RDR3-Decompiled-Scripts/blob/5ac4e28d9887ffa934679d559c7cbcda2666fb0c/1491-18/benchmark.c#L1848
+    if ((uint32_t)arg->Arg->arg[0] == 1000)
+    {
+        SendInputWrapper(VK_F11);
+        printf_s("Started benchmark\n");
+    }
+    CScript_DoScreenFadeInAsm(arg);
+}
+
+float waitForCaptureProcessing = 0.0f;
+
+static void DO_SCREEN_FADE_OUT_Hook(CScriptFuncArgs* arg)
+{
+    // https://github.com/Halen84/RDR3-Decompiled-Scripts/blob/5ac4e28d9887ffa934679d559c7cbcda2666fb0c/1491-18/benchmark.c#L3778
+    if ((uint32_t)arg->Arg->arg[0] == 1000)
+    {
+        SendInputWrapper(VK_F11);
+        printf_s("Started benchmark\n");
+        quitProgramAfterCapture = true;
+        waitForCaptureProcessing = 0.0f;
+    }
+    CScript_DoScreenFadeOutAsm(arg);
+}
 static void ApplyPatches()
 {
     Install_NoLogo_MainMenu_Patch((bSkipLegalMainMenu || bBenchmarkOnly) ? ModInstallEnable : ModDisable);
@@ -202,14 +277,29 @@ static void ApplyPatches()
         void* OpcodePattern = (void*)FindAndPrintPatternW(L"48 83 eb 10 48 ff c7 0f b6 17", L"6c Opcode finder");
         g_nextScrOpcodeReturnAddr = FindAndPrintPatternW(L"4c 8b 75 67 4c 8b 7c 24 38 4c 8b c3 48 ff c7", L"nextScrOpcode", +9);
         makeHash_ = (makeHash__ptr)FindAndPrintPatternW(L"48 63 c1 48 8b ca 4c 8d 04 80 4d 03 c0 48 8d 05 ? ? ? ? 4a ff 24 c0", L"makeHash");
-        if (OpcodePattern && jumpPattern && g_nextScrOpcodeReturnAddr)
+        uintptr_t Cam_DoFadePtrs = FindAndPrintPatternW(L"48 8b 41 10 8b 08 e9 ?? ?? ?? ?? cc 48 8b 41 10 b2 01 8b 08 e9 ?? ?? ?? ??", L"Cam_DoFadePtrs");
+        if (OpcodePattern && jumpPattern && g_nextScrOpcodeReturnAddr && Cam_DoFadePtrs)
         {
             BranchFunction32(OpcodePattern, jumpPattern, 10);
             Memory::DetourFunction64(jumpPattern, (void*)Opcode6cAsm, 14);
+            {
+                void* jumpPattern2 = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
+                BranchFunction32((void*)Cam_DoFadePtrs, jumpPattern2, 6);
+                Memory::DetourFunction64(jumpPattern2, (void*)DO_SCREEN_FADE_IN_Hook, 14);
+                CScript_DoScreenFadeInReturn = Cam_DoFadePtrs + 6;
+            }
+            {
+                void* jumpPattern2 = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
+                BranchFunction32((void*)(Cam_DoFadePtrs + 12), jumpPattern2, 6);
+                Memory::DetourFunction64(jumpPattern2, (void*)DO_SCREEN_FADE_OUT_Hook, 14);
+                CScript_DoScreenFadeOutReturn = Cam_DoFadePtrs + 12 + 6;
+            }
         }
 
         // failed attempt at skipping logos and main menu
+#ifndef _DEBUG
         if (false)
+#endif
         {
             uintptr_t* boot_flow_vftable = (uintptr_t*)ReadLEA32(L"48 8d 05 ? ? ? ? 33 d2 48 89 03 48 8d 8b 30 01 00 00", L"boot_flow_vftable", 0, 3, 7);
             uintptr_t* landing_launcher_flow_vftable = (uintptr_t*)ReadLEA32(L"48 8d 05 ? ? ? ? 48 8b d9 48 89 01 48 81 c1 a8 06 00 00", L"landing_launcher_flow_vftable", 0, 3, 7);
@@ -226,6 +316,7 @@ static void ApplyPatches()
                 }
             }
 
+            /*
             if (landing_launcher_flow_vftable)
             {
                 void* jumpPattern2 = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
@@ -235,15 +326,10 @@ static void ApplyPatches()
                     Memory::DetourFunction64(jumpPattern2, (void*)AfterLoadScreenHook2, 14);
                 }
             }
+            */
         }
     }
 }
-
-#define IMPORT __declspec(dllimport)
-
-IMPORT void scriptRegister(HMODULE module, void(*LP_SCRIPT_MAIN)());
-IMPORT void scriptUnregister(HMODULE module);
-IMPORT void scriptWait(DWORD time);
 
 static void ScriptMain()
 {
@@ -262,6 +348,19 @@ static void ScriptMain()
             SCRIPTS::START_NEW_SCRIPT(SCRIPT_NAME, SCRIPT_STACK);
             startedBenchmark = true;
         }
+    }
+    while (true)
+    {
+        if (quitProgramAfterCapture)
+        {
+            if (waitForCaptureProcessing > 4.0f)
+            {
+                exit(0);
+            }
+            waitForCaptureProcessing += MISC::GET_SYSTEM_TIME_STEP();
+            //printf_s("waitForCaptureProcessing %.1f\n", waitForCaptureProcessing);
+        }
+        scriptWait(0);
     }
     printf_s("ScriptMain() exit\n");
 }
