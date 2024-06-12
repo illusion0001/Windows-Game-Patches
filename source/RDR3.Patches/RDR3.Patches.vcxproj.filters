@@ -43,5 +43,20 @@
     <ClInclude Include="mod_enum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scripthook_sdk\inc\natives.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripthook_sdk\inc\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripthook_sdk\inc\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripthook_sdk\inc\main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripthook_sdk\inc\nativeCaller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

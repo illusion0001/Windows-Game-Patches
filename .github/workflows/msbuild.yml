@@ -46,7 +46,7 @@ jobs:
           # So upload it ourselves
           # curl -fLJO http://www.dev-c.com/files/$ScriptHookZip
           curl -fLJO https://github.com/illusion0001/ScriptHook-Mirrors/releases/download/mirrors/$ScriptHookZip
-          7z x $ScriptHookZip
+          7z x $ScriptHookZip -aos
       - name: Build x64
         run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=x64 -maxcpucount:1 Windows-Game-Patches-x64.sln
       - name: Build Win32
