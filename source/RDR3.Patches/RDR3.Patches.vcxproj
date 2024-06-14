@@ -111,14 +111,12 @@
     <ClCompile Include="..\Shared\memory.cpp" />
     <ClCompile Include="..\Shared\stdafx.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="install_mod.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\helper.hpp" />
     <ClInclude Include="..\..\include\memory.hpp" />
     <ClInclude Include="..\..\include\stdafx.h" />
-    <ClInclude Include="mod_data.hpp" />
-    <ClInclude Include="mod_enum.h" />
+    <ClInclude Include="mod_data.h" />
     <ClInclude Include="scripthook_sdk\inc\enums.h" />
     <ClInclude Include="scripthook_sdk\inc\main.h" />
     <ClInclude Include="scripthook_sdk\inc\nativeCaller.h" />

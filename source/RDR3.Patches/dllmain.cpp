@@ -6,8 +6,6 @@
 #include "nativeCaller.h"
 #include "natives.h"
 
-#include "mod_enum.h"
-
 HMODULE baseModule{};
 
 #define wstr(s) L#s
@@ -31,14 +29,7 @@ static void ReadConfig()
     {
         // no ini, lets generate one.
         std::wstring ini_defaults = L"[Settings]\n"
-            "; Installs No Legal and Main Menu Mod\n"
-            "; Mod files:\n"
-            "; ```\n"
-            "; /x64/data/startup.meta\n"
-            "; /x64/main_and_legal_menu_skip_data/legal_screen_patch.ymt\n"
-            "; /x64/main_and_legal_menu_skip_data/main_menu_patch.ymt\n"
-            "; ```\n"
-            "; Source: https://www.rdr2mods.com/downloads/rdr2/other/304-main-and-legal-menu-skip/\n"
+            "; Thanks to this mod for reference on flowblock: https://www.rdr2mods.com/downloads/rdr2/other/304-main-and-legal-menu-skip/\n"
             wstr(bSkipLegalMainMenu)" = true\n"
             "; Start benchmark mode after game loads into autosave\n"
             wstr(bBenchmarkOnly)" = false\n";
@@ -86,6 +77,8 @@ static void __attribute__((naked)) Opcode6cAsm()
         jnz not_match;
         cmp dword ptr[rcx + 0x440], 0x08FA8CCA;
         jnz not_match;
+        cmp dword ptr[rcx + 0x1090], 5;
+        jz  not_match;
         mov dword ptr[rcx + 0x1090], 5; // benchmark sequence override
     not_match:;
         jmp qword ptr[rip + g_nextScrOpcodeReturnAddr];
@@ -98,9 +91,6 @@ static void __attribute__((naked)) Opcode6cAsm()
 
 #define INIT_FUNCTION_PTR(func_name) \
     func_name##_ptr func_name = nullptr
-
-TYPEDEF_FUNCTION_PTR(uint32_t, makeHash_, void* arg1, const char* str);
-INIT_FUNCTION_PTR(makeHash_);
 
 typedef struct ScriptFuncArgs_
 {
@@ -172,14 +162,8 @@ namespace SCRIPTS
     }
 }
 
-uint32_t makeHash(const char* str)
+void showConsole()
 {
-    return makeHash_(nullptr, str);
-}
-
-static uint32_t* AfterLoadScreenHook1(void* arg1, uint32_t* arg2)
-{
-#ifdef _DEBUG
     AllocConsole();
     SetConsoleTitleA(PROJECT_NAME " - Debug Console");
     freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
@@ -191,20 +175,7 @@ static uint32_t* AfterLoadScreenHook1(void* arg1, uint32_t* arg2)
     GetConsoleMode(hConsole, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hConsole, dwMode);
-#endif
-    * arg2 = 0; // not valid flow
-    return arg2;
 }
-bool breakLoop = false;
-static uint32_t* AfterLoadScreenHook2(void* arg1, uint32_t* arg2)
-{
-    // cannot skip this flow for now, must use mod to workaround it
-    // <https://www.rdr2mods.com/downloads/rdr2/other/304-main-and-legal-menu-skip/>
-    *arg2 = makeHash("landing_page/flow/landing_launcher_flow");
-    return arg2;
-}
-
-void Install_NoLogo_MainMenu_Patch(int mode);
 
 uintptr_t CScript_DoScreenFadeInReturn = 0;
 uintptr_t CScript_DoScreenFadeOutReturn = 0;
@@ -267,16 +238,93 @@ static void DO_SCREEN_FADE_OUT_Hook(CScriptFuncArgs* arg)
     }
     CScript_DoScreenFadeOutAsm(arg);
 }
+
+uintptr_t ParseFlowBlockReturn = 19;
+
+typedef struct xml_keys_
+{
+    void* not_useful[9];
+    char* key;
+    void* not_useful2[3];
+}xml_keys;
+
+static void __attribute__((naked)) ParseFlowBlockAsm(void* arg1, xml_keys* keys, const char* prev_key)
+{
+    __asm
+    {
+        MOV RAX, RSP;
+        MOV qword ptr[RAX + 0x8], RBX;
+        MOV qword ptr[RAX + 0x10], RBP;
+        MOV qword ptr[RAX + 0x18], RSI;
+        MOV qword ptr[RAX + 0x20], RDI;
+        jmp qword ptr[rip + ParseFlowBlockReturn];
+    }
+}
+
+// https://github.com/PLTytus/various_joaat/blob/e06f51b1cfe95c2690b0fb46adce51c7d1f81d8a/joaat.c
+// Hash method doesn't really matter
+// Its just to prevent using strcmp
+constexpr uint32_t joaat(const char* s)
+{
+    uint32_t hash = 0;
+    for (; *s; ++s)
+    {
+        hash += *s;
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return hash;
+}
+
+static int detect_count = 0;
+
+static void ParseFlowBlockHook(void* arg1, xml_keys* keys, const char* prev_key)
+{
+    uint32_t key_hash = 0;
+    if (!keys->key || detect_count == 2)
+    {
+        // the compiler will generate similar code if i used call() + return
+        goto no_match_or_quit;
+    }
+    key_hash = joaat(keys->key);
+    switch (key_hash)
+    {
+    case joaat("feedback_context_switch.boot_screen_host.sign_in_flow_activity_sentinel.account_picker_activity_sentinel.account_picker_wrapper"):
+    {
+        keys->key = (char*)"feedback_context_switch.boot_screen_host.profile_flow_activity_sentinel.wait_for_profile";
+        detect_count++;
+        break;
+    }
+    case joaat("input_context_switch.can_access_sp_check"):
+    case joaat("input_context_switch.boot_flow_startup"):
+    case joaat("input_context_switch.boot_flow_invite"):
+    case joaat("input_context_switch.boot_flow_sign_out"):
+    case joaat("input_context_switch.mp_direct_dispatch_code_event.mp_direct_scene.mp_direct_host"):
+    {
+        keys->key = (char*)"input_context_switch.landing_camera_fader.landing_main.landing_filter.priority_feed_decision_sp.set_feedback_context.from_priority_feed_decision_sp_can_access_sp.sp_menu.launch_sp";
+        break;
+    }
+    default:
+    {
+        break;
+    }
+    }
+no_match_or_quit:
+    ParseFlowBlockAsm(arg1, keys, prev_key);
+}
+
 static void ApplyPatches()
 {
-    Install_NoLogo_MainMenu_Patch((bSkipLegalMainMenu || bBenchmarkOnly) ? ModInstallEnable : ModDisable);
     if (bBenchmarkOnly)
     {
-        baseModule = GetModuleHandle(NULL);
         void* jumpPattern = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
         void* OpcodePattern = (void*)FindAndPrintPatternW(L"48 83 eb 10 48 ff c7 0f b6 17", L"6c Opcode finder");
         g_nextScrOpcodeReturnAddr = FindAndPrintPatternW(L"4c 8b 75 67 4c 8b 7c 24 38 4c 8b c3 48 ff c7", L"nextScrOpcode", +9);
-        makeHash_ = (makeHash__ptr)FindAndPrintPatternW(L"48 63 c1 48 8b ca 4c 8d 04 80 4d 03 c0 48 8d 05 ? ? ? ? 4a ff 24 c0", L"makeHash");
         uintptr_t Cam_DoFadePtrs = FindAndPrintPatternW(L"48 8b 41 10 8b 08 e9 ?? ?? ?? ?? cc 48 8b 41 10 b2 01 8b 08 e9 ?? ?? ?? ??", L"Cam_DoFadePtrs");
         if (OpcodePattern && jumpPattern && g_nextScrOpcodeReturnAddr && Cam_DoFadePtrs)
         {
@@ -295,38 +343,26 @@ static void ApplyPatches()
                 CScript_DoScreenFadeOutReturn = Cam_DoFadePtrs + 12 + 6;
             }
         }
+    }
 
-        // failed attempt at skipping logos and main menu
-#ifndef _DEBUG
-        if (false)
-#endif
+    // generates cleaner diff
+    {
+        if (bBenchmarkOnly || bSkipLegalMainMenu)
         {
-            uintptr_t* boot_flow_vftable = (uintptr_t*)ReadLEA32(L"48 8d 05 ? ? ? ? 33 d2 48 89 03 48 8d 8b 30 01 00 00", L"boot_flow_vftable", 0, 3, 7);
-            uintptr_t* landing_launcher_flow_vftable = (uintptr_t*)ReadLEA32(L"48 8d 05 ? ? ? ? 48 8b d9 48 89 01 48 81 c1 a8 06 00 00", L"landing_launcher_flow_vftable", 0, 3, 7);
-            printf_s("boot_flow_vftable[30] = 0x%p\n", boot_flow_vftable[30]);
-            printf_s("landing_launcher_flow_vftable[30] = 0x%p\n", landing_launcher_flow_vftable[30]);
-
-            if (boot_flow_vftable)
+            uintptr_t ParseXmlBlockAddr = FindAndPrintPatternW(L"48 8b c4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 56 48 83 ec 20 49 8b f0 48 8b da 4c 8b 41 08", L"ParseXmlBlockAddr");
+            uintptr_t BogusErrorCheck = FindAndPrintPatternW(L"48 83 ec 28 45 33 c9 e8 ?? ?? ?? ?? cc", L"BogusErrorCheck");
+            if (ParseXmlBlockAddr && BogusErrorCheck)
             {
-                void* jumpPattern2 = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
-                if (jumpPattern2)
-                {
-                    BranchFunction32((void*)boot_flow_vftable[30], jumpPattern2, 5);
-                    Memory::DetourFunction64(jumpPattern2, (void*)AfterLoadScreenHook1, 14);
-                }
+                ParseFlowBlockReturn += ParseXmlBlockAddr;
+                Memory::DetourFunction64((void*)ParseXmlBlockAddr, (void*)ParseFlowBlockHook, 14);
+                // patches sus errors when replacing the pointer in `ParseFlowBlockHook`
+                // TODO: Check if calling C script from a hook works now
+                // and also find a c script function that only runs when player is alive and once a frame
+                // this will hopefully eliminate the need for linking with scriptHook
+                // just like orbis version
+                unsigned char ret[] = { 0xc3 };
+                Memory::PatchBytes(BogusErrorCheck, ret, sizeof(ret));
             }
-
-            /*
-            if (landing_launcher_flow_vftable)
-            {
-                void* jumpPattern2 = (void*)FindAndPrintPatternW(L"cc cc cc cc cc cc cc cc cc cc cc cc cc cc", L"Int3 Array");
-                if (jumpPattern2)
-                {
-                    BranchFunction32((void*)landing_launcher_flow_vftable[30], jumpPattern2, 5);
-                    Memory::DetourFunction64(jumpPattern2, (void*)AfterLoadScreenHook2, 14);
-                }
-            }
-            */
         }
     }
 }
@@ -367,6 +403,10 @@ static void ScriptMain()
 
 static void Main(HMODULE hModule)
 {
+#ifdef _DEBUG
+    showConsole();
+#endif
+    baseModule = GetModuleHandle(NULL);
     ReadConfig();
     ApplyPatches();
     if (bBenchmarkOnly)
