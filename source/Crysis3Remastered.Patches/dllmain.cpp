@@ -31,7 +31,7 @@ void ReadConfig(void)
     {
         // no ini, lets generate one.
         std::wstring ini_defaults = L"[Settings]\n"
-            wstr(bBenchmarkingOnly)" false\n"
+            wstr(bBenchmarkingOnly)" = false\n"
             wstr(bVerboseConsoleOutput)" = false\n"
             "; Benchmark types:\n"
             "; 1 = CPU Benchmark\n"
@@ -162,7 +162,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        CreateThread(NULL, 0, Main, 0, NULL, 0);
+        Main(NULL);
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
