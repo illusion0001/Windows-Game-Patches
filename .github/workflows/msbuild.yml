@@ -81,6 +81,8 @@ jobs:
             ${{ env.BUILD_CONFIGURATION }}/**/*.asi
             ${{ env.BUILD_CONFIGURATION }}/**/*.dll
             ${{ env.BUILD_CONFIGURATION }}/**/*.ini
+            ${{ env.BUILD_CONFIGURATION }}/**/*.CSF
+            ${{ env.BUILD_CONFIGURATION }}/**/*.meta
             ${{ env.BUILD_CONFIGURATION }}/hashes.txt
       - name: Upload artifact
         uses: actions/upload-artifact@main
@@ -88,7 +90,10 @@ jobs:
           name: ${{ env.zip_name }}-pdb
           path: |
             ${{ env.BUILD_CONFIGURATION }}/**/*.asi
+            ${{ env.BUILD_CONFIGURATION }}/**/*.dll
             ${{ env.BUILD_CONFIGURATION }}/**/*.ini
+            ${{ env.BUILD_CONFIGURATION }}/**/*.CSF
+            ${{ env.BUILD_CONFIGURATION }}/**/*.meta
             ${{ env.BUILD_CONFIGURATION }}/**/*.pdb
             ${{ env.BUILD_CONFIGURATION }}/hashes.txt
 
