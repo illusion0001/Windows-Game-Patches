@@ -21,7 +21,7 @@ void __attribute__((naked)) Memory_PushAllocator_CC()
         mov dword ptr[rsp + 0x30], eax;
         mov r15, r9;
         mov r14d, r8d;
-        jmp[Memory_PushAllocatorReturnAddr];
+        jmp[rip + Memory_PushAllocatorReturnAddr];
     }
 }
 
@@ -53,7 +53,7 @@ void __attribute__((naked)) Memory_NewHandler_CC()
         mov[rsp + 0x60], eax;
     code_exit:;
         mov rbx, r8;
-        jmp[Memory_NewHandlerReturnAddr];
+        jmp[rip + Memory_NewHandlerReturnAddr];
     }
 }
 
@@ -399,7 +399,7 @@ void __attribute__((naked)) GivePlayerWeapon_MainCC() {
         mov byte ptr[rsp + 0x20], 0;
         mov r9, qword ptr[temp_reg1];
     code_exit:;
-        jmp[GivePlayerWeapon_MainReturn];
+        jmp[rip + GivePlayerWeapon_MainReturn];
     }
 }
 
@@ -422,7 +422,7 @@ void __attribute__((naked)) GivePlayerWeapon_SubCC() {
         mov byte ptr[rsp + 0x20], 0;
         mov r9, qword ptr[temp_reg1];
     code_exit:;
-        jmp[GivePlayerWeapon_SubReturn];
+        jmp[rip + GivePlayerWeapon_SubReturn];
     }
 }
 
@@ -440,7 +440,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryCC() {
         call GivePlayerWeaponMainSimple;
         mov r8, rax;
     code_exit:;
-        jmp[GivePlayerWeapon_EntryReturn];
+        jmp[rip + GivePlayerWeapon_EntryReturn];
     }
 }
 
@@ -449,7 +449,7 @@ void __attribute__((naked)) GivePlayerWeapon_EntryHeaderCC() {
         mov ecx, 4;
         call GivePlayerWeaponMainSimple;
         mov rdx, rax;
-        jmp[GivePlayerWeapon_EntryHeaderReturn];
+        jmp[rip + GivePlayerWeapon_EntryHeaderReturn];
     }
 }
 
@@ -494,7 +494,7 @@ void __attribute__((naked)) ActiveTaskDisplay_CC()
         mov    r8, r14;
         mov    QWORD PTR[rsp + 0x28], rax;
         mov    QWORD PTR[rsp + 0x20], rsi;
-        jmp qword ptr[ActiveTaskDisplayReturnAddr];
+        jmp qword ptr[rip + ActiveTaskDisplayReturnAddr];
     }
 }
 
@@ -537,9 +537,9 @@ void __attribute__((naked)) DebugPrint_CC()
     __asm
     {
         mov qword ptr[DebugPrint_WindowContext], rcx;
-        call qword ptr[DebugPrint_OriginalAddr];
+        call qword ptr[rip + DebugPrint_OriginalAddr];
         mov rcx, qword ptr[DebugPrint_WindowContext]; // need the window context
-        call qword ptr[MyDebugPrintFunction];
-        jmp qword ptr[DebugPrint_ReturnAddr];
+        call MyDebugPrintFunction;
+        jmp qword ptr[rip + DebugPrint_ReturnAddr];
     }
 }
