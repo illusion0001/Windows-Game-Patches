@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
@@ -9,11 +8,9 @@ HMODULE baseModule = GetModuleHandle(NULL);
 #define wxstr(s) wstr(s)
 #define _PROJECT_NAME L"ACMirage.NoTAA"
 
-wchar_t exePath[_MAX_PATH] = { 0 };
-
 // INI Variables
-bool bDisableTAA;
-bool bDisableCA;
+bool bDisableTAA {};
+bool bDisableCA {};
 
 void ReadConfig(void)
 {
@@ -61,8 +58,6 @@ void DisableCA(void)
 
 DWORD __stdcall Main(void*)
 {
-    wchar_t LogPath[_MAX_PATH] = { 0 };
-    wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     ReadConfig();
 
     if (bDisableTAA)

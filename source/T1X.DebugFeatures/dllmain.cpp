@@ -4,7 +4,6 @@
 #include "patterns.hpp"
 #include "code_caves.hpp"
 #include "dmenu.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
@@ -26,9 +25,6 @@ void ReadConfig(void)
 {
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
-    LOG(L"" GIT_COMMIT "\n");
-    LOG(L"" GIT_VER "\n");
-    LOG(L"" GIT_NUM "\n");
     LOG(L"" BUILD_TIME "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
@@ -260,9 +256,6 @@ void ApplyDebugPatches(void)
         freopen_s(&fGame, "CONOUT$", "w", stdout);
         freopen_s(&fGame, "CONOUT$", "w", stderr);
         freopen_s(&fGame, "CONOUT$", "w", stdin);
-        printf_s(GIT_COMMIT "\n");
-        printf_s(GIT_VER "\n");
-        printf_s(GIT_NUM "\n");
         printf_s(BUILD_TIME "\n");
     }
 }

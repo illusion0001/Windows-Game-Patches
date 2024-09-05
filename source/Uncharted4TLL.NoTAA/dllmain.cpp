@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 #include "code_caves.hpp"
 #include "patterns.hpp"
 
@@ -34,9 +33,6 @@ void ReadConfig(void)
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
     LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
-    LOG(L"" GIT_COMMIT "\n");
-    LOG(L"" GIT_VER "\n");
-    LOG(L"" GIT_NUM "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
 
@@ -227,7 +223,7 @@ void EnbaleDebugMenu()
     CodeCave::DMenu_Addr = ReadLEA32(Patterns::DMenu_Ptr, wstr(Patterns::DMenu_Ptr), 0, 3, 7);
     CodeCave::DebugDraw_UpdateLoopAddr = FindAndPrintPatternW(Patterns::DebugDraw_UpdateLoop, wstr(Pattern::DebugDraw_UpdateLoop));
     CodeCave::DMenu_Update = FindAndPrintPatternW(Patterns::DMenu_Update, wstr(Pattern::DMenu_Update));
-    if (CodeCave::DMenu_Addr && CodeCave::DebugDraw_UpdateLoop && CodeCave::DMenu_Update)
+    if (CodeCave::DMenu_Addr && CodeCave::DebugDraw_UpdateLoopAddr && CodeCave::DMenu_Update)
     {
         WritePatchPattern_Hook(Patterns::DebugDraw_UpdateLoop, 22, wstr(Patterns::DebugDraw_UpdateLoop), 0, (void*)CodeCave::DebugDraw_UpdateLoop, nullptr);
         CodeCave::DebugDraw_UpdateLoopReturnAddr = CodeCave::DebugDraw_UpdateLoopAddr + 22;

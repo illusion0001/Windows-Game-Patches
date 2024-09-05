@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
@@ -21,9 +20,6 @@ void ReadConfig(void)
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
     LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
-    LOG(L"" GIT_COMMIT "\n");
-    LOG(L"" GIT_VER "\n");
-    LOG(L"" GIT_NUM "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
 
@@ -75,20 +71,19 @@ void __attribute__((naked)) SetCustomSharpnessAsm()
 {
     __asm
     {
-        movss xmm13, [fSharpness]    
+        movss xmm13, [fSharpness];
         // original code: 
         // 00007FF77E427D52 | 73 06                | jae remnant2-win64-shipping.7FF77E427D5A     | if xmm13 < 0
         // 00007FF77E427D54 | 45:0F57ED            | xorps xmm13, xmm13                           | xmm13 = 0  
         // 00007FF77E427D58 | EB 09                | jmp remnant2 - win64 - shipping.7FF77E427D63 | else
         // 00007FF77E427D5A | F344:0F5D2D B1E78402 | minss xmm13, dword ptr ds : [7FF780C76514]   | xmm13 = min(xmm13, 10.0)
-
-        jmp [SetCustomSharpnessReturnAddress]
+        jmp [rip + SetCustomSharpnessReturnAddress];
     }
 }
 
 void SetCustomSharpness(void)
 {
-    WritePatchPattern_Hook(L"73 06 45 0F 57 ED EB 09 F3 44 0F 5D 2D ?? ?? ?? ??", 17, L"Set Custom Sharpness", 0, SetCustomSharpnessAsm, &SetCustomSharpnessReturnAddress);
+    WritePatchPattern_Hook(L"73 06 45 0F 57 ED EB 09 F3 44 0F 5D 2D ?? ?? ?? ??", 17, L"Set Custom Sharpness", 0, (void*)&SetCustomSharpnessAsm, &SetCustomSharpnessReturnAddress);
 }
 
 DWORD __stdcall Main(void*)

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
+#include <filesystem>
 
 bool bLoggingEnabled;
 FILE* fp_log;
@@ -338,4 +339,109 @@ uintptr_t ReadLEA32(uintptr_t Address, const wchar_t* Pattern_Name, size_t offse
         return New_Offset;
     }
     return 0;
+}
+
+void SendInputWrapper(WORD inputKey)
+{
+#ifdef _DEBUG
+    if (IsDebuggerPresent())
+    {
+        // don't want inputs when debugger active
+        return;
+    }
+#endif
+    INPUT inputs[2] {};
+    inputs[0].type = INPUT_KEYBOARD;
+    inputs[0].ki.wVk = inputKey;
+    inputs[1].type = INPUT_KEYBOARD;
+    inputs[1].ki.wVk = inputKey;
+    inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
+    SendInput(_countof(inputs), inputs, sizeof(inputs[0]));
+}
+
+#define DEFAULT_BENCHMARK_COOLDOWN_PATH "Benchmark_Cooldown.ini"
+#define DEFAULT_BENCHMARK_COOLDOWN_TIMER 5
+#define DEFAULT_INI "[Settings]\r\n" \
+                    "WaitTimerSeconds = " xstr(DEFAULT_BENCHMARK_COOLDOWN_TIMER) "\r\n"
+
+#define str(s) #s
+#define xstr(s) str(s)
+
+static void CooldownDefault(const wchar_t* inifile)
+{
+    HANDLE fd = CreateFile(inifile, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (fd == INVALID_HANDLE_VALUE)
+    {
+        return;
+    }
+    else
+    {
+        const wchar_t* default_ini = L"" DEFAULT_INI;
+        DWORD dwBytesWritten = 0;
+        WriteFile(fd,
+            default_ini,
+            (sizeof(DEFAULT_INI) * sizeof(wchar_t)),
+            &dwBytesWritten,
+            0);
+        CloseHandle(fd);
+    }
+}
+
+static void CheckCooldown(bool isBenchmarking, size_t BenchmarkIndex)
+{
+    if (!isBenchmarking)
+    {
+        return;
+    }
+
+    std::filesystem::path currentDir = std::filesystem::current_path();
+    std::filesystem::path cfgPath = currentDir / L"" DEFAULT_BENCHMARK_COOLDOWN_PATH;
+    const wchar_t* iniFilename = cfgPath.native().c_str();
+
+    BOOL check = GetFileAttributes(iniFilename) != INVALID_FILE_ATTRIBUTES;
+    if (!check)
+    {
+        CooldownDefault(iniFilename);
+        wchar_t msg[512]{};
+        _snwprintf_s(msg, _countof(msg), L"Cooldown file created at: \"%s\".\n"
+            "You may edit it to set cooldown timer in seconds after first benchmark run.", iniFilename);
+        MessageBox(0, msg, L"BenchmarkCooldown.Check", MB_ICONINFORMATION | MB_OK);
+    }
+
+    int cooldownSeconds = GetPrivateProfileInt(L"Settings", L"WaitTimerSeconds", DEFAULT_BENCHMARK_COOLDOWN_TIMER, iniFilename);
+    if (cooldownSeconds > 600)
+    {
+        MessageBox(0, L"Cooldown timer longer than 10 minutes! Setting timer to 1 minute.", L"BenchmarkCooldown.Check", MB_ICONWARNING | MB_OK);
+        cooldownSeconds = 60;
+    }
+    if (isBenchmarking && BenchmarkIndex > 0 && cooldownSeconds > 0)
+    {
+        Sleep(cooldownSeconds * 1000);
+    }
+}
+
+#define CHECK_FILE "C:\\benchmarking\\check.txt"
+
+void CheckScriptFile()
+{
+    BOOL check = GetFileAttributes(TEXT(CHECK_FILE)) != INVALID_FILE_ATTRIBUTES;
+    if (!check)
+    {
+        HANDLE fd = CreateFile(TEXT(CHECK_FILE), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (fd == INVALID_HANDLE_VALUE)
+        {
+            return;
+        }
+        else
+        {
+            const wchar_t* default_ini = L"Example file created by patch\n";
+            DWORD dwBytesWritten = 0;
+            WriteFile(fd,
+                default_ini,
+                (wcslen(default_ini) * sizeof(wchar_t)),
+                &dwBytesWritten,
+                0);
+            CloseHandle(fd);
+        }
+    }
 }
