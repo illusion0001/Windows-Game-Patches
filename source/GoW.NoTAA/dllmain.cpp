@@ -112,7 +112,7 @@ void __attribute__((naked)) DisableVignetteAsm()
         movss dword ptr [rcx], xmm0
 
         pop rcx
-        jmp [DisableVignetteReturnAddress]
+        jmp [rip + DisableVignetteReturnAddress]
     }
 }
 
