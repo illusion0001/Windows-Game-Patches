@@ -184,6 +184,11 @@
 ### Red Dead Redemption 2
 </summary>
 
+#### Notes
+
+  - Please use version [1.0.136-321f7350](https://github.com/illusion0001/Windows-Game-Patches/releases/tag/1.0.136-321f7350) in the meantime while cmake transitioning is in progress.
+
+#### Patches
   - Skip Legal and Logo videos
   - Load directly into benchmark mode (5th index, Saint Denis benchmark)
 
