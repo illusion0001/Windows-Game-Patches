@@ -98,8 +98,6 @@ jobs:
             ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
       - name: Prepare Release
         if: github.event_name == 'workflow_dispatch'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $hashMarkdown = @'
           
@@ -134,10 +132,8 @@ jobs:
             DestinationPath  = "${{ env.zip_name }}-x64.zip"
           }
           Compress-Archive @compress
-      - name: Create Release
+      - name: Branch Check
         if: github.event_name == 'workflow_dispatch'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $prerelease = ""
           if ("${{ env.BRANCH }}" -ieq "main")
@@ -147,8 +143,12 @@ jobs:
           }
           else
           {
-              $prerelease = "--prerelease"
+              $prerelease = " --prerelease"
               echo "Is not main release: ${{ env.BRANCH }}"
           }
-
-          & gh release create ${{ env.commit_ver }} ${{ env.zip_name }}-x64-pdb.zip ${{ env.zip_name }}-x64.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md $prerelease
+          echo "prerelease=$prerelease" >> $Env:GITHUB_ENV
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: '& gh release create ${{ env.commit_ver }} ${{ env.zip_name }}-x64-pdb.zip ${{ env.zip_name }}-x64.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
