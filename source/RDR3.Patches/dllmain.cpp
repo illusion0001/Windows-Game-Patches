@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 #include "main.h"
 #include "nativeCaller.h"
 #include "natives.h"
@@ -17,9 +16,6 @@ bool bSkipLegalMainMenu{};
 
 static void ReadConfig()
 {
-    LOG(L"" GIT_COMMIT "\n");
-    LOG(L"" GIT_VER "\n");
-    LOG(L"" GIT_NUM "\n");
 
     inipp::Ini<wchar_t> ini;
     // Initialize config
@@ -198,17 +194,6 @@ static void __attribute__((naked)) CScript_DoScreenFadeOutAsm(CScriptFuncArgs* a
         MOV DL, 0x1;
         jmp[rip + CScript_DoScreenFadeOutReturn];
     }
-}
-
-static void SendInputWrapper(WORD inputKey)
-{
-    INPUT inputs[2]{};
-    inputs[0].type = INPUT_KEYBOARD;
-    inputs[0].ki.wVk = inputKey;
-    inputs[1].type = INPUT_KEYBOARD;
-    inputs[1].ki.wVk = inputKey;
-    inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
-    SendInput((sizeof(inputs) / sizeof(inputs[0])), inputs, sizeof(INPUT));
 }
 
 bool quitProgramAfterCapture = false;

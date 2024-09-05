@@ -15,6 +15,7 @@
 *.so
 *.dylib
 *.dll
+*.asi
 
 # Fortran module files
 *.mod
@@ -37,3 +38,12 @@
 /**/Release
 *.user
 /**/git_ver.h
+
+# CMake
+_build/
+build/
+CMakeFiles/
+vcpkg_installed/
+CMakeUserPresets.json
+out/
+

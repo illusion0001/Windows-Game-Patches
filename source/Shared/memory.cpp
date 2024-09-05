@@ -6,7 +6,7 @@
 namespace Memory
 {
 
-    void PatchBytes(uintptr_t address, const unsigned char* pattern, unsigned int numBytes)
+    void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes)
     {
         DWORD oldProtect;
         VirtualProtect((LPVOID)address, numBytes, PAGE_EXECUTE_READWRITE, &oldProtect);
@@ -54,24 +54,20 @@ namespace Memory
 
     void* DetourFunction64(void* pSource, void* pDestination, DWORD dwLen)
     {
-        DWORD MinLen = 14;
+        constexpr DWORD MinLen = 14;
+
+        if (dwLen < MinLen)
+        {
+            return nullptr;
+        }
 
         BYTE stub[] = {
         0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
         };
 
-        void* pTrampoline = VirtualAlloc(0, dwLen + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-
         DWORD dwOld = 0;
         VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
-
-        DWORD64 retto = (DWORD64)pSource + dwLen;
-
-        // trampoline
-        memcpy(stub + 6, &retto, 8);
-        memcpy((void*)((DWORD_PTR)pTrampoline), pSource, dwLen);
-        memcpy((void*)((DWORD_PTR)pTrampoline + dwLen), stub, sizeof(stub));
 
         // orig
         memcpy(stub + 6, &pDestination, 8);
@@ -83,7 +79,60 @@ namespace Memory
         }
 
         VirtualProtect(pSource, dwLen, dwOld, &dwOld);
-        return (void*)((DWORD_PTR)pTrampoline);
+        return pDestination;
+    }
+
+    bool CallFunction32(void* src, void* dst, int len)
+    {
+        if (!src || !dst || len < 5)
+        {
+            return false;
+        }
+        DWORD curProtection;
+        VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &curProtection);
+
+        memset(src, 0x90, len);
+
+        uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - 5;
+
+        *(BYTE*)src = 0xE8;
+        *(uint32_t*)((uintptr_t)src + 1) = relativeAddress;
+
+        DWORD temp;
+        VirtualProtect(src, len, curProtection, &temp);
+
+        return true;
+    }
+
+    void* CallFunction64(void* pSource, void* pDestination, DWORD dwLen)
+    {
+        constexpr DWORD MinLen = 16;
+
+        if (! pSource || !pDestination || dwLen < MinLen)
+        {
+            return nullptr;
+        }
+
+        BYTE stub[] = {
+        0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, // call qword ptr [$+8]
+        0xEB, 0x08, // jmp $+8
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
+        };
+
+        DWORD dwOld = 0;
+        VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
+
+        // orig
+        memcpy(stub + 8, &pDestination, 8);
+        memcpy(pSource, stub, sizeof(stub));
+
+        for (DWORD i = MinLen; i < dwLen; i++)
+        {
+            *(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
+        }
+
+        VirtualProtect(pSource, dwLen, dwOld, &dwOld);
+        return pDestination;
     }
 
     HMODULE GetThisDllHandle()

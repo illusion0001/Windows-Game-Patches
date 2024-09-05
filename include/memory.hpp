@@ -3,11 +3,13 @@
 // TODO: Find out where this came from
 namespace Memory
 {
-    void PatchBytes(uintptr_t address, const unsigned char* pattern, unsigned int numBytes);
+    void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes);
     void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size);
     uintptr_t ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets);
     bool DetourFunction32(void* src, void* dst, int len);
     void* DetourFunction64(void* pSource, void* pDestination, DWORD dwLen);
+    bool CallFunction32(void* src, void* dst, int len);
+    void* CallFunction64(void* pSource, void* pDestination, DWORD dwLen);
     HMODULE GetThisDllHandle();
     // CSGOSimple's pattern scan
     // https://github.com/OneshotGH/CSGOSimple-master/blob/master/CSGOSimple/helpers/utils.cpp

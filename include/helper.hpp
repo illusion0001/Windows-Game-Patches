@@ -51,4 +51,8 @@ constexpr StringId64 ToStringId64(const char* str)
     return base;
 }
 
+void SendInputWrapper(WORD inputKey);
+void CheckCooldown(bool isBenchmarking, size_t BenchmarkIndex);
+void CheckScriptFile();
+
 #define LOG(fmt, ...) file_log(L"%-24s:%u " fmt, __FUNCTIONW__, __LINE__, __VA_ARGS__);

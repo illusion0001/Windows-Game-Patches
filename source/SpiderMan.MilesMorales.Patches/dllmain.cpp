@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule{};
 

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule = GetModuleHandle(NULL);
 
@@ -23,9 +22,6 @@ void ReadConfig(void)
     inipp::Ini<wchar_t> ini;
     // Get game name and exe path
     LOG(_PROJECT_NAME " Built: " __TIME__ " @ " __DATE__ "\n");
-    LOG(L"" GIT_COMMIT "\n");
-    LOG(L"" GIT_VER "\n");
-    LOG(L"" GIT_NUM "\n");
     LOG(L"Game Name: %s\n", Memory::GetVersionProductName().c_str());
     LOG(L"Game Path: %s\n", exePath);
 
@@ -89,30 +85,30 @@ void __attribute__((naked)) DisableVignetteAsm()
     __asm
     {
         // original code
-        mulss xmm5, xmm0
-        movss xmm0, [rcx]
+        mulss xmm5, xmm0;
+        movss xmm0, [rcx];
 
         // backup xmm1 value
-        push rcx
-        movq rcx, xmm1
+        push rcx;
+        movq rcx, xmm1;
 
         // now we can check the vignette
-        movss xmm1, [fVignetteFind]
-        comiss xmm0, xmm1
-        jne do_not_replace
+        movss xmm1, [fVignetteFind];
+        comiss xmm0, xmm1;
+        jne do_not_replace;
 
-        movss xmm0, [fVignetteReplace]
-        do_not_replace :    // do nothing
+        movss xmm0, [fVignetteReplace];
+        do_not_replace :;    // do nothing
 
         //restore fp registers
-        movq xmm1, rcx
+        movq xmm1, rcx;
 
         // apply vignette
         mov rcx, [fVignette_Address];
-        movss dword ptr [rcx], xmm0
+        movss dword ptr [rcx], xmm0;
 
-        pop rcx
-        jmp [rip + DisableVignetteReturnAddress]
+        pop rcx;
+        jmp [rip + DisableVignetteReturnAddress];
     }
 }
 
@@ -127,7 +123,7 @@ void DisableVignette(void)
     fVignette_Address = ReadLEA32(L"F3 0F 59 E8 F3 0F 10 01 F3 0F 11 05 ?? ?? ?? ?? F3 41 0F 10 09", L"test", 8, 12, 8);
 
     // Finally, inject code
-    WritePatchPattern_Hook(L"F3 0F 59 E8 F3 0F 10 01 F3 0F 11 05 ?? ?? ?? ?? F3 41 0F 10 09", 16, L"Disable Vignette", 0, DisableVignetteAsm, &DisableVignetteReturnAddress);
+    WritePatchPattern_Hook(L"F3 0F 59 E8 F3 0F 10 01 F3 0F 11 05 ?? ?? ?? ?? F3 41 0F 10 09", 16, L"Disable Vignette", 0, (void*)&DisableVignetteAsm, &DisableVignetteReturnAddress);
 }
 
 void DisableSharpness(void)

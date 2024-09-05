@@ -6,14 +6,16 @@
 #include <cassert>
 #include <cstdint>
 #pragma GCC diagnostic ignored "-Wdelete-non-abstract-non-virtual-dtor"
+#pragma GCC diagnostic ignored "-Wuninitialized"
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <inttypes.h>
 #include <sstream>
-#include "inipp/inipp/inipp.h"
+#include "inipp/inipp.h"
 #pragma GCC diagnostic warning "-Wdelete-non-abstract-non-virtual-dtor"
+#pragma GCC diagnostic warning "-Wuninitialized"
 #include <SDKDDKVer.h>
 #include <Windows.h>
 #include <shlwapi.h>

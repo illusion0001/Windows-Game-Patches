@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
-#include "git_ver.h"
 
 HMODULE baseModule{};
 
@@ -106,7 +105,7 @@ void DisableTAA(void)
     GetConsoleMode(hConsole, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hConsole, dwMode);
-    WritePatchPattern_Hook(L"c6 83 08 df 00 00 00", 14, L"CreateConsoleHook", 0, CreateConsoleHookAsm, nullptr);
+    WritePatchPattern_Hook(L"c6 83 08 df 00 00 00", 14, L"CreateConsoleHook", 0, (void*)&CreateConsoleHookAsm, nullptr);
     // 40 53 48 83 ec ?? e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 8b 0d
     APT2_Hash_ = (APT2_Hash__ptr)FindAndPrintPatternW(L"48 c7 01 00 00 00 00 4c 8b ca", L"APT2_Hash");
     wprintf_s(L"ReadLEA32: 0x%016llx\n", ReadLEA32(L"40 53 48 83 ec ?? e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 8b 0d", L"_RegisterCmd", 11, 1, 5));
