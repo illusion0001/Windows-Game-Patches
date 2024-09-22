@@ -6,7 +6,7 @@ HMODULE baseModule = GetModuleHandle(NULL);
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define _PROJECT_NAME L"GoW.NoTAA"
+#define _PROJECT_NAME L"GoWR.NoTAA"
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
 wchar_t exePath[_MAX_PATH] = { 0 };
@@ -15,7 +15,6 @@ wchar_t exePath[_MAX_PATH] = { 0 };
 bool bDisableTAA;
 bool bDisableDoF;
 bool bDisableVignette;
-bool bDisableSharpness;
 
 void ReadConfig(void)
 {
@@ -42,7 +41,6 @@ void ReadConfig(void)
         bDisableTAA = true;
         bDisableDoF = true;
         bDisableVignette = true;
-        bDisableSharpness = true;
         LOG(L"Created default config file.\n");
     }
     else
@@ -51,28 +49,35 @@ void ReadConfig(void)
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableTAA), bDisableTAA);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableDoF), bDisableDoF);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableVignette), bDisableVignette);
-        inipp::get_value(ini.sections[L"Settings"], wstr(bDisableSharpness), bDisableSharpness);
     }
 
     // Log config parse
     LOG(L"%s: %s (%i)\n", wstr(bDisableTAA), GetBoolStr(bDisableTAA), bDisableTAA);
     LOG(L"%s: %s (%i)\n", wstr(bDisableDoF), GetBoolStr(bDisableDoF), bDisableDoF);
     LOG(L"%s: %s (%i)\n", wstr(bDisableVignette), GetBoolStr(bDisableVignette), bDisableVignette);
-    LOG(L"%s: %s (%i)\n", wstr(bDisableSharpness), GetBoolStr(bDisableSharpness), bDisableSharpness);
 }
 
 void DisableTAA(void)
 {
-    const unsigned char patch_taa[] = { 0x41, 0xC7, 0x42, 0x08, 0x00, 0x00, 0x80, 0x7F, 0x41, 0xC7, 0x42, 0x0C, 0x00, 0x00, 0x80, 0x7F, 0x90, 0x90, 0x90, 0x90 };
-    WritePatchPattern(L"F3 41 0F 11 42 08 F3 0F 10 ?? ?? ?? ?? ?? F3 41 0F 11 4A 0C", patch_taa, sizeof(patch_taa), L"Disable TAA", 0);
+    // 00007FF753AA55A3 | F341:0F59C4            | mulss xmm0,xmm12                               
+    // 00007FF753AA55A8 | C705 D6E6FA01 0000803F | mov dword ptr ds : [<taa_enable>] , 3F800000 -> C705 D6E6FA01 00000000 | mov dword ptr ds : [<taa_enable>] , 00000000
+    const unsigned char patch_taa[] = { 0x00, 0x00, 0x00, 0x00 };
+    WritePatchPattern(L"F3 41 0F 59 C4 C7 05 ?? ?? ?? ?? 00 00 80 3F", patch_taa, sizeof(patch_taa), L"Disable TAA", 11);
+
+    // 00007FF753AB0C19 | C683 3C030000 01       | mov byte ptr ds:[rbx+33C],1 -> C683 3C030000 00       | mov byte ptr ds:[rbx+33C],0 
     const unsigned char patch_jitter[] = { 0x00 };
-    WritePatchPattern(L"C6 83 A0 03 00 00 01", patch_jitter, sizeof(patch_jitter), L"Disable Camera Jitter", 6);
+    WritePatchPattern(L"C6 83 3C 03 00 00 01", patch_jitter, sizeof(patch_jitter), L"Disable Camera Jitter", 6);
 }
 
 void DisableDoF(void)
 {
-    const unsigned char patch[] = { 0x45, 0x0F, 0x57, 0xC0, 0xF3, 0x41, 0x0F, 0x5E, 0xD0 };
-    WritePatchPattern(L"F3 44 0F 59 C7 F3 0F 59 D7", patch, sizeof(patch), L"Disable DoF", 0);
+    // 00007FF753AA59FE | F341:0F59F2 | mulss xmm6,xmm10  -> 0F57F6    | xorps xmm6, xmm6
+    // 00007FF753AA5A03 | F341:0F59DA | mulss xmm3, xmm10 -> F3:0F5EDE | divss xmm3, xmm6
+    //                                                    -> 90        | nop
+    //                                                    -> 90        | nop
+    //                                                    -> 90        | nop
+    const unsigned char patch[] = { 0x0F, 0x57, 0xF6, 0xF3, 0x0F, 0x5E, 0xDE, 0x90, 0x90, 0x90 };
+    WritePatchPattern(L"F3 41 0F 59 F2 F3 41 0F 59 DA", patch, sizeof(patch), L"Disable DoF", 0);
 }
 
 uintptr_t fVignette_Address;
@@ -85,8 +90,7 @@ void __attribute__((naked)) DisableVignetteAsm()
     __asm
     {
         // original code
-        mulss xmm5, xmm0;
-        movss xmm0, [rcx];
+        movss xmm0, dword ptr [rbx + 0x68];
 
         // backup xmm1 value
         push rcx;
@@ -108,28 +112,26 @@ void __attribute__((naked)) DisableVignetteAsm()
         movss dword ptr [rcx], xmm0;
 
         pop rcx;
+
+        // original code
+        movss xmm1, dword ptr [rbx + 0x6C];
+
         jmp [rip + DisableVignetteReturnAddress];
     }
 }
 
 void DisableVignette(void)
 {
-    // Load fVignetteFind = 0x3E333333 (approx. 0.174)
-    const unsigned char iVignetteFind[] = { 0x33, 0x33, 0x33, 0x3E };
+    // Load fVignetteFind = 0x3E800000 (0.25)
+    const unsigned char iVignetteFind[] = { 0x00, 0x00, 0x80, 0x3E };
     memcpy(&fVignetteFind, iVignetteFind, sizeof(iVignetteFind));
     // Load fVignetteReplace
     fVignetteReplace = 1.0;
     // Find actual vignette address (this is necessary because writepatchpattern_hook requires at least 14 bytes of instructions to work)
-    fVignette_Address = ReadLEA32(L"F3 0F 59 E8 F3 0F 10 01 F3 0F 11 05 ?? ?? ?? ?? F3 41 0F 10 09", L"test", 8, 12, 8);
+    fVignette_Address = ReadLEA32(L"F3 0F 10 43 68 F3 0F 11 05 ?? ?? ?? ?? F3 0F 10 4B 6C", L"test", 5, 5+4, 8);
 
     // Finally, inject code
-    WritePatchPattern_Hook(L"F3 0F 59 E8 F3 0F 10 01 F3 0F 11 05 ?? ?? ?? ?? F3 41 0F 10 09", 16, L"Disable Vignette", 0, (void*)&DisableVignetteAsm, &DisableVignetteReturnAddress);
-}
-
-void DisableSharpness(void)
-{
-    const unsigned char patch[] = { 0x00, 0x00 };
-    WritePatchPattern(L"0F 28 C2 C7 05 ?? ?? ?? 00 00 00 80 3F", patch, sizeof(patch), L"Disable Sharpness", 11);
+    WritePatchPattern_Hook(L"F3 0F 10 43 68 F3 0F 11 05 ?? ?? ?? ?? F3 0F 10 4B 6C", 18, L"Disable Vignette", 0, (void*)&DisableVignetteAsm, &DisableVignetteReturnAddress);
 }
 
 DWORD __stdcall Main(void*)
@@ -147,8 +149,6 @@ DWORD __stdcall Main(void*)
         DisableDoF();
     if (bDisableVignette)
         DisableVignette();
-    if (bDisableSharpness)
-        DisableSharpness();
 
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
     fclose(fp_log);
