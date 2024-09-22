@@ -140,7 +140,11 @@ DWORD __stdcall Main(void*)
     wchar_t LogPath[_MAX_PATH] = { 0 };
     wcscpy_s(exePath, _countof(exePath), GetRunningPath(exePath));
     _snwprintf_s(LogPath, _countof(LogPath), _TRUNCATE, L"%s\\%s", exePath, _PROJECT_LOG_PATH);
-    LoggingInit(_PROJECT_NAME, LogPath);
+
+    // Disable logging as this game loads the ASI twice for some reason.
+    // This will otherwise incur into a permission denied error since the log file
+    // is not closed yet for the second process.
+    //LoggingInit(_PROJECT_NAME, LogPath);
     ReadConfig();
 
     if (bDisableTAA)
@@ -151,7 +155,7 @@ DWORD __stdcall Main(void*)
         DisableVignette();
 
     LOG(L"Shutting down " wstr(fp_log) " file handle.\n");
-    fclose(fp_log);
+    //fclose(fp_log);
     return true;
 }
 
