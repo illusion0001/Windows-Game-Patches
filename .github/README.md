@@ -110,6 +110,22 @@
 </details>
 <details><summary>
 
+### God of War: Ragnarök
+</summary>
+
+  - Disable TAA
+  - Disable Static Vignette
+  - Disable Depth of Field
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game folder.
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
+  - `GoWR.NoTAA.asi`
+</details>
+<details><summary>
+
 ### HITMAN 3
 </summary>
 
