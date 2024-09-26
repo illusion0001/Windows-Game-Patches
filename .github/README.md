@@ -61,7 +61,36 @@
   - `BrightMemoryInfinite.NoTAA.asi`
 </details>
 <details><summary>
-  
+
+### Dead Space (2023)
+</summary>
+
+  - Disable Forced TAA
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the root game folder.
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
+  - `DeadSpace.NoTAA.asi`
+</details>
+<details><summary>
+
+
+### Dragon's Dogma 2
+</summary>
+
+  - Disable Forced Sharpening
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Download [REFramework](https://github.com/praydog/REFramework) and extract `dinput8.dll` into the game root folder.
+  - Extract `DD2.Sharpness.dll` from the release zip in the folder `Dragons Dogma 2\reframework\plugins`.
+
+</details>
+<details><summary>
+
 ### Death Stranding (original and Director's Cut)
 </summary>
 
