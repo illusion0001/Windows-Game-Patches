@@ -184,7 +184,22 @@
   - `LiesOfP.NoTAA.asi`
 </details>
 <details><summary>
-  
+
+### LEGO Horizon Adventures
+</summary>
+
+  - Disable TAA
+  - Disable Depth of Field
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the Win64 folder. (`LEGO Horizon Adventures\Glow\Binaries\Win64\`).
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
+  - `LegoHorizonAdventures.NoTAA.asi`
+</details>
+<details><summary>
+ 
 ### Marvel's Guardians of the Galaxy
 </summary>
 
