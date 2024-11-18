@@ -13,6 +13,10 @@ extern struct tm timeinfo;
 #define str(s) #s
 #define xstr(s) str(s)
 
+#define GET_KEY(key, section, as_type, default_) key = config[section][#key].as<as_type>(default_); printf_s("" #key ": %d\n", key)
+#define GET_KEY_FMT(key, section, as_type, default_, fmt) key = config[section][#key].as<as_type>(default_); printf_s("" #key ": " fmt "\n", key)
+#define GET_KEY_BOOL(key, section ,as_type ,default_) key = config[section][#key].as<as_type>(default_); printf_s("" #key ": %s\n", key ? "true" : "false")
+
 void log_time(void);
 void file_log(const wchar_t* fmt, ...);
 void file_log2(const wchar_t* fmt, ...);
