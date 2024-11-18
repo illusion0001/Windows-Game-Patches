@@ -53,17 +53,17 @@ void ReadConfig(void)
 
 void ForceTAAOff(void)
 {
-    const unsigned char patch[] = { 0x33, 0xD2, 0x90 }; 
+    static const unsigned char patch[] = { 0x33, 0xD2, 0x90 }; 
     // E8 4FE0C8FF | call eldenring.7FF699AB3D30
-    // 8B53 28     | mov edx, dword ptr ds : [rbx + 28]         --> 33D2 | xor edx, edx
+    // 8B53 28     | mov edx, dword ptr ds : [rbx + 2C]         --> 33D2 | xor edx, edx
     //                                                              90   | nop
     // 48 8BCF     | mov rcx, rdi
-    WritePatchPattern(L"E8 ?? ?? ?? ?? 8B 53 28 48 8B CF", patch, sizeof(patch), L"Force TAA Off", 5);
+    WritePatchPattern(L"E8 ?? ?? ?? ?? 8B 53 2C 48 8B CF", patch, sizeof(patch), L"Force TAA Off", 5);
 }
 
 void DisableCA(void)
 {
-    const unsigned char patch[] = { 0x33, 0xC0, 0x90 };
+    static const unsigned char patch[] = { 0x33, 0xC0, 0x90 };
     // 8B42 38       | mov eax, dword ptr ds : [rdx + 38]       --> 33C0 | xor eax, eax
     //                                                              90   | nop
     // 8981 DC000000 | mov dword ptr ds : [rcx + DC] , eax
