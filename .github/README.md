@@ -70,9 +70,16 @@
 #### Installation
 
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
-  - Extract the following contents of the release zip into the root game folder.
-  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
-  - `DeadSpace.NoTAA.asi`
+  - *This patch has no ini file! meaning TAA will be disabled without any config adjustments.*
+- Extract the following contents of the release zip into the root game folder.
+  - Extract `dinput8.dll` from zip `!ASI_Loader_x64` and rename to `winmm.dll` and copy to game folder.
+  - Extract `DeadSpace.NoTAA.asi` to game folder.
+  - Create `winmm.ini` and add the following to the new created file: (See [#36](https://github.com/illusion0001/Windows-Game-Patches/issues/36#issuecomment-2525569596))
+    ```ini
+    [GlobalSets]
+    DontLoadFromDllMain=0
+    ```
+
 </details>
 <details><summary>
 
