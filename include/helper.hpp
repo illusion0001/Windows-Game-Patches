@@ -29,11 +29,15 @@ void WritePatchAddressFloat64(uint64_t Patch_Address, const double* Patch_Bytes,
 wchar_t* GetRunningPath(wchar_t* output);
 wchar_t* GetModuleName(wchar_t* output);
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
+void Make32to64Call(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name);
 void Make32to64Hook(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name);
 void Make32Hook(void* source_target, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* target_jmp_name);
 void Make64Hook(void* source_target, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* target_jmp_name);
 uintptr_t ReadLEA32(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset, size_t lea_size, size_t lea_opcode_size);
 uintptr_t ReadLEA32(uintptr_t Address, const wchar_t* Pattern_Name, size_t offset, size_t lea_size, size_t lea_opcode_size);
+
+#define MAKE32HOOK(src,mid,dest,size) Make32to64Hook((void*)(src),(void*)(mid),(void*)(dest),size,TEXT(#src) " Size: " #size ,TEXT(#mid),TEXT(#dest))
+#define MAKE32CALL(src,mid,dest,size) Make32to64Call((void*)(src),(void*)(mid),(void*)(dest),size,TEXT(#src) " Size: " #size ,TEXT(#mid),TEXT(#dest))
 
 #define SID(str) ToStringId64(str)
 typedef uint64_t StringId64;
