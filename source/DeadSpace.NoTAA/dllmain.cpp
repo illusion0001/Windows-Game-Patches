@@ -4,17 +4,44 @@
 
 HMODULE baseModule {};
 
-#define wstr(s) L#s
-#define wxstr(s) wstr(s)
 #define EXE_NAME "Dead Space.exe"
 #define PROJECT_NAME "DeadSpace.NoTAA"
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 
+static uintptr_t g_PostProcessPtr{};
+static int g_AntiAliasOffset{};
+
+static void __attribute__((naked)) WritePostProcessPtrAsm()
+{
+    __asm
+    {
+        // rax will be overwriten so lets use it
+        // read original ptr
+        mov rax, qword ptr[g_PostProcessPtr];
+        // write it back
+        mov qword ptr[rax], rcx;
+        // read PostProcess AntiAliasing offset
+        movsxd rax, dword ptr[g_AntiAliasOffset];
+        // write it with None
+        mov dword ptr[rcx + rax], 0;
+        ret;
+    }
+}
+
 static void DisableTAA()
 {
-    // This will stop working when game is updated and RIP is shifted
-    const uint8_t PostAA_Mode0[] = { 0x83, 0xC1, 0x07, 0x90, 0x90, 0x48, 0x63, 0xC1 };
-    WritePatchPattern(L"83 F9 07 77 56 48 63 C1 48 8D 15 C1 31 4F FC", PostAA_Mode0, sizeof(PostAA_Mode0), L"Disable TAA", 0);
+    const uintptr_t WritePostProcessPtr = FindAndPrintPatternW(L"48 89 0D ? ? ? ? 48 8B 83 ? ? ? ? 48 85 C0", L"WritePostProcessPtr");
+    const uintptr_t ReadAntiAliasOffset = FindAndPrintPatternW(L"8B 8B ? ? ? ? 8D 41 FF 83 F8 02", L"ReadAntiAliasOffset");
+    if (WritePostProcessPtr && ReadAntiAliasOffset)
+    {
+        g_PostProcessPtr = ReadLEA32(WritePostProcessPtr, L"g_PostProcessPtr", 0, 3, 7);
+        Memory::ReadBytes(ReadAntiAliasOffset + 2, &g_AntiAliasOffset, sizeof(g_AntiAliasOffset));
+        const uintptr_t int3 = FindAndPrintPatternW(L"C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC", L"ret;int3", 1);
+        if (g_PostProcessPtr && g_AntiAliasOffset && int3)
+        {
+            MAKE32CALL(WritePostProcessPtr, int3, &WritePostProcessPtrAsm, 7);
+        }
+    }
 }
 
 static void* Main(void* ptr)
