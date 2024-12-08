@@ -80,6 +80,12 @@ static void ShowConsole1()
 }
 
 #pragma GCC diagnostic warning "-Wunused-function"
+#define iMSGA(msg, title) MessageBoxA(0, msg, title, MB_ICONINFORMATION)
+#define iMSGW(msg, title) MessageBoxW(0, msg, title, MB_ICONINFORMATION)
+#define eMSGA(msg, title) MessageBoxA(0, msg, title, MB_ICONERROR)
+#define eMSGW(msg, title) MessageBoxW(0, msg, title, MB_ICONERROR)
+#define wMSGA(msg, title) MessageBoxA(0, msg, title, MB_ICONWARNING)
+#define wMSGW(msg, title) MessageBoxW(0, msg, title, MB_ICONWARNING)
 
 #pragma GCC diagnostic ignored "-Wmicrosoft-string-literal-from-predefined"
 // translates to `"foo():1234: "`
