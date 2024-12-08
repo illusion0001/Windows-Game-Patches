@@ -240,6 +240,23 @@ uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Patt
     return 0;
 }
 
+void Make32to64Call(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name)
+{
+    if (!source_target || !second_jmp || !target_jmp || source_size < 5)
+    {
+        LOG(L"Canoot create jump '%s' from '%s' to '%s'\n", source_name, second_jmp_name, target_jmp_name);
+        LOG(L"source_target: 0x%p\n", source_target);
+        LOG(L"source_size: %u bytes\n", source_size);
+        LOG(L"second_jmp: 0x%p\n", second_jmp);
+        LOG(L"target_jmp: 0x%p\n", target_jmp);
+        return;
+    }
+    Memory::CallFunction32((void*)source_target, (void*)second_jmp, source_size);
+    LOG(L"Created jump %s (0x%016llx) to %s (0x%016llx)\n", source_name, (uintptr_t)source_target, second_jmp_name, (uintptr_t)second_jmp);
+    Memory::DetourFunction64((void*)second_jmp, (void*)target_jmp, 14);
+    LOG(L"Created jump %s (0x%016llx) to %s (0x%016llx)\n", second_jmp_name, (uintptr_t)second_jmp, target_jmp_name, (uintptr_t)target_jmp);
+}
+
 void Make32to64Hook(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name)
 {
     if (!source_target || !second_jmp || !target_jmp || source_size < 5)
