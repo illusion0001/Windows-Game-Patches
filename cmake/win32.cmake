@@ -1,0 +1,42 @@
+# Win32 compile settings
+# When generating post cache in visual studio, CMAKE_BUILD_TYPE is always empty
+# So I set them in `CMAKE_C_FLAGS` + `CMAKE_CXX_FLAGS` instead
+# `target_compile_options` does not have a way to set for specific configs?
+
+ADD_DEFINITIONS(-DUNICODE)
+ADD_DEFINITIONS(-D_UNICODE)
+ADD_DEFINITIONS(-D_USRDLL)
+
+# https://stackoverflow.com/questions/41264827/setting-optimization-settings-in-visual-studio-through-cmake
+# https://github.com/fl0werD/rezombie/blob/fa28fc01bf5da5a22239587ca310e93b79cf3d20/cmake/Windows.cmake
+set(OPT_DEB
+""             # hack for visual studio??
+"/Gw-"         # Whole-program global data optimization
+"/Gy-"         # Function-level linking
+"/Od"          # Disable optimization
+"/Oy-"         # Omit frame pointer
+"/Zi"          # Generate complete debugging information
+)
+
+message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `${OPT_DEB}`")
+string(APPEND CMAKE_C_FLAGS_DEBUG "${OPT_DEB}")
+string(APPEND CMAKE_CXX_FLAGS_DEBUG "${OPT_DEB}")
+
+set(OPT_REL
+# ""           # hack for visual studio??
+"/O1"        # Create size code
+"/Ob1"       # Inline Function expansion (Only __inline (/Ob1))
+"/Os"        # Favor size code
+"/Oi"        # Generate intrinsic functions
+"/Oy-"       # Omit frame pointer
+"/Zi"        # Generate complete debugging information
+"/Zo-"       # Generate richer debugging information for optimized code
+)
+
+message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `${OPT_REL}`")
+string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO " ${OPT_REL}")
+string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " ${OPT_REL}")
+
+ADD_DEFINITIONS(-DPROJECT_NAME="${PROJECT_NAME}")
+ADD_DEFINITIONS(-D_PROJECT_NAME="${PROJECT_NAME}")
+
