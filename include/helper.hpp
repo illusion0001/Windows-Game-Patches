@@ -59,4 +59,8 @@ void SendInputWrapper(WORD inputKey);
 void CheckCooldown(bool isBenchmarking, size_t BenchmarkIndex);
 void CheckScriptFile();
 
-#define LOG(fmt, ...) file_log(L"%-24s:%u " fmt, __FUNCTIONW__, __LINE__, __VA_ARGS__);
+#pragma GCC diagnostic ignored "-Wmicrosoft-string-literal-from-predefined"
+// translates to `"foo():1234: "`
+// also workarounds intelisense thinking `__FUNCTION__` not exist
+#define FUNC_LINE __FUNCTION__ "():" xstr(__LINE__) ": "
+#define LOG(fmt, ...) file_log(L"" FUNC_LINE fmt, __VA_ARGS__)
