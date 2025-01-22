@@ -8,7 +8,6 @@ HMODULE baseModule{};
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define _PROJECT_NAME L"Uncharted4TLL.NoTAA"
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
 wchar_t exePath[_MAX_PATH] = { 0 };
