@@ -10,6 +10,7 @@ struct tm timeinfo;
 
 void log_time(void)
 {
+    return;
     wchar_t wtime[256];
     if (localtime_s(&timeinfo, &current_time) == 0 && std::wcsftime(wtime, _countof(wtime), L"%A %c", &timeinfo))
         fwprintf_s(fp_log, L"%-32s ", wtime);
@@ -17,12 +18,14 @@ void log_time(void)
 
 void file_log(const wchar_t* fmt, ...)
 {
-    if (!bLoggingEnabled || !fp_log)
-        return;
     log_time();
     va_list args;
     va_start(args, fmt);
-    vfwprintf_s(fp_log, fmt, args);
+    if (fp_log)
+    {
+        vfwprintf_s(fp_log, fmt, args);
+    }
+    vfwprintf_s(stdout, fmt, args);
     va_end(args);
 }
 
@@ -215,9 +218,9 @@ wchar_t* ConvertToWideChar(const char* input)
     return output;
 }
 
-uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset)
+uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset)
 {
-    size_t Address_Result = (size_t)Memory::PatternScanW(baseModule, Patch_Pattern);
+    size_t Address_Result = (size_t)Memory::PatternScanW(Module, Patch_Pattern);
     size_t Patch_Address = 0;
     if (Address_Result)
     {
@@ -238,6 +241,11 @@ uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Patt
         LogPatchFailed(Pattern_Name, Patch_Pattern);
     }
     return 0;
+}
+
+uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset)
+{
+    return FindAndPrintPatternW(baseModule, Patch_Pattern, Pattern_Name, offset);
 }
 
 void Make32to64Call(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name)
