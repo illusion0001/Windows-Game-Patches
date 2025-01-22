@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-ADD_DEFINITIONS(-DUNICODE)
-ADD_DEFINITIONS(-D_UNICODE)
-ADD_DEFINITIONS(-D_USRDLL)
+# Keep Debug and RelWithDebInfo, dont want other configs
+set(CMAKE_CONFIGURATION_TYPES "Debug;RelWithDebInfo" CACHE STRING "" FORCE)
 
 list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
