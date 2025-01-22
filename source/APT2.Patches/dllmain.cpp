@@ -6,7 +6,6 @@ HMODULE baseModule{};
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define PROJECT_NAME "APT2.Patches"
 
 // INI Variables
 bool bDisableTAA;
