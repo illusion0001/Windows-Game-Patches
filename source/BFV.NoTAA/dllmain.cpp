@@ -6,7 +6,6 @@ HMODULE baseModule = GetModuleHandle(NULL);
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define PROJECT_NAME "BFV.NoTAA"
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 
 wchar_t exePath[_MAX_PATH] = { 0 };
