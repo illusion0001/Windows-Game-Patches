@@ -62,6 +62,31 @@
 </details>
 <details><summary>
 
+### Crysis Warhead
+</summary>
+
+  - Restore Chicken Bullets
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - *This patch has no ini file!*
+- Extract the following contents of the release zip into the root game folder.
+  - Extract `dinput8.dll` from zip `!ASI_Loader_x64` and rename to `version.dll` and copy to game `Bin64` folder.
+  - Extract `CrysisWarhead.Patches.asi` to game `Bin64` folder.
+- Once in game, open console and type `chickens` to enable.
+
+#### Installation
+
+- Only 64 bit version of game is supported.
+  - Tested version is Steam 1.1.711
+- OS:
+  - Windows 7 x64 and newer:
+    - ASI Loader only supports Windows 7 due to missing `AcquireSRWlockExclusive` and few others in XP x64 kernel32.
+
+</details>
+<details><summary>
+
 ### Dead Space (2023)
 </summary>
 
