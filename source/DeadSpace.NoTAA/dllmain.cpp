@@ -5,7 +5,6 @@
 HMODULE baseModule {};
 
 #define EXE_NAME "Dead Space.exe"
-#define PROJECT_NAME "DeadSpace.NoTAA"
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 
 static uintptr_t g_PostProcessPtr{};

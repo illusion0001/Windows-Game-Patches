@@ -1,4 +1,7 @@
 #include "memory.hpp"
+#include "HDE/Table64.h"
+#include "HDE/HDE64.h"
+#include "HDE/HDE64.c"
 
 // TODO: Find out where this came from
 // https://github.com/Lyall/IshinFix/blob/eae0caeecdd17e2959e1a44802c6ea54e19fee03/src/helper.hpp#L6
@@ -6,17 +9,50 @@
 namespace Memory
 {
 
+    void MakeNops(const uintptr_t address, const int numOfNops)
+    {
+        FillInt(address, 0x90, numOfNops);
+    }
+    void FillInt(const uintptr_t address, const int intNum, const int numOfNops)
+    {
+        if (!address || !numOfNops)
+        {
+            return;
+        }
+        DWORD curProtection{};
+        VirtualProtect((LPVOID)address, numOfNops, PAGE_EXECUTE_READWRITE, &curProtection);
+        memset((LPVOID)address, intNum, numOfNops);
+        VirtualProtect((LPVOID)address, numOfNops, curProtection, &curProtection);
+        printf_s("Write %d bytes of 0x%08x to 0x%llx\n", numOfNops, intNum, address);
+    }
+    void PatchBytes(uintptr_t address, uintptr_t pattern, unsigned int numBytes)
+    {
+        PatchBytes(address, (void*)pattern, numBytes);
+    }
     void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes)
     {
-        DWORD oldProtect;
+        if (!address || !pattern || !numBytes)
+        {
+            return;
+        }
+        DWORD oldProtect{}, temp{};
         VirtualProtect((LPVOID)address, numBytes, PAGE_EXECUTE_READWRITE, &oldProtect);
         memcpy((LPVOID)address, pattern, numBytes);
-        VirtualProtect((LPVOID)address, numBytes, oldProtect, &oldProtect);
+        VirtualProtect((LPVOID)address, numBytes, oldProtect, &temp);
+        printf_s("Write %d bytes of 0x%llx\n", numBytes, address);
     }
 
     void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size)
     {
+        if (!address || !buffer || !size)
+        {
+            return;
+        }
+        DWORD oldProtect{}, temp{};
+        VirtualProtect((LPVOID)address, size, PAGE_EXECUTE_READWRITE, &oldProtect);
         memcpy(buffer, reinterpret_cast<const void*>(address), size);
+        VirtualProtect((LPVOID)address, size, oldProtect, &temp);
+        printf_s("Read %lld bytes of 0x%llx to 0x%p\n", size, address, buffer);
     }
 
     uintptr_t ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets)
@@ -33,15 +69,20 @@ namespace Memory
         return base;
     }
 
-    bool DetourFunction32(void* src, void* dst, int len)
+    constexpr int jmpcallbytes = 5;
+
+    void DetourFunction32(void* src, void* dst, int len)
     {
 
+        if (!src || !dst || len < jmpcallbytes)
+        {
+            return;
+        }
+        MakeNops((uintptr_t)src, len);
         DWORD curProtection;
         VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &curProtection);
 
-        memset(src, 0x90, len);
-
-        uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - 5;
+        const uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - jmpcallbytes;
 
         *(BYTE*)src = 0xE9;
         *(uint32_t*)((uintptr_t)src + 1) = relativeAddress;
@@ -49,90 +90,129 @@ namespace Memory
         DWORD temp;
         VirtualProtect(src, len, curProtection, &temp);
 
-        return true;
     }
 
-    void* DetourFunction64(void* pSource, void* pDestination, DWORD dwLen)
+    void DetourFunction32(uintptr_t src, uintptr_t dst, int len)
     {
-        constexpr DWORD MinLen = 14;
-
-        if (dwLen < MinLen)
+        if (!src || !dst || len < jmpcallbytes)
         {
-            return nullptr;
+            return;
         }
-
-        BYTE stub[] = {
-        0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
-        };
-
-        DWORD dwOld = 0;
-        VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
-
-        // orig
-        memcpy(stub + 6, &pDestination, 8);
-        memcpy(pSource, stub, sizeof(stub));
-
-        for (DWORD i = MinLen; i < dwLen; i++)
-        {
-            *(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
-        }
-
-        VirtualProtect(pSource, dwLen, dwOld, &dwOld);
-        return pDestination;
+        DetourFunction32((void*)src, (void*)dst, len);
     }
 
-    bool CallFunction32(void* src, void* dst, int len)
+    const static BYTE JMPstub[] = {
+    0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
+    };
+
+    const static BYTE CALLstub[] = {
+    0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, // call qword ptr [$+8]
+    0xEB, 0x08, // jmp $+8
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
+    };
+
+    void DetourFunction64(const void* pSource, const void* pDestination, const DWORD dwLen, const BOOL callMode)
     {
-        if (!src || !dst || len < 5)
+
+        const BYTE* stub = callMode ? CALLstub : JMPstub;
+        const size_t stubSize = callMode ? sizeof(CALLstub) : sizeof(JMPstub);
+        const size_t stubOffset = stubSize - sizeof(uintptr_t);
+
+        if (!pSource || !pDestination || dwLen < stubSize)
         {
-            return false;
+            return;
         }
-        DWORD curProtection;
-        VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &curProtection);
-
-        memset(src, 0x90, len);
-
-        uintptr_t relativeAddress = ((uintptr_t)dst - (uintptr_t)src) - 5;
-
-        *(BYTE*)src = 0xE8;
-        *(uint32_t*)((uintptr_t)src + 1) = relativeAddress;
-
-        DWORD temp;
-        VirtualProtect(src, len, curProtection, &temp);
-
-        return true;
+        const uintptr_t upSource = (uintptr_t)pSource;
+        MakeNops(upSource, dwLen);
+        PatchBytes(upSource, stub, stubSize);
+        PatchBytes(upSource + stubOffset, &pDestination, sizeof(pDestination));
+    }
+    void DetourFunction64(uintptr_t pSource, uintptr_t pDestination, DWORD dwLen)
+    {
+        DetourFunction64((void*)pSource, (void*)pDestination, dwLen);
     }
 
-    void* CallFunction64(void* pSource, void* pDestination, DWORD dwLen)
+    void CallFunction32(void* src, void* dst, int len)
     {
-        constexpr DWORD MinLen = 16;
-
-        if (! pSource || !pDestination || dwLen < MinLen)
+        if (!src || !dst || len < jmpcallbytes)
         {
-            return nullptr;
+            return;
+        }
+        DetourFunction32(src, dst, len);
+        static const uint8_t call[] = { 0xe8 };
+        PatchBytes((uintptr_t)src, call, sizeof(call));
+    }
+
+    void CallFunction64(void* pSource, void* pDestination, DWORD dwLen)
+    {
+        DetourFunction64(pSource, pDestination, dwLen, true);
+    }
+
+    // https://github.com/GoldHEN/GoldHEN_Plugins_SDK/blob/bcea3c7ef01dac6d7f9f49ebf9e90fe66d86f5f7/source/Detour.c#L26-L41
+    static size_t GetInstructionSize(uint64_t Address, size_t MinSize)
+    {
+        size_t InstructionSize = 0;
+
+        if (!Address)
+        {
+            return 0;
         }
 
-        BYTE stub[] = {
-        0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, // call qword ptr [$+8]
-        0xEB, 0x08, // jmp $+8
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
-        };
-
-        DWORD dwOld = 0;
-        VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
-
-        // orig
-        memcpy(stub + 8, &pDestination, 8);
-        memcpy(pSource, stub, sizeof(stub));
-
-        for (DWORD i = MinLen; i < dwLen; i++)
+        while (InstructionSize < MinSize)
         {
-            *(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
+            // hde64_disasm always clears it
+            hde64s hs{};
+            uint32_t temp = hde64_disasm((void*)(Address + InstructionSize), &hs);
+
+            if (hs.flags & F_ERROR)
+            {
+                return 0;
+            }
+
+            InstructionSize += temp;
         }
 
-        VirtualProtect(pSource, dwLen, dwOld, &dwOld);
-        return pDestination;
+        return InstructionSize;
+    }
+
+    // Allocation-less version of a Prologue hook
+    // I use pre-allocated `returnPad`, copy instructions to it and write instructions to it
+    uintptr_t CreatePrologueHook(const uintptr_t address, const int min_instruction_size)
+    {
+        static BOOL once{};
+        static size_t caveInstSize = 0;
+        if (!once)
+        {
+            memset(cavePad, 0xcc, sizeof(cavePad));
+            DWORD temp = caveInstSize = 0;
+            VirtualProtect(cavePad, sizeof(cavePad), PAGE_EXECUTE_WRITECOPY, &temp);
+            once = true;
+        }
+        if (!address || min_instruction_size < 5)
+        {
+            return 0;
+        }
+        const size_t int_size = GetInstructionSize(address, min_instruction_size);
+        if (!int_size)
+        {
+            return 0;
+        }
+        const uintptr_t ucavePad = (uintptr_t)&cavePad;
+        const uintptr_t ucavePadNew = ucavePad + caveInstSize;
+        const size_t addroffset = (sizeof(JMPstub) - sizeof(uintptr_t));
+        const uintptr_t retaddr = address + int_size;
+        // prevents memcpy inlining
+        PatchBytes(ucavePadNew, address, int_size);
+        PatchBytes(ucavePadNew + int_size, &JMPstub, addroffset);
+        PatchBytes(ucavePadNew + int_size + addroffset, &retaddr, sizeof(retaddr));
+        const uintptr_t caveAddr = ucavePad + caveInstSize;
+        caveInstSize += int_size + sizeof(JMPstub);
+        if (ucavePad != ucavePadNew)
+        {
+            printf_s("ucavePad: 0x%llx + 0x%llx -> ucavePadNew: 0x%llx\n", ucavePad, caveInstSize, ucavePadNew);
+        }
+        return caveAddr;
     }
 
     HMODULE GetThisDllHandle()
@@ -240,6 +320,11 @@ namespace Memory
         return nullptr;
     }
 
+    uint8_t* char_Scan(void* module, const char* value)
+    {
+        return char_Scan(module, value, strlen(value));
+    }
+
     uint8_t* char_Scan(void* module, const char* value, size_t value_len)
     {
         auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
@@ -249,6 +334,28 @@ namespace Memory
         for (size_t i = 0; i < sizeOfImage - value_len; ++i) {
             const char* currentValue = reinterpret_cast<const char*>(&scanBytes[i]);
             if (strncmp(currentValue, value, value_len) == 0) {
+                return &scanBytes[i];
+            }
+        }
+        return nullptr;
+    }
+
+    uint8_t* wchar_Scan(void* module, const wchar_t* value)
+    {
+        return wchar_Scan(module, value, wcslen(value));
+    }
+
+    uint8_t* wchar_Scan(void* module, const wchar_t* value, size_t value_len)
+    {
+        auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+        auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>((std::uint8_t*)module + dosHeader->e_lfanew);
+        auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+        auto scanBytes = reinterpret_cast<std::uint8_t*>(module);
+        for (size_t i = 0; i < sizeOfImage - value_len; ++i)
+        {
+            const wchar_t* currentValue = reinterpret_cast<const wchar_t*>(&scanBytes[i]);
+            if (wcscmp(currentValue, value) == 0)
+            {
                 return &scanBytes[i];
             }
         }
@@ -287,6 +394,7 @@ namespace Memory
         return nullptr;
     }
 
+#if !defined(WINXP)
     std::string GetVersionString()
     {
         auto hInst = GetModuleHandle(NULL);
@@ -355,4 +463,5 @@ namespace Memory
         VerQueryValue(buffer.data(), query, (LPVOID*)&p, &n_chars);
         return std::wstring(p, p + n_chars);
     }
+#endif
 }

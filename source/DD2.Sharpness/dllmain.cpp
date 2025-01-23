@@ -6,7 +6,6 @@ HMODULE baseModule{};
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define _PROJECT_NAME "DD2.Sharpness"
 #define _PROJECT_LOG_PATH _PROJECT_NAME L".log"
 
 const wchar_t* g_ProgramName = L"" _PROJECT_NAME;
