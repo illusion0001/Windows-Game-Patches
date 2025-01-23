@@ -4,8 +4,6 @@
 
 HMODULE baseModule {};
 
-#define PROJECT_NAME "ACUnity.Patches"
-
 static void Main2()
 {
     uintptr_t LogoVideosByte = FindAndPrintPatternW(L"80 3d ba ? ? ? ? 48 89 b4 24 c0 00 00 00 48 89 bc 24 c8 00 00 00 0f 85 ? ? ? ? 80 3d a1 ? ? ? ? 0f 85 ? ? ? ? 80 3d 98 ? ? ? ? 74 ?", L"LogoVideosByte");

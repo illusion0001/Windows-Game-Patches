@@ -6,7 +6,6 @@ HMODULE baseModule = GetModuleHandle(NULL);
 
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define _PROJECT_NAME L"ACMirage.NoTAA"
 
 // INI Variables
 bool bDisableTAA {};
