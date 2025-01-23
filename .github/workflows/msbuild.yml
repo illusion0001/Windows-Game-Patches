@@ -97,6 +97,11 @@ jobs:
         if: env.WANT_RELEASE == 'true'
         run: |
           $hashMarkdown = @'
+
+          ## ⚠️ Requires [7-Zip](https://github.com/ip7z/7zip/releases/latest) for extracting archive files. ⚠️
+
+          - [7z x86](https://github.com/ip7z/7zip/releases/download/24.09/7z2409.exe)
+          - [7z x64](https://github.com/ip7z/7zip/releases/download/24.09/7z2409-x64.exe)
           
           <details>
           <summary>Readme Contents (Click to Expand)</summary>
