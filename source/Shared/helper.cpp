@@ -392,6 +392,8 @@ void SendInputWrapper(WORD inputKey)
 #define str(s) #s
 #define xstr(s) str(s)
 
+#if !defined(WINXP)
+
 static void CooldownDefault(const wchar_t* inifile)
 {
     HANDLE fd = CreateFile(inifile, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
@@ -470,3 +472,4 @@ void CheckScriptFile()
         }
     }
 }
+#endif
