@@ -394,6 +394,7 @@ namespace Memory
         return nullptr;
     }
 
+#if !defined(WINXP)
     std::string GetVersionString()
     {
         auto hInst = GetModuleHandle(NULL);
@@ -462,4 +463,5 @@ namespace Memory
         VerQueryValue(buffer.data(), query, (LPVOID*)&p, &n_chars);
         return std::wstring(p, p + n_chars);
     }
+#endif
 }
