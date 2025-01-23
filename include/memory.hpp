@@ -35,7 +35,9 @@ namespace Memory
     uint8_t* wchar_Scan(void* module, const wchar_t* value);
     uint8_t* u32_Scan(void* module, uint32_t value);
     uint8_t* u64_Scan(void* module, uint64_t value);
+#if !defined(WINXP)
     std::string GetVersionString();
     std::vector<int> string_to_ints(const std::string& s, char delimiter);
     std::wstring GetVersionProductName();
+#endif
 }
