@@ -9,13 +9,19 @@ on:
       - '**/*.md'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
     env:
-      BUILD_CONFIGURATION: ${{ github.workspace }}/out/build/x64-release
+      BUILD_PRESET: vs2022
+      CONFIGURATION: RelWithDebInfo
       INSTALL_CONFIGURATION: ${{ github.workspace }}/out/install
-      BRANCH: ${{ github.ref_name }}
+      DLL_OUT: x64_lib
+      WANT_RELEASE: true
     permissions:
       contents: write
     steps:
@@ -27,33 +33,39 @@ jobs:
       - name: Setup environment variables
         run: |
           $cmdOutput = Split-Path -Path $pwd -Leaf
-          $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)"
+          $branch = "${{ github.ref_name }}"
+          $branch = $branch.replace('/','-')
+          $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)+${{ github.run_number }}-branch-$branch"
           echo "commit_ver=$_ver" >> "$Env:GITHUB_ENV"
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
-      - name: Setup ScriptHook SDK
-        if: false
-        working-directory: source/RDR3.Patches/scripthook_sdk
+          echo "zip_file=${{ github.workspace }}\$cmdOutput-$_ver.7z" >> "$Env:GITHUB_ENV"
+          echo "zip_file_pdb=${{ github.workspace }}\$cmdOutput-$_ver-pdb.7z" >> "$Env:GITHUB_ENV"
+          echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
+          echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
+          $push = "false"
+          if ("${{ github.event_name }}" -ieq "push" -or "${{ github.event_name }}" -ieq "pull_request")
+          {
+              $push = "true"
+          }
+          echo "IS_PUSH=$push" >> "$Env:GITHUB_ENV"
+          echo "BRANCH=$branch" >> "$Env:GITHUB_ENV"
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@main
+      - name: Setup install folder for CI
         run: |
-          $ScriptHookZip = "ScriptHookRDR2_SDK_1.0.1207.73.zip"
-          # Curl cannot download from this url
-          # So upload it ourselves
-          # curl -fLJO http://www.dev-c.com/files/$ScriptHookZip
-          curl -fLJO https://github.com/illusion0001/ScriptHook-Mirrors/releases/download/mirrors/$ScriptHookZip
-          7z x $ScriptHookZip -aos
-      - name: Setup VS environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-      - name: Setup CMake Project (Release x64)
-        run: cmake --preset x64-release
-      - name: Build CMake Project (Release x64)
-        run: cmake --build ${{ env.BUILD_CONFIGURATION }}
-      - name: Install CMake Project (Release x64)
-        run: cmake --install ${{ env.BUILD_CONFIGURATION }}
+          $myFile = "${{github.workspace}}\CMakePresets.json"
+          (Get-Content $myFile ).Replace('"installDir": "${sourceDir}/out/install",', '"installDir": "${sourceDir}/out/install/${{ env.DLL_OUT }}",') | Set-Content $myFile
+          cat $myFile
+      - name: Setup CMake Project (${{ env.CONFIGURATION }})
+        run: cmake --preset ${{ env.BUILD_PRESET }}
+      - name: Build CMake Project (${{ env.CONFIGURATION }})
+        run: cmake --build ${{ env.BUILD_CONFIGURATION }} --config ${{ env.CONFIGURATION }} -- /verbosity:normal
+      - name: Install CMake Project (${{ env.CONFIGURATION }})
+        run: cmake --install ${{ env.BUILD_CONFIGURATION }} --config ${{ env.CONFIGURATION }}
       - name: Bundle loaders and data files
         working-directory: ${{ env.INSTALL_CONFIGURATION }}
         run: |
-          Rename-Item x64-release x64
+          mkdir x64
           $ScriptHookZip = "ScriptHookRDR2_1.0.1491.17.zip"
           $ASI_win32 = "Ultimate-ASI-Loader.zip"
           $ASI_x64 = "Ultimate-ASI-Loader_x64.zip"
@@ -67,10 +79,22 @@ jobs:
           # Copy-Item bin/ScriptHookRDR2.dll ./x64/RDR3.Patches/
           # Copy config files
           Copy-Item -Recurse -Force ${{ github.workspace }}/data/*/ ./
+          Copy-Item -Recurse -Force x64/* ${{ env.DLL_OUT }}
       - name: Clean output folder
-        run: Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.lib
+        run: |
+          Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.lib
+          $Folders = Get-ChildItem -Path ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }} -Directory
+          foreach ($Folder in $Folders)
+          {
+              $HasRequiredFiles = Get-ChildItem -Path "$($Folder.FullName)\*" -Include *.asi,*.dll
+              if ($HasRequiredFiles.Count -eq 0)
+              {
+                  echo "$($Folder.FullName) not included"
+                  Remove-Item -Path $Folder.FullName -Recurse -Force
+              }
+          }
       - name: Generate Hash file
-        working-directory: ${{ env.INSTALL_CONFIGURATION }}/x64
+        working-directory: ${{ env.INSTALL_CONFIGURATION }}
         run: |
           $asiFiles = Get-ChildItem -Path "." -Filter "*.asi" -Recurse
           foreach ($file in $asiFiles)
@@ -79,27 +103,32 @@ jobs:
               $hash | Out-File -Append -FilePath "${{ env.INSTALL_CONFIGURATION }}\hashes.txt"
               echo $hash
           }
-      - name: Upload artifact
-        if: github.event_name != 'workflow_dispatch'
+      - name: Upload artifact (PDB)
+        if: env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}-x64-pdb
           path: |
-            ${{ env.INSTALL_CONFIGURATION }}/x64
+            ${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}
             ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
-      - name: Upload artifact (PDB)
-        if: github.event_name != 'workflow_dispatch'
+      - name: Upload artifact
+        if: env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}-x64
           path: |
-            ${{ env.INSTALL_CONFIGURATION }}/x64
-            !${{ env.INSTALL_CONFIGURATION }}/x64/**/*.pdb
-            ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
+            ${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}
+            !${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}/**/*.pdb
+            ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
       - name: Prepare Release
-        if: github.event_name == 'workflow_dispatch'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         run: |
           $hashMarkdown = @'
+
+          ## ⚠️ Requires [7-Zip](https://github.com/ip7z/7zip/releases/latest) for extracting archive files. ⚠️
+
+          - [7z x86](https://github.com/ip7z/7zip/releases/download/24.09/7z2409.exe)
+          - [7z x64](https://github.com/ip7z/7zip/releases/download/24.09/7z2409-x64.exe)
           
           <details>
           <summary>Readme Contents (Click to Expand)</summary>
@@ -118,22 +147,14 @@ jobs:
           </details>
           '@ -f (Get-Content ".github\README.md" | Out-String), (Get-Content "${{ env.INSTALL_CONFIGURATION }}\hashes.txt" | Out-String)
           $hashMarkdown | Out-File -FilePath hash.md
-          Get-Content hash.md
-
-          $compress = @{
-            Path             = "${{ env.INSTALL_CONFIGURATION }}\x64", "${{ env.INSTALL_CONFIGURATION }}\hashes.txt"
-            DestinationPath  = "${{ env.zip_name }}-x64-pdb.zip"
-          }
-          Compress-Archive @compress
-
+          # Get-Content hash.md
+          7z a -mx9 -mtm- "${{ env.zip_file_pdb }}" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
+          7z a -mx9 -mtm- "${{ env.zip_file_pdb }}" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
           Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.pdb
-          $compress = @{
-            Path             = "${{ env.INSTALL_CONFIGURATION }}\x64", "${{ env.INSTALL_CONFIGURATION }}\hashes.txt"
-            DestinationPath  = "${{ env.zip_name }}-x64.zip"
-          }
-          Compress-Archive @compress
+          7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
+          7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
       - name: Branch Check
-        if: github.event_name == 'workflow_dispatch'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         run: |
           $prerelease = ""
           if ("${{ env.BRANCH }}" -ieq "main")
@@ -148,7 +169,7 @@ jobs:
           }
           echo "prerelease=$prerelease" >> $Env:GITHUB_ENV
       - name: Create Release
-        if: github.event_name == 'workflow_dispatch'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: '& gh release create ${{ env.commit_ver }} ${{ env.zip_name }}-x64-pdb.zip ${{ env.zip_name }}-x64.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
+        run: '& gh release create ${{ env.commit_ver }} "${{ env.zip_file_pdb }}" "${{ env.zip_file }}" --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
