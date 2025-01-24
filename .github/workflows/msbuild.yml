@@ -20,7 +20,6 @@ jobs:
       BUILD_PRESET: vs2022
       CONFIGURATION: RelWithDebInfo
       INSTALL_CONFIGURATION: ${{ github.workspace }}/out/install
-      BRANCH: ${{ github.ref_name }}
       DLL_OUT: x64_lib
       WANT_RELEASE: true
     permissions:
@@ -34,8 +33,9 @@ jobs:
       - name: Setup environment variables
         run: |
           $cmdOutput = Split-Path -Path $pwd -Leaf
-          $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)+${{ github.run_number }}-branch-${{ env.BRANCH }}"
-          $_ver = $_ver.replace('/','|')
+          $branch = ${{ github.ref_name }}
+          $branch = $branch.replace('/','|')
+          $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)+${{ github.run_number }}-branch-$branch"
           echo "commit_ver=$_ver" >> "$Env:GITHUB_ENV"
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
