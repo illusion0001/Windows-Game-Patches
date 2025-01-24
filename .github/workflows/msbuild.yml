@@ -41,7 +41,7 @@ jobs:
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
           echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
           $push = "false"
-          if ("${{ github.event_name }}" -ieq "push" || "${{ github.event_name }}" -ieq "pull_request")
+          if ("${{ github.event_name }}" -ieq "push" -or "${{ github.event_name }}" -ieq "pull_request")
           {
               $push = "true"
           }
