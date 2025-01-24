@@ -38,6 +38,8 @@ jobs:
           $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)+${{ github.run_number }}-branch-$branch"
           echo "commit_ver=$_ver" >> "$Env:GITHUB_ENV"
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
+          echo "zip_file=${{ github.workspace }}\$cmdOutput-$_ver.7z" >> "$Env:GITHUB_ENV"
+          echo "zip_file_pdb=${{ github.workspace }}\$cmdOutput-$_ver-pdb.7z" >> "$Env:GITHUB_ENV"
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
           echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
           $push = "false"
@@ -146,11 +148,11 @@ jobs:
           '@ -f (Get-Content ".github\README.md" | Out-String), (Get-Content "${{ env.INSTALL_CONFIGURATION }}\hashes.txt" | Out-String)
           $hashMarkdown | Out-File -FilePath hash.md
           # Get-Content hash.md
-          7z a -mx9 -mtm- "${{ env.zip_name }}-x64-pdb.7z" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
-          7z a -mx9 -mtm- "${{ env.zip_name }}-x64-pdb.7z" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
+          7z a -mx9 -mtm- "${{ env.zip_file_pdb }}" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
+          7z a -mx9 -mtm- "${{ env.zip_file_pdb }}" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
           Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.pdb
-          7z a -mx9 -mtm- "${{ env.zip_name }}-x64.7z" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
-          7z a -mx9 -mtm- "${{ env.zip_name }}-x64.7z" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
+          7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
+          7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
       - name: Branch Check
         if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         run: |
@@ -170,4 +172,4 @@ jobs:
         if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: '& gh release create ${{ env.commit_ver }} "${{ env.zip_name }}-x64-pdb.7z" "${{ env.zip_name }}-x64.7z" --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
+        run: '& gh release create ${{ env.commit_ver }} "${{ env.zip_file_pdb }}" "${{ env.zip_file }}" --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
