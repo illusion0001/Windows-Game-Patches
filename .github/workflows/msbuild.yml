@@ -175,7 +175,7 @@ jobs:
           }
           echo "prerelease=$prerelease" >> $Env:GITHUB_ENV
       - name: Create Release
-        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true' && env.IS_PR == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: '& gh release create ${{ env.commit_ver }} "${{ env.zip_file_pdb }}" "${{ env.zip_file }}" --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
