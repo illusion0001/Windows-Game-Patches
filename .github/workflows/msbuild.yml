@@ -117,6 +117,7 @@ jobs:
             !${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}/**/*.pdb
             ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
       - name: Prepare Release
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         run: |
           $hashMarkdown = @'
 
