@@ -39,6 +39,12 @@ jobs:
           echo "zip_name=$cmdOutput-$_ver" >> "$Env:GITHUB_ENV"
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
           echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
+          $push = "false"
+          if ("${{ github.event_name }}" -ieq "push")
+          {
+              $push = "true"
+          }
+          echo "IS_PUSH=$push" >> "$Env:GITHUB_ENV"
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@main
       - name: Setup install folder for CI
@@ -94,7 +100,6 @@ jobs:
               echo $hash
           }
       - name: Prepare Release
-        if: env.WANT_RELEASE == 'true'
         run: |
           $hashMarkdown = @'
 
@@ -127,7 +132,7 @@ jobs:
           7z a -mx9 -mtm- "${{ env.zip_name }}-x64.7z" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
           7z a -mx9 -mtm- "${{ env.zip_name }}-x64.7z" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
       - name: Branch Check
-        if: env.WANT_RELEASE == 'true'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         run: |
           $prerelease = ""
           if ("${{ env.BRANCH }}" -ieq "main")
@@ -142,7 +147,7 @@ jobs:
           }
           echo "prerelease=$prerelease" >> $Env:GITHUB_ENV
       - name: Create Release
-        if: env.WANT_RELEASE == 'true'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: '& gh release create ${{ env.commit_ver }} "${{ env.zip_name }}-x64-pdb.7z" "${{ env.zip_name }}-x64.7z" --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md${{ env.prerelease }}'
