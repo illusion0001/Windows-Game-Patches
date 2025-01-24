@@ -100,7 +100,7 @@ jobs:
               $hash | Out-File -Append -FilePath "${{ env.INSTALL_CONFIGURATION }}\hashes.txt"
               echo $hash
           }
-      - name: Upload artifact
+      - name: Upload artifact (PDB)
         if: env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
@@ -108,7 +108,7 @@ jobs:
           path: |
             ${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}
             ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
-      - name: Upload artifact (PDB)
+      - name: Upload artifact
         if: env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
