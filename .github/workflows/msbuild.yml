@@ -46,6 +46,7 @@ jobs:
               $push = "true"
           }
           echo "IS_PUSH=$push" >> "$Env:GITHUB_ENV"
+          echo "BRANCH=$branch" >> "$Env:GITHUB_ENV"
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@main
       - name: Setup install folder for CI
