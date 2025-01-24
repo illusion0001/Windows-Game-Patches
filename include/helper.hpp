@@ -29,6 +29,7 @@ void WritePatchAddressFloat64(uint64_t Patch_Address, const double* Patch_Bytes,
 wchar_t* GetRunningPath(wchar_t* output);
 wchar_t* GetModuleName(wchar_t* output);
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
+uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
 void Make32to64Call(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name);
 void Make32to64Hook(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name);
 void Make32Hook(void* source_target, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* target_jmp_name);
@@ -59,4 +60,27 @@ void SendInputWrapper(WORD inputKey);
 void CheckCooldown(bool isBenchmarking, size_t BenchmarkIndex);
 void CheckScriptFile();
 
-#define LOG(fmt, ...) file_log(L"%-24s:%u " fmt, __FUNCTIONW__, __LINE__, __VA_ARGS__);
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+static void ShowConsole1()
+{
+    AllocConsole();
+    SetConsoleTitle(L"" PROJECT_NAME " - Debug Console");
+    freopen_s(reinterpret_cast<FILE**>(stdin), "conin$", "r", stdin);
+    freopen_s(reinterpret_cast<FILE**>(stdout), "conout$", "w", stdout);
+    freopen_s(reinterpret_cast<FILE**>(stderr), "conout$", "w", stderr);
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hConsole, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hConsole, dwMode);
+}
+
+#pragma GCC diagnostic warning "-Wunused-function"
+
+#pragma GCC diagnostic ignored "-Wmicrosoft-string-literal-from-predefined"
+// translates to `"foo():1234: "`
+// also workarounds intelisense thinking `__FUNCTION__` not exist
+#define FUNC_LINE __FUNCTION__ "():" xstr(__LINE__) ": "
+#define LOG(fmt, ...) file_log(L"" FUNC_LINE fmt, __VA_ARGS__)

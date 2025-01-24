@@ -8,7 +8,6 @@
 HMODULE baseModule = GetModuleHandle(NULL);
 #define wstr(s) L#s
 #define wxstr(s) wstr(s)
-#define PROJECT_NAME "T1X.DebugFeatures"
 #define PROJECT_LOG_PATH PROJECT_NAME ".log"
 #define BUILD_TIME PROJECT_NAME " Built: " __DATE__ " @ " __TIME__
 
