@@ -43,10 +43,16 @@ jobs:
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
           echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
           $push = "false"
-          if ("${{ github.event_name }}" -ieq "push" -or "${{ github.event_name }}" -ieq "pull_request")
+          $pr = $push
+          if ("${{ github.event_name }}" -ieq "push")
           {
               $push = "true"
           }
+          if ( "${{ github.event_name }}" -ieq "pull_request")
+          {
+              $pr = "true"
+          }
+          echo "IS_PR=$pr" >> "$Env:GITHUB_ENV"
           echo "IS_PUSH=$push" >> "$Env:GITHUB_ENV"
           echo "BRANCH=$branch" >> "$Env:GITHUB_ENV"
       - name: Add MSBuild to PATH
@@ -121,7 +127,7 @@ jobs:
             !${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}/**/*.pdb
             ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
       - name: Prepare Release
-        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true' && env.IS_PR == 'false'
         run: |
           $hashMarkdown = @'
 
@@ -154,7 +160,7 @@ jobs:
           7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }}
           7z a -mx9 -mtm- "${{ env.zip_file }}" ${{ env.INSTALL_CONFIGURATION }}\hashes.txt
       - name: Branch Check
-        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true'
+        if: env.WANT_RELEASE == 'true' && env.IS_PUSH == 'true' && env.IS_PR == 'false'
         run: |
           $prerelease = ""
           if ("${{ env.BRANCH }}" -ieq "main")
