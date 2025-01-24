@@ -33,7 +33,7 @@ jobs:
       - name: Setup environment variables
         run: |
           $cmdOutput = Split-Path -Path $pwd -Leaf
-          $branch = ${{ github.ref_name }}
+          $branch = "${{ github.ref_name }}"
           $branch = $branch.replace('/','|')
           $_ver = "1.0.$(git rev-list HEAD --count)-$(git rev-parse --short=8 HEAD)+${{ github.run_number }}-branch-$branch"
           echo "commit_ver=$_ver" >> "$Env:GITHUB_ENV"
