@@ -41,3 +41,10 @@ namespace Memory
     std::wstring GetVersionProductName();
 #endif
 }
+
+// https://github.com/emoose/NieRAutomata-LodMod/blob/fc7316bd3309ab38eb2a4016a96f9282d285fb90/Automata-LodMod/pch.h#L54
+template <typename T>
+inline T GameAddress(uintptr_t addr)
+{
+    return reinterpret_cast<T>(addr);
+}
