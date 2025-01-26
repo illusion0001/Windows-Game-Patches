@@ -33,6 +33,7 @@ add_subdirectory(source/GoWR.NoTAA)
 add_subdirectory(source/Hitman3.NoTAA)
 add_subdirectory(source/LiesOfP.NoTAA)
 add_subdirectory(source/LegoHorizonAdventures.NoTAA)
+add_subdirectory(source/NierAutomata.DebugFeatures)
 add_subdirectory(source/NierReplicant.Fix)
 add_subdirectory(source/PlanetOfLana.NoTAA)
 # TODO: Figure out linking or ditch scriptHook
