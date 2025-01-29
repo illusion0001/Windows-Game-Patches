@@ -29,6 +29,10 @@ namespace Memory
     {
         PatchBytes(address, (void*)pattern, numBytes);
     }
+    void PatchBytes(void* address, const void* pattern, unsigned int numBytes)
+    {
+        PatchBytes((uintptr_t)address, pattern, numBytes);
+    }
     void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes)
     {
         if (!address || !pattern || !numBytes)
