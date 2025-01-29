@@ -11,6 +11,7 @@ namespace Memory
     void FillInt(const uintptr_t address, const int intNum, const int numOfNops);
     void PatchBytes(uintptr_t address, uintptr_t pattern, unsigned int numBytes);
     void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes);
+    void PatchBytes(void* address, const void* pattern, unsigned int numBytes);
     void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size);
     uintptr_t ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets);
     void DetourFunction32(void* src, void* dst, int len);
