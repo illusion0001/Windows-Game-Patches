@@ -40,6 +40,7 @@ static void InitImGui()
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+    io.FontGlobalScale = 2.25f;
     // TODO: Style instead of using defaults
     ImGui::StyleColorsClassic();
     ImGui_ImplWin32_Init(window);
