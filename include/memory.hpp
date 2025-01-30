@@ -12,6 +12,8 @@ namespace Memory
     void PatchBytes(uintptr_t address, uintptr_t pattern, unsigned int numBytes);
     void PatchBytes(uintptr_t address, const void* pattern, unsigned int numBytes);
     void PatchBytes(void* address, const void* pattern, unsigned int numBytes);
+    void nPatchBytes(void* address, const void* pattern, unsigned int numBytes, int toPtr);
+    void nReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size);
     void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size);
     uintptr_t ReadMultiLevelPointer(uintptr_t base, const std::vector<uint32_t>& offsets);
     void DetourFunction32(void* src, void* dst, int len);
@@ -22,6 +24,7 @@ namespace Memory
     void CallFunction64(void* pSource, void* pDestination, DWORD dwLen);
     static uint8_t cavePad[MAX_CAVE_SIZE]{};
     uintptr_t CreatePrologueHook(const uintptr_t address, const int min_instruction_size);
+    uintptr_t CreateCodeCaveBlockX64(const void* data, const uintptr_t retaddr, const size_t data_size);
     HMODULE GetThisDllHandle();
     // CSGOSimple's pattern scan
     // https://github.com/OneshotGH/CSGOSimple-master/blob/master/CSGOSimple/helpers/utils.cpp
