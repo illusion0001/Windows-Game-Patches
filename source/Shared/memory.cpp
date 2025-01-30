@@ -46,6 +46,14 @@ namespace Memory
         printf_s("Write %d bytes of 0x%llx\n", numBytes, address);
     }
 
+    void nPatchBytes(void* address, const void* pattern, unsigned int numBytes, int toPtr)
+    {
+        memcpy(address, toPtr ? &pattern : pattern, numBytes);
+    }
+    void nReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size)
+    {
+        memcpy(buffer, reinterpret_cast<const void*>(address), size);
+    }
     void ReadBytes(const uintptr_t address, void* const buffer, const SIZE_T size)
     {
         if (!address || !buffer || !size)
@@ -180,31 +188,45 @@ namespace Memory
         return InstructionSize;
     }
 
-    // Allocation-less version of a Prologue hook
-    // I use pre-allocated `returnPad`, copy instructions to it and write instructions to it
-    uintptr_t CreatePrologueHook(const uintptr_t address, const int min_instruction_size)
+    static size_t caveInstSize = 0;
+    static void CaveBlockInit()
     {
         static BOOL once{};
-        static size_t caveInstSize = 0;
         if (!once)
         {
             memset(cavePad, 0xcc, sizeof(cavePad));
             DWORD temp = caveInstSize = 0;
             VirtualProtect(cavePad, sizeof(cavePad), PAGE_EXECUTE_WRITECOPY, &temp);
             once = true;
+            printf_s("cavePad setup at 0x%p! Size %lld\n", cavePad, sizeof(cavePad));
         }
+    }
+    static BOOL validnateBlockSize(const size_t newSize)
+    {
+        if (newSize > sizeof(cavePad))
+        {
+            printf_s("Block size %lld is smaller than requested size %lld!\n", sizeof(cavePad), newSize);
+            return 0;
+        }
+        return 1;
+    }
+    const size_t addroffset = (sizeof(JMPstub) - sizeof(uintptr_t));
+    // Allocation-less version of a Prologue hook
+    // I use pre-allocated `returnPad`, copy instructions to it and write instructions to it
+    uintptr_t CreatePrologueHook(const uintptr_t address, const int min_instruction_size)
+    {
+        CaveBlockInit();
         if (!address || min_instruction_size < 5)
         {
             return 0;
         }
         const size_t int_size = GetInstructionSize(address, min_instruction_size);
-        if (!int_size)
+        if (!int_size || !validnateBlockSize(caveInstSize + int_size + sizeof(JMPstub)))
         {
             return 0;
         }
         const uintptr_t ucavePad = (uintptr_t)&cavePad;
         const uintptr_t ucavePadNew = ucavePad + caveInstSize;
-        const size_t addroffset = (sizeof(JMPstub) - sizeof(uintptr_t));
         const uintptr_t retaddr = address + int_size;
         // prevents memcpy inlining
         PatchBytes(ucavePadNew, address, int_size);
@@ -212,11 +234,29 @@ namespace Memory
         PatchBytes(ucavePadNew + int_size + addroffset, &retaddr, sizeof(retaddr));
         const uintptr_t caveAddr = ucavePad + caveInstSize;
         caveInstSize += int_size + sizeof(JMPstub);
-        if (ucavePad != ucavePadNew)
-        {
-            printf_s("ucavePad: 0x%llx + 0x%llx -> ucavePadNew: 0x%llx\n", ucavePad, caveInstSize, ucavePadNew);
-        }
+        printf_s("New caveInstSize: %lld\n", caveInstSize);
         return caveAddr;
+    }
+    uintptr_t CreateCodeCaveBlockX64(const void* data, const uintptr_t retaddr, const size_t data_size)
+    {
+        CaveBlockInit();
+        if (!validnateBlockSize(caveInstSize + data_size + sizeof(JMPstub)))
+        {
+            return 0;
+        }
+        if (retaddr)
+        {
+            const uintptr_t ucavePad = (uintptr_t)&cavePad + caveInstSize;
+            const uintptr_t pRet = retaddr;
+            Memory::PatchBytes(ucavePad, data, data_size);
+            Memory::PatchBytes(ucavePad + data_size, JMPstub, sizeof(JMPstub));
+            Memory::PatchBytes(ucavePad + data_size + addroffset, &pRet, sizeof(pRet));
+            caveInstSize += data_size + sizeof(JMPstub);
+            printf_s("Uploaded %lld bytes to cave 0x%llx\n", data_size, ucavePad);
+            printf_s("New caveInstSize: %lld\n", caveInstSize);
+            return ucavePad;
+        }
+        return 0;
     }
 
     HMODULE GetThisDllHandle()
