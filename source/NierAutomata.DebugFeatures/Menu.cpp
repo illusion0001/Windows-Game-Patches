@@ -43,12 +43,40 @@ void set_paused_flag(BOOL v)
 static void DemoMenu()
 {
     ImGui::ShowDemoWindow();
+    ImGui::ShowStyleEditor();
 }
+
+int g_DamageMode = 0;
+int g_DamageMul = 4;
+int g_DamageConst = 1;
 
 void RenderMenu()
 {
     if (ImGui::Begin("Menu"))
     {
+        ImGui::DragFloat("global scale", &ImGui::GetIO().FontGlobalScale, 0.005f, 0.1f, 10.f, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+
+        uint32_t* ptr = 0;
+        bool cheat_enabled = CheckFlag(DBG, dbg_flag_DBG_EM_MANY_DAMAGE, &ptr);
+        if (ptr)
+        {
+            ImGui::CheckboxFlags("DBG_EM_MANY_DAMAGE", ptr, GetRawFlag(dbg_flag_DBG_EM_MANY_DAMAGE));
+            ImGui::CheckboxFlags("DBG_PLAYER_INVINCIBLE", FlagPtr(DBG, dbg_flag_DBG_PLAYER_INVINCIBLE), GetRawFlag(dbg_flag_DBG_PLAYER_INVINCIBLE));
+            if (!cheat_enabled)
+            {
+                ImGui::BeginDisabled(true);
+            }
+            ImGui::RadioButton("Normal", &g_DamageMode, 0);
+            ImGui::RadioButton("Multiply", &g_DamageMode, 1);
+            ImGui::RadioButton("Constant", &g_DamageMode, 2);
+            ImGui::Text("g_DamageMode: %d", g_DamageMode);
+            ImGui::SliderInt("g_DamageMul", &g_DamageMul, 1, 10000);
+            ImGui::SliderInt("g_DamageConst", &g_DamageConst, 1, 1024 * 1024);
+            if (!cheat_enabled)
+            {
+                ImGui::EndDisabled();
+            }
+        }
         ImGui::Checkbox("Pause when opened", &dont_pause_in_menu);
         if (!dont_pause_in_menu)
         {

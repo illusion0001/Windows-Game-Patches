@@ -47,6 +47,14 @@ static int CheckFlag(const uint32_t cat, uint32_t flag)
     return ((*ptr & rawFlag) != 0);
 }
 
+static int CheckFlag(const uint32_t cat, uint32_t flag, uint32_t** retptr)
+{
+    uint32_t rawFlag = 0;
+    uint32_t* ptr = FlagPtr(cat, flag, rawFlag);
+    *retptr = ptr;
+    return ((*ptr & rawFlag) != 0);
+}
+
 static void SetFlag(const uint32_t cat, uint32_t flag, const char* flag_name = 0)
 {
     uint32_t rawFlag = 0;

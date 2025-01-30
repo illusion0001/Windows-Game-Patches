@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "helper.hpp"
-#define MAX_CAVE_SIZE 128
 #include "memory.hpp"
 #include "SDKEnums.hpp"
 
@@ -63,6 +62,47 @@ static void DoPatches()
         {
             LOG("g_Cat[%lld].cat_list: 0x%p\n", i, g_Cat[i].cat_list);
             LOG("g_Cat[%lld].cat_name: %hs\n", i, g_Cat[i].cat_name);
+        }
+    }
+    const uintptr_t damageMulAddr = FindAndPrintPatternW(L"0f ba e0 1a 73 ? 8d 34 b6 44 8b f6", L"damageMulAddr");
+    if (damageMulAddr)
+    {
+        const uintptr_t int3jmp = FindInt3Jmp();
+        if (int3jmp)
+        {
+            static uint8_t cave[] =
+            {
+                0x48, 0xBA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, // movabs rdx, 0x1000000000000000
+                0x49, 0xBE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, // movabs r14, 0x2000000000000000
+                0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, // movabs rcx, 0x3000000000000000
+                0x0F, 0xBA, 0xE0, 0x1A, // bt eax, 0x1a
+                0x73, 0x27, // jae 0x4b
+                0x8B, 0x12, // mov edx, dword ptr [rdx]
+                0x85, 0xD2, // test edx, edx
+                0x74, 0x1B, // je 0x45
+                0x83, 0xFA, 0x01, // cmp edx, 1
+                0x74, 0x07, // je 0x36
+                0x83, 0xFA, 0x02, // cmp edx, 2
+                0x74, 0x0B, // je 0x3f
+                0xEB, 0x0F, // jmp 0x45
+                0x45, 0x8B, 0x36, // mov r14d, dword ptr [r14]
+                0x41, 0x0F, 0xAF, 0xF6, // imul esi, r14d
+                0xEB, 0x09, // jmp 0x48
+                0x8B, 0x09, // mov ecx, dword ptr [rcx]
+                0x89, 0xCE, // mov esi, ecx
+                0xEB, 0x03, // jmp 0x48
+                0x8D, 0x34, 0xB6, // lea esi, [rsi + rsi*4]
+                0x41, 0x89, 0xF6, // mov r14d, esi
+            };
+            extern int g_DamageMode;
+            extern int g_DamageMul;
+            extern int g_DamageConst;
+            Memory::nPatchBytes(cave + 0 + 2, &g_DamageMode, sizeof(&g_DamageConst), true);
+            Memory::nPatchBytes(cave + 10 + 2, &g_DamageMul, sizeof(&g_DamageMul), true);
+            Memory::nPatchBytes(cave + 10 + 10 + 2, &g_DamageConst, sizeof(&g_DamageConst), true);
+            const size_t retaddr = 12;
+            const uintptr_t caveDst = Memory::CreateCodeCaveBlockX64(cave, damageMulAddr + retaddr, sizeof(cave));
+            MAKE32HOOK(damageMulAddr, int3jmp, caveDst, retaddr);
         }
     }
 }

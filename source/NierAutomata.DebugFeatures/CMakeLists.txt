@@ -3,6 +3,8 @@ string(REPLACE " " "_" ProjectId ${PROJECT_NAME})
 project(${PROJECT_NAME})
 include(win32)
 
+ADD_DEFINITIONS(-DMAX_CAVE_SIZE=128)
+
 include_directories("../../external/imgui")
 include_directories("../../external")
 
