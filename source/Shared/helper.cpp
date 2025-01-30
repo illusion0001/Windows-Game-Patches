@@ -248,6 +248,20 @@ uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Patt
     return FindAndPrintPatternW(baseModule, Patch_Pattern, Pattern_Name, offset);
 }
 
+#define INT3PATTERN_OFFSET 1
+
+uintptr_t FindInt3Jmp(const HMODULE Module)
+{
+    return FindAndPrintPatternW(Module, L"C3 CC CC CC CC CC CC CC CC CC CC CC CC CC CC", L"Int3Jump + " xstr(INT3PATTERN_OFFSET), INT3PATTERN_OFFSET);
+}
+
+uintptr_t FindInt3Jmp()
+{
+    return FindInt3Jmp(baseModule);
+}
+
+#undef INT3PATTERN_OFFSET
+
 void Make32to64Call(void* source_target, void* second_jmp, void* target_jmp, uint32_t source_size, const wchar_t* source_name, const wchar_t* second_jmp_name, const wchar_t* target_jmp_name)
 {
     if (!source_target || !second_jmp || !target_jmp || source_size < 5)
