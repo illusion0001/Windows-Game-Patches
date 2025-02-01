@@ -4,6 +4,7 @@ project(${PROJECT_NAME})
 include(win32)
 
 ADD_DEFINITIONS(-DMAX_CAVE_SIZE=128)
+ADD_DEFINITIONS(-D__IM_SUBMENU__)
 
 include_directories("../../external/imgui")
 include_directories("../../external")

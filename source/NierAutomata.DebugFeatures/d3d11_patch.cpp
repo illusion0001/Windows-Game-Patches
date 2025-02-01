@@ -3,6 +3,8 @@
 #include <imgui/backends/imgui_impl_dx11.h>
 #include <imgui/backends/imgui_impl_win32.h>
 
+#include "ImSubMenu.hpp"
+
 #include "Menu.hpp"
 
 #include "memory.hpp"
@@ -107,7 +109,10 @@ HRESULT Present_Hook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
     if (opened)
     {
         set_paused_flag(opened);
-        RenderMenu();
+        RenderMenu(
+            PROJECT_NAME "\n"
+            "Built: " __DATE__ " @ " __TIME__
+        );
     }
 
     ImGui::Render();
