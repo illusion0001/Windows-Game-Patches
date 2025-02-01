@@ -36,17 +36,13 @@ static void RenderFlagMenu(const char* title, FLAG_CATEGORY category, const Flag
     if (ImGui::CollapsingHeader(title))
     {
         static char hoveredFlag[FLAG_CATEGORY::MAX][128]{};
-        ImGui::Text("%s", !*hoveredFlag[category] ? " \n " : hoveredFlag[category]);
+        ImGui::TextUnformatted(!*hoveredFlag[category] ? " \n " : hoveredFlag[category]);
         const int maxCol = 8;
         // TODO: Split into 8 8 rows
         // [0] [0] [0] [0] [0] [0] [0] [0]    [0] [0] [0] [0] [0] [0] [0] [0]
         // [0] [0] [0] [0] [0] [0] [0] [0]    [0] [0] [0] [0] [0] [0] [0] [0]
         // ...
-        ImGui::BeginTable(title, maxCol, ImGuiTableFlags_SizingFixedFit);
-        for (int col = 0; col < maxCol; col++)
-        {
-            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, 25.0f);
-        }
+        ImGui::BeginTable(title, maxCol);
         for (size_t i = 0; i < list_count; i++)
         {
             ImGui::TableNextColumn();
@@ -97,7 +93,6 @@ static void RenderFlagMenu(const char* title, FLAG_CATEGORY category, const Flag
 
 void FlagMenu()
 {
-    if (ImGui::Begin("Flag Menu"))
     {
         ImGui::Checkbox("Enable unknown flags", &force_enable_reserved);
         FLAG_MENU("Debug", DBG, dbg_flag_x, dbg_flag);
@@ -110,7 +105,6 @@ void FlagMenu()
         FLAG_MENU("Display", DISP, dbg_disp_flag_x, dbg_disp);
         FLAG_MENU("Gameplay", GAME, dbg_game_flag_x, dbg_game);
     }
-    ImGui::End();
 }
 
 #undef FLAG_RESERVED
