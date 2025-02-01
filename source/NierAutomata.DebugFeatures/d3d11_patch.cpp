@@ -95,29 +95,29 @@ HRESULT Present_Hook(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
         }
     }
 
-    // Create new frame
-    ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
-
     if (GetAsyncKeyState(VK_HOME) & 1 || (XGetAsyncKeyState(XINPUT_GAMEPAD_LEFT_SHOULDER | XINPUT_GAMEPAD_RIGHT_THUMB)))
     {
         opened = !opened;
         set_paused_flag(opened);
     }
 
-    if (opened)
+    if (init && opened)
     {
+        // Create new frame
+        ImGui_ImplDX11_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
+
         set_paused_flag(opened);
         RenderMenu(
             PROJECT_NAME "\n"
             "Built: " __DATE__ " @ " __TIME__
         );
-    }
 
-    ImGui::Render();
-    pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
-    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        ImGui::Render();
+        pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    }
 
     return Present_Original(pSwapChain, SyncInterval, Flags);
 }
