@@ -10,6 +10,7 @@
 #include "flags.hpp"
 #pragma GCC diagnostic warning "-Wunused-function"
 
+#include "ImSubMenu.hpp"
 #include "FlagMenu.hpp"
 
 bool dont_pause_in_menu = false;
@@ -40,19 +41,12 @@ void set_paused_flag(BOOL v)
     }
 }
 
-static void DemoMenu()
-{
-    ImGui::ShowDemoWindow();
-    ImGui::ShowStyleEditor();
-}
-
 int g_DamageMode = 0;
 int g_DamageMul = 4;
 int g_DamageConst = 1;
 
-void RenderMenu()
+static void CheatMenu()
 {
-    if (ImGui::Begin("Menu"))
     {
         ImGui::DragFloat("global scale", &ImGui::GetIO().FontGlobalScale, 0.005f, 0.1f, 10.f, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
 
@@ -95,10 +89,18 @@ void RenderMenu()
             ImGui::EndDisabled();
         }
     }
+    /*
     ImGui::End();
     FlagMenu();
     if (0)
     {
         DemoMenu();
     }
+    */
+}
+
+void RenderMenus()
+{
+    ShowSubmenu("Cheat", "Cheat Menu...", CheatMenu);
+    ShowSubmenu("Flag Menu", "Flag Menus...", FlagMenu);
 }
