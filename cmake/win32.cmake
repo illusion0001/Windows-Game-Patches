@@ -18,14 +18,16 @@ set(OPT_DEB
 "/Zi"          # Generate complete debugging information
 )
 
-message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `${OPT_DEB}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `CMAKE_C_FLAGS_DEBUG: ${CMAKE_C_FLAGS_DEBUG}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}`")
 
 foreach (link_line ${OPT_DEB})
     string(APPEND CMAKE_C_FLAGS_DEBUG " \"${link_line}\" ")
     string(APPEND CMAKE_CXX_FLAGS_DEBUG " \"${link_line}\" ")
 endforeach(link_line)
 
-message(STATUS "updated options for target: `${PROJECT_NAME}` `Debug` `${OPT_DEB}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `CMAKE_C_FLAGS_DEBUG: ${CMAKE_C_FLAGS_DEBUG}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `Debug` `CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}`")
 
 set(OPT_REL
 # ""         # hack for visual studio??
@@ -39,14 +41,16 @@ set(OPT_REL
 "/Zo-"       # Generate richer debugging information for optimized code
 )
 
-message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `${OPT_REL}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `CMAKE_C_FLAGS_RELWITHDEBINFO: ${CMAKE_C_FLAGS_RELWITHDEBINFO}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `CMAKE_CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}`")
 
 foreach (link_line ${OPT_REL})
     string(APPEND CMAKE_C_FLAGS_RELWITHDEBINFO " \"${link_line}\" ")
     string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " \"${link_line}\" ")
 endforeach(link_line)
 
-message(STATUS "updated options for target: `${PROJECT_NAME}` `RelWithDebInfo` `${OPT_REL}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `CMAKE_C_FLAGS_RELWITHDEBINFO: ${CMAKE_C_FLAGS_RELWITHDEBINFO}`")
+message(STATUS "updating options for target: `${PROJECT_NAME}` `RelWithDebInfo` `CMAKE_CXX_FLAGS_RELWITHDEBINFO: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}`")
 
 set(LINK_FLAGS
     "/SUBSYSTEM:WINDOWS"        # Prevents Visual Studio from starting console on debug start
@@ -76,8 +80,6 @@ set(LINK_DEB
 
 message(STATUS "Before Debug Linker flag: ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}")
 
-# turns out you have to set them in one line
-# so here you go
 foreach (link_line ${LINK_DEB})
     string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG " \"${link_line}\" ")
 endforeach(link_line)
