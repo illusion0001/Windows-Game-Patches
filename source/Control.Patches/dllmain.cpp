@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "helper.hpp"
 #include "memory.hpp"
+#include "function_ptr.h"
 
 HMODULE baseModule{};
 
@@ -56,20 +57,13 @@ void __attribute__((naked)) SkipLogoEnableMissionSelectAsm()
     }
 }
 
-#define TYPEDEF_FUNCTION_PTR(ret_type, func_name, ...) \
-    typedef ret_type (*func_name##_ptr)(__VA_ARGS__); \
-    extern func_name##_ptr func_name;
-
-#define INIT_FUNCTION_PTR(func_name) \
-    func_name##_ptr func_name = nullptr
-
 void** DebugPageControllerPtr = nullptr;
 
 typedef struct DebugPanelVftable_
 {
     // void* unk[0x1b];
     void (*Func0)();
-    void (*SentMenuEvent)(void* CurrentPagePtr, uint32_t* Event);
+    void (*SentMenuEvent)(void* This, void* Event);
     void (*Func2)();
     void (*Func3)();
     void (*Func4)();
@@ -116,6 +110,22 @@ typedef struct DebugPanelController_
 }DebugPanelController;
 
 int MenuIndex = 0;
+
+void DebugRenderUpdateInput(void* event_)
+{
+    DebugPanelController* DebugPanelController1 = (DebugPanelController*)*DebugPageControllerPtr;
+    DebugPanel* CurrentController = DebugPanelController1->ptr[MenuIndex];
+    CurrentController->Vftable->SentMenuEvent(CurrentController, event_);
+}
+
+uiTYPEDEF_FUNCTION_PTR(void, GameClient_UpdateWindowInput_Original, void* this_, void* event_);
+
+void GameClient_UpdateWindowInputHook(void* this_, void* event_)
+{
+    // use event from gameclient
+    DebugRenderUpdateInput(event_);
+    GameClient_UpdateWindowInput_Original.ptr(this_, event_);
+}
 
 void DebugRenderUpdate2()
 {
@@ -175,6 +185,17 @@ void ShowConsole()
 
 void ApplyPatches()
 {
+    const uintptr_t updateWindowHandler = FindAndPrintPatternW(L"48 89 5c ? 08 57 48 83 ec 20 48 8b d9 48 8b fa 48 8b 0d ? ? ? ? 48 83 c1 08 48 8b 01 ff 50 08", L"updateWindowHandler");
+    if (updateWindowHandler)
+    {
+        const uintptr_t pupdateWindowHandler = (uintptr_t)Memory::u64_Scan(baseModule, updateWindowHandler);
+        if (pupdateWindowHandler)
+        {
+            GameClient_UpdateWindowInput_Original.addr = updateWindowHandler;
+            const uintptr_t newF = (uintptr_t)GameClient_UpdateWindowInputHook;
+            Memory::PatchBytes(pupdateWindowHandler, &newF, sizeof(newF));
+        }
+    }
     DebugPageControllerPtr = (void**)ReadLEA32(L"48 89 3d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 89 45 28", L"DebugPageControllerPtr", 0, 3, 7);
     constexpr uint32_t PtrReturnBytes = 20;
     uintptr_t Ptr = FindAndPrintPatternW(L"48 c7 81 34 01 00 00 00 01 00 01 c6 81 3c 01 00 00 00 33 ff", L"SkipLogoEnableMissionSelect");
