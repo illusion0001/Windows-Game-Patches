@@ -39,26 +39,6 @@ void ReadConfig()
     LOG(wstr(bEnableDevMenu) " = %d\n", bEnableDevMenu);
 }
 
-uintptr_t SkipLogoEnableMissionSelectReturn = 0;
-
-void __attribute__((naked)) SkipLogoEnableMissionSelectAsm()
-{
-    __asm
-    {
-        MOV qword ptr[rcx + 0x00000134], 0x1000100;
-        movzx edi, byte ptr [bEnableDevMenu];
-        mov byte ptr[rcx + 0x00000130], dil;
-        movzx edi, byte ptr [bDisableStartupLogo];
-        mov byte ptr[rcx + 0x00000139], dil;
-        mov byte ptr[rcx + 0x0000013b], dil;
-        xor edi, edi;
-        mov byte ptr[rcx + 0x0000013c], dil;
-        jmp qword ptr[rip + SkipLogoEnableMissionSelectReturn];
-    }
-}
-
-void** DebugPageControllerPtr = nullptr;
-
 typedef struct DebugPanelVftable_
 {
     // void* unk[0x1b];
@@ -109,12 +89,12 @@ typedef struct DebugPanelController_
     DebugPanel** ptr;
 }DebugPanelController;
 
-int MenuIndex = 0;
+DebugPanelController** DebugPageControllerPtr = nullptr;
+int64_t MenuIndex = 0;
 
 void DebugRenderUpdateInput(void* event_)
 {
-    DebugPanelController* DebugPanelController1 = (DebugPanelController*)*DebugPageControllerPtr;
-    DebugPanel* CurrentController = DebugPanelController1->ptr[MenuIndex];
+    DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
     CurrentController->Vftable->SentMenuEvent(CurrentController, event_);
 }
 
@@ -129,43 +109,9 @@ void GameClient_UpdateWindowInputHook(void* this_, void* event_)
 
 void DebugRenderUpdate2()
 {
-    if (MenuIndex > 15 || MenuIndex < 0)
-    {
-        MenuIndex = 0;
-    }
-    DebugPanelController* DebugPanelController1 = (DebugPanelController*)*DebugPageControllerPtr;
-    if (DebugPanelController1)
-    {
-        DebugPanel* CurrentController = DebugPanelController1->ptr[MenuIndex];
-        DebugPanelVftable* CurrentVftable = CurrentController->Vftable;
-        CurrentVftable->Update(CurrentController);
-    }
-}
-
-void __attribute__((naked)) DebugRenderUpdateAsm()
-{
-    __asm
-    {
-        // technically this can be anywhere but i didn't want to start an extra thread
-        // and sleeping after batching menu draws
-        call DebugRenderUpdate2;
-        LEA R11, [RSP + 0x90];
-        MOV RBX, qword ptr[R11 + 0x48];
-        MOVAPS XMM6, xmmword ptr[R11 + -0x10];
-        MOVAPS XMM7, xmmword ptr[RSP + 0x70];
-        MOVAPS XMM8, xmmword ptr[R11 + -0x30];
-        MOVAPS XMM9, xmmword ptr[R11 + -0x40];
-        MOVAPS XMM10, xmmword ptr[R11 + -0x50];
-        MOV RSP, R11;
-        POP R15;
-        POP R14;
-        POP R13;
-        POP R12;
-        POP RDI;
-        POP RSI;
-        POP RBP;
-        RET;
-    }
+    DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
+    DebugPanelVftable* CurrentVftable = CurrentController->Vftable;
+    CurrentVftable->Update(CurrentController);
 }
 
 void ShowConsole()
@@ -183,27 +129,56 @@ void ShowConsole()
     SetConsoleMode(hConsole, dwMode);
 }
 
+uiTYPEDEF_FUNCTION_PTR(void, RenderLoop_Original, void* param_1, void* param_2, void* param_3);
+
+void RenderLoopHook(void* param_1, void* param_2, void* param_3)
+{
+    DebugRenderUpdate2();
+    RenderLoop_Original.ptr(param_1, param_2, param_3);
+}
+
+uiTYPEDEF_FUNCTION_PTR(void, GameInfoConstructor_Original, void* param_1);
+
+void GameInfoConstructorHook(uint8_t* param_1)
+{
+    GameInfoConstructor_Original.ptr(param_1);
+    param_1[0x130] = bEnableDevMenu;
+    param_1[0x139] = param_1[0x13b] = bDisableStartupLogo;
+}
+
 void ApplyPatches()
 {
-    const uintptr_t updateWindowHandler = FindAndPrintPatternW(L"48 89 5c ? 08 57 48 83 ec 20 48 8b d9 48 8b fa 48 8b 0d ? ? ? ? 48 83 c1 08 48 8b 01 ff 50 08", L"updateWindowHandler");
-    if (updateWindowHandler)
+    if (bEnableDevMenu || bDisableStartupLogo)
     {
-        const uintptr_t pupdateWindowHandler = (uintptr_t)Memory::u64_Scan(baseModule, updateWindowHandler);
-        if (pupdateWindowHandler)
+        const uintptr_t GameInfoConstructor = FindAndPrintPatternW(L"48 8d 8c 24 e0 04 00 00 e8 ? ? ? ? 90", L"GameInfoConstructor", 8);
+        const uintptr_t int3 = FindInt3Jmp();
+        if (GameInfoConstructor && int3)
         {
-            GameClient_UpdateWindowInput_Original.addr = updateWindowHandler;
-            const uintptr_t newF = (uintptr_t)GameClient_UpdateWindowInputHook;
-            Memory::PatchBytes(pupdateWindowHandler, &newF, sizeof(newF));
+            GameInfoConstructor_Original.addr = ReadLEA32(GameInfoConstructor, L"GameInfoConstructor_Original", 0, 1, 5);
+            MAKE32CALL(GameInfoConstructor, int3, GameInfoConstructorHook, 5);
         }
     }
-    DebugPageControllerPtr = (void**)ReadLEA32(L"48 89 3d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 89 45 28", L"DebugPageControllerPtr", 0, 3, 7);
-    constexpr uint32_t PtrReturnBytes = 20;
-    uintptr_t Ptr = FindAndPrintPatternW(L"48 c7 81 34 01 00 00 00 01 00 01 c6 81 3c 01 00 00 00 33 ff", L"SkipLogoEnableMissionSelect");
-    SkipLogoEnableMissionSelectReturn = Ptr + PtrReturnBytes;
-    Memory::DetourFunction64((void*)Ptr, (void*)SkipLogoEnableMissionSelectAsm, PtrReturnBytes);
     if (bEnableDevMenu)
     {
-        WritePatchPattern_Hook(L"4c 8d 9c 24 90 00 00 00 49 8b 5b 48 41 0f 28 73 f0 0f 28 7c 24 70 45 0f 28 43 d0 45 0f 28 4b c0 45 0f 28 53 b0 49 8b e3 41 5f 41 5e 41 5d 41 5c 5f 5e 5d c3", 52, L"DebugRenderUpdate2", 0, (void*)DebugRenderUpdateAsm, nullptr);
+        DebugPageControllerPtr = (DebugPanelController**)ReadLEA32(L"48 89 3d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 89 45 28", L"DebugPageControllerPtr", 0, 3, 7);
+        if (DebugPageControllerPtr)
+        {
+            const uintptr_t RenderLoop = FindAndPrintPatternW(L"48 8b 8f c8 02 00 00 48 8b 97 60 02 00 00 48 8b 49 08 e8 ? ? ? ?", L"RenderLoop", 18);
+            const uintptr_t updateWindowHandler = FindAndPrintPatternW(L"48 89 5c ? 08 57 48 83 ec 20 48 8b d9 48 8b fa 48 8b 0d ? ? ? ? 48 83 c1 08 48 8b 01 ff 50 08", L"updateWindowHandler");
+            const uintptr_t int3 = FindInt3Jmp();
+            if (RenderLoop && int3 && updateWindowHandler)
+            {
+                const uintptr_t pupdateWindowHandler = (uintptr_t)Memory::u64_Scan(baseModule, updateWindowHandler);
+                if (pupdateWindowHandler)
+                {
+                    GameClient_UpdateWindowInput_Original.addr = updateWindowHandler;
+                    const uintptr_t newF = (uintptr_t)GameClient_UpdateWindowInputHook;
+                    Memory::PatchBytes(pupdateWindowHandler, &newF, sizeof(newF));
+                }
+                RenderLoop_Original.addr = ReadLEA32(RenderLoop, L"RenderLoop_Original", 0, 1, 5);
+                MAKE32CALL(RenderLoop, int3, RenderLoopHook, 5);
+            }
+        }
     }
 }
 
