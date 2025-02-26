@@ -39,55 +39,50 @@ void ReadConfig()
     LOG(wstr(bEnableDevMenu) " = %d\n", bEnableDevMenu);
 }
 
-typedef struct DebugPanelVftable_
+class DebugPanel
 {
-    // void* unk[0x1b];
-    void (*Func0)();
-    void (*SentMenuEvent)(void* This, void* Event);
-    void (*Func2)();
-    void (*Func3)();
-    void (*Func4)();
-    void (*Func5)();
-    void (*Func6)();
-    void (*Func7)();
-    void (*Func8)();
-    void (*Func9)();
-    void (*Func10)();
-    void (*Func11)();
-    void (*Func12)();
-    void (*Func13)();
-    void (*Func14)();
-    void (*Func15)();
-    void (*Func16)();
-    void (*Func17)();
-    void (*Func18)();
-    void (*Func19)();
-    void (*Func20)();
-    void (*Func21)();
-    void (*Func22)();
-    void (*Func23)();
-    void (*Func24)();
-    void (*Func25)();
-    void (*Func26)();
-    void (*Update)(void* CurrentPagePtr);
-    void (*Func28)();
-    void (*Func29)();
-    void (*Func30)();
-    void (*Func31)();
-    void (*Func32)();
-    void (*Func33)();
-}DebugPanelVftable;
+public:
+    virtual void Func0() = 0;
+    virtual void SentMenuEvent(void* Event) = 0;
+    virtual void Func2() = 0;
+    virtual void Func3() = 0;
+    virtual void Func4() = 0;
+    virtual void Func5() = 0;
+    virtual void Func6() = 0;
+    virtual void Func7() = 0;
+    virtual void Func8() = 0;
+    virtual void Func9() = 0;
+    virtual void Func10() = 0;
+    virtual void Func11() = 0;
+    virtual void Func12() = 0;
+    virtual void Func13() = 0;
+    virtual void Func14() = 0;
+    virtual void Func15() = 0;
+    virtual void Func16() = 0;
+    virtual void Func17() = 0;
+    virtual void Func18() = 0;
+    virtual void Func19() = 0;
+    virtual void Func20() = 0;
+    virtual void Func21() = 0;
+    virtual void Func22() = 0;
+    virtual void Func23() = 0;
+    virtual void Func24() = 0;
+    virtual void Func25() = 0;
+    virtual void Func26() = 0;
+    virtual void Update() = 0;
+    virtual void Func28() = 0;
+    virtual void Func29() = 0;
+    virtual void Func30() = 0;
+    virtual void Func31() = 0;
+    virtual void Func32() = 0;
+    virtual void Func33() = 0;
+};
 
-typedef struct DebugPanel_
-{
-    DebugPanelVftable* Vftable;
-}DebugPanel;
-
-typedef struct DebugPanelController_
+struct DebugPanelController
 {
     void* unk;
     DebugPanel** ptr;
-}DebugPanelController;
+};
 
 DebugPanelController** DebugPageControllerPtr = nullptr;
 int64_t MenuIndex = 0;
@@ -95,7 +90,7 @@ int64_t MenuIndex = 0;
 void DebugRenderUpdateInput(void* event_)
 {
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
-    CurrentController->Vftable->SentMenuEvent(CurrentController, event_);
+    CurrentController->SentMenuEvent(event_);
 }
 
 uiTYPEDEF_FUNCTION_PTR(void, GameClient_UpdateWindowInput_Original, void* this_, void* event_);
@@ -110,8 +105,7 @@ void GameClient_UpdateWindowInputHook(void* this_, void* event_)
 void DebugRenderUpdate2()
 {
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
-    DebugPanelVftable* CurrentVftable = CurrentController->Vftable;
-    CurrentVftable->Update(CurrentController);
+    CurrentController->Update();
 }
 
 void ShowConsole()
