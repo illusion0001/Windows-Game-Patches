@@ -12,7 +12,7 @@ HMODULE baseModule{};
 bool bDisableStartupLogo{};
 bool bEnableDevMenu{};
 
-void ReadConfig()
+static void ReadConfig()
 {
     inipp::Ini<wchar_t> ini;
     // Initialize config
@@ -87,7 +87,7 @@ struct DebugPanelController
 DebugPanelController** DebugPageControllerPtr = nullptr;
 int64_t MenuIndex = 0;
 
-void DebugRenderUpdateInput(void* event_)
+static void DebugRenderUpdateInput(void* event_)
 {
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
     CurrentController->SentMenuEvent(event_);
@@ -95,20 +95,20 @@ void DebugRenderUpdateInput(void* event_)
 
 uiTYPEDEF_FUNCTION_PTR(void, GameClient_UpdateWindowInput_Original, void* this_, void* event_);
 
-void GameClient_UpdateWindowInputHook(void* this_, void* event_)
+static void GameClient_UpdateWindowInputHook(void* this_, void* event_)
 {
     // use event from gameclient
     DebugRenderUpdateInput(event_);
     GameClient_UpdateWindowInput_Original.ptr(this_, event_);
 }
 
-void DebugRenderUpdate2()
+static void DebugRenderUpdate2()
 {
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
     CurrentController->Update();
 }
 
-void ShowConsole()
+static void ShowConsole()
 {
     AllocConsole();
     SetConsoleTitleA(PROJECT_NAME " - Debug Console");
@@ -125,7 +125,7 @@ void ShowConsole()
 
 uiTYPEDEF_FUNCTION_PTR(void, RenderLoop_Original, void* param_1, void* param_2, void* param_3);
 
-void RenderLoopHook(void* param_1, void* param_2, void* param_3)
+static void RenderLoopHook(void* param_1, void* param_2, void* param_3)
 {
     DebugRenderUpdate2();
     RenderLoop_Original.ptr(param_1, param_2, param_3);
@@ -133,14 +133,14 @@ void RenderLoopHook(void* param_1, void* param_2, void* param_3)
 
 uiTYPEDEF_FUNCTION_PTR(void, GameInfoConstructor_Original, void* param_1);
 
-void GameInfoConstructorHook(uint8_t* param_1)
+static void GameInfoConstructorHook(uint8_t* param_1)
 {
     GameInfoConstructor_Original.ptr(param_1);
     param_1[0x130] = bEnableDevMenu;
     param_1[0x139] = param_1[0x13b] = bDisableStartupLogo;
 }
 
-void ApplyPatches()
+static void ApplyPatches()
 {
     if (bEnableDevMenu || bDisableStartupLogo)
     {
@@ -176,7 +176,7 @@ void ApplyPatches()
     }
 }
 
-DWORD Main()
+static DWORD Main()
 {
     baseModule = GetModuleHandle(L"Control_DX11.exe") ? : GetModuleHandle(L"Control_DX12.exe");
     if (!baseModule)
