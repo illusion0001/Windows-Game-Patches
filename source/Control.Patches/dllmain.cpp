@@ -72,8 +72,8 @@ public:
     virtual void Func24() = 0;
     virtual void Func25() = 0;
     virtual void Func26() = 0;
-    virtual void Update() = 0;
-    virtual void Func28() = 0;
+    virtual void Update() = 0;  // Retail Version
+    virtual void Update2() = 0; // HDR Version has a new method
     virtual void Func29() = 0;
     virtual void Func30() = 0;
     virtual void Func31() = 0;
@@ -263,10 +263,12 @@ static void GameClient_UpdateWindowInputHook(void* this_, void* event_)
     GameClient_UpdateWindowInput_Original.ptr(this_, event_);
 }
 
+static bool isHDRVer = false;
+
 static void DebugRenderUpdate2()
 {
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
-    CurrentController->Update();
+    isHDRVer ? CurrentController->Update2() : CurrentController->Update();
 }
 
 static void ShowConsole()
@@ -321,6 +323,13 @@ static void ApplyPatches()
     {
         DebugPageControllerPtr = (DebugPanelController**)ReadLEA32(L"48 89 3d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 89 45 28", L"DebugPageControllerPtr", 0, 3, 7);
         const HMODULE inputModule = GetModuleHandle(L"input_rmdwin7_f.dll") ? : GetModuleHandle(L"input_rmdwin10_f.dll");
+        {
+            const HMODULE AppModule = GetModuleHandle(L"app_rmdwin7_f.dll") ? : GetModuleHandle(L"app_rmdwin10_f.dll");
+            if (AppModule)
+            {
+                isHDRVer = GetProcAddress(AppModule, "?handleAppEvent@EventHandler@app@@UEAA_NPEAUDisplayChangedEvent@2@@Z") ? true : false;
+            }
+        }
         if (inputModule)
         {
             pInputManagerInstance = (InputManagerInstance**)GetProcAddress(inputModule, "?sm_pInstance@InputManager@input@@0PEAV12@EA");
