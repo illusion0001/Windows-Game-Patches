@@ -209,7 +209,11 @@ void ApplyPatches()
 
 DWORD Main()
 {
-    baseModule = GetModuleHandle(NULL);
+    baseModule = GetModuleHandle(L"Control_DX11.exe") ? : GetModuleHandle(L"Control_DX12.exe");
+    if (!baseModule)
+    {
+        return false;
+    }
     ShowConsole();
     ReadConfig();
     ApplyPatches();
@@ -225,7 +229,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        Main();
+        return Main();
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
