@@ -3,6 +3,9 @@
 #include "memory.hpp"
 #include "function_ptr.h"
 
+#include <Xinput.h>
+#pragma comment(lib,"Xinput.lib")
+
 HMODULE baseModule{};
 
 #define wstr(s) L#s
@@ -84,11 +87,169 @@ struct DebugPanelController
     DebugPanel** ptr;
 };
 
+struct InputManagerInstance
+{
+    void* pad1[6];
+    void* kb;
+    char pad2[0x3c];
+    bool isMenuOn;
+    char pad3[0x5];
+    bool isMenuControlsOn;
+    char pad4[0x2];
+    bool isPlayerControl1;
+    bool isPlayerControl2;
+};
+
+static_assert(__builtin_offsetof(InputManagerInstance, isMenuOn) == 0x74, "");
+static_assert(__builtin_offsetof(InputManagerInstance, isMenuControlsOn) == 0x7a, "");
+static_assert(__builtin_offsetof(InputManagerInstance, isPlayerControl1) == 0x7d, "");
+static_assert(__builtin_offsetof(InputManagerInstance, isPlayerControl2) == 0x7e, "");
+
 DebugPanelController** DebugPageControllerPtr = nullptr;
 int64_t MenuIndex = 0;
+BOOL MenuOpen = false;
+InputManagerInstance** pInputManagerInstance = nullptr;
+
+namespace input
+{
+    namespace Gamepad
+    {
+        uiTYPEDEF_FUNCTION_PTR(bool, buttonPressed, void* pGamepad, int gamepadKey);
+    }
+    namespace inputX86
+    {
+        uiTYPEDEF_FUNCTION_PTR(void*, isAnyKeyPressed, void* pInputManagerInstance, int32_t* out);
+    }
+    namespace InputManager
+    {
+        uiTYPEDEF_FUNCTION_PTR(void*, getKeyboard, void* pInputManagerInstance);
+        uiTYPEDEF_FUNCTION_PTR(void*, getGamepad, void* pInputManagerInstance, int gamepadIdx);
+        uiTYPEDEF_FUNCTION_PTR(void*, readDigital, void* pInputManagerInstance, int key);
+        uiTYPEDEF_FUNCTION_PTR(void*, readKeyboard, void* pInputManagerInstance, int key);
+    }
+    namespace Keyboard
+    {
+        uiTYPEDEF_FUNCTION_PTR(bool, keyPressed, void* kb, int kn);
+    }
+}
+
+// https://github.com/NightFyre/Palworld-Internal/blob/8ad3dede62430ee864d726dcc630dc50f941bb5b/src/Game.cpp#L34
+static bool XGetAsyncKeyState(WORD combinationButtons)
+{
+    static bool wasPressed = false;
+    XINPUT_STATE state{};
+    if (XInputGetState(0, &state) == ERROR_SUCCESS)
+    {
+        bool isPressed = (state.Gamepad.wButtons & combinationButtons) == combinationButtons;
+        if (isPressed && !wasPressed)
+        {
+            wasPressed = true;
+            return true;
+        }
+        else if (!isPressed)
+        {
+            wasPressed = false;
+        }
+    }
+    return false;
+}
+
+static bool XGetAsyncKeyStateDown(WORD combinationButtons)
+{
+    XINPUT_STATE state{};
+    if (XInputGetState(0, &state) == ERROR_SUCCESS)
+    {
+        return (state.Gamepad.wButtons & combinationButtons) == combinationButtons;
+    }
+    return false;
+}
+
+static void DebugRenderUpdateIndex()
+{
+    if (MenuOpen)
+    {
+        bool checkMenu = false;
+        if (GetAsyncKeyState(VK_PRIOR) & 1 || (XGetAsyncKeyState(XINPUT_GAMEPAD_RIGHT_SHOULDER)))
+        {
+            MenuIndex++;
+            checkMenu = true;
+        }
+        else if (GetAsyncKeyState(VK_NEXT) & 1 || (XGetAsyncKeyState(XINPUT_GAMEPAD_LEFT_SHOULDER)))
+        {
+            MenuIndex--;
+            checkMenu = true;
+        }
+        if (checkMenu)
+        {
+            constexpr int64_t maxMenu = 14;
+            if (MenuIndex > maxMenu)
+            {
+                MenuIndex = 0;
+            }
+            else if (MenuIndex < 0)
+            {
+                MenuIndex = maxMenu;
+            }
+        }
+    }
+}
+
+struct StateMachineState
+{
+    char pad[0x269];
+    bool m_RequestPause;
+    bool m_FreezeFrame;
+    bool m_Unpause;
+    bool m_StepOneFrame;
+};
+
+struct GameClient
+{
+    void* pad[0x68 / 0x8];
+    StateMachineState* pStateMachineState;
+};
+
+struct GameHelper
+{
+    void* pad[6];
+    GameClient pGameClientBase;
+};
+
+GameHelper** s_pGameClientBase = 0;
 
 static void DebugRenderUpdateInput(void* event_)
 {
+    bool MenuStatus = false;
+    const WORD button1 = XINPUT_GAMEPAD_LEFT_THUMB;
+    const WORD button2 = XINPUT_GAMEPAD_RIGHT_THUMB;
+    if (GetAsyncKeyState(VK_HOME) & 1 || (XGetAsyncKeyState(button1 | button2)))
+    {
+        MenuOpen = !MenuOpen;
+        MenuStatus = true;
+    }
+    DebugRenderUpdateIndex();
+    InputManagerInstance* p = pInputManagerInstance[0];
+    if (p)
+    {
+        p->isPlayerControl1 = p->isPlayerControl2 = !XGetAsyncKeyStateDown(button1);
+        if (MenuStatus)
+        {
+            static bool set = false;
+            if (!set)
+            {
+                set = MenuOpen;
+            }
+            else if (set)
+            {
+                set = MenuOpen;
+            }
+            p->isMenuOn = p->isMenuControlsOn = MenuOpen;
+        }
+    }
+    if (!MenuOpen)
+    {
+        return;
+    }
     DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
     CurrentController->SentMenuEvent(event_);
 }
@@ -127,6 +288,10 @@ uiTYPEDEF_FUNCTION_PTR(void, RenderLoop_Original, void* param_1, void* param_2, 
 
 static void RenderLoopHook(void* param_1, void* param_2, void* param_3)
 {
+    if (!MenuOpen)
+    {
+        return;
+    }
     DebugRenderUpdate2();
     RenderLoop_Original.ptr(param_1, param_2, param_3);
 }
@@ -155,6 +320,23 @@ static void ApplyPatches()
     if (bEnableDevMenu)
     {
         DebugPageControllerPtr = (DebugPanelController**)ReadLEA32(L"48 89 3d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 89 45 28", L"DebugPageControllerPtr", 0, 3, 7);
+        const HMODULE inputModule = GetModuleHandle(L"input_rmdwin7_f.dll") ? : GetModuleHandle(L"input_rmdwin10_f.dll");
+        if (inputModule)
+        {
+            pInputManagerInstance = (InputManagerInstance**)GetProcAddress(inputModule, "?sm_pInstance@InputManager@input@@0PEAV12@EA");
+            input::Gamepad::buttonPressed.addr = (uintptr_t)GetProcAddress(inputModule, "?buttonPressed@Gamepad@input@@QEBA_NH@Z");
+            input::InputManager::getGamepad.addr = (uintptr_t)GetProcAddress(inputModule, "?getGamepad@InputManager@input@@QEAAPEAVGamepad@2@H@Z");
+            input::Keyboard::keyPressed.addr = (uintptr_t)GetProcAddress(inputModule, "?keyPressed@Keyboard@input@@QEBA_NH@Z");
+            input::InputManager::getKeyboard.addr = (uintptr_t)GetProcAddress(inputModule, "?getKeyboard@InputManager@input@@QEAAPEAVKeyboard@2@XZ");
+            input::InputManager::readDigital.addr = (uintptr_t)GetProcAddress(inputModule, "?readDigital@InputManager@input@@QEAA_NH_N@Z");
+            input::InputManager::readKeyboard.addr = (uintptr_t)GetProcAddress(inputModule, "?readKeyboard@InputManager@input@@AEAA_NHW4ControlType@2@@Z");
+            input::inputX86::isAnyKeyPressed.addr = (uintptr_t)GetProcAddress(inputModule, "?isAnyKeyPressed@InputX86@input@@QEAA_NAEAH@Z");
+        }
+        const HMODULE coreGameModule = GetModuleHandle(L"coregame_rmdwin7_f.dll") ? : GetModuleHandle(L"coregame_rmdwin10_f.dll");
+        if (coreGameModule)
+        {
+            s_pGameClientBase = (GameHelper**)GetProcAddress(coreGameModule, "?s_pGameClientBase@GameHelper@coregame@@2PEAVGameClientBase@2@EA");
+        }
         if (DebugPageControllerPtr)
         {
             const uintptr_t RenderLoop = FindAndPrintPatternW(L"48 8b 8f c8 02 00 00 48 8b 97 60 02 00 00 48 8b 49 08 e8 ? ? ? ?", L"RenderLoop", 18);
