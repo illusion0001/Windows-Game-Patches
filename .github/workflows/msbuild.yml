@@ -110,7 +110,7 @@ jobs:
               echo $hash
           }
       - name: Upload artifact (PDB)
-        if: env.IS_PUSH == 'true'
+        if: false # env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}-pdb
@@ -118,7 +118,7 @@ jobs:
             ${{ env.INSTALL_CONFIGURATION }}/${{ env.DLL_OUT }}
             ${{ env.INSTALL_CONFIGURATION }}/hashes.txt
       - name: Upload artifact
-        if: env.IS_PUSH == 'true'
+        if: false # env.IS_PUSH == 'true'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.zip_name }}
