@@ -87,28 +87,9 @@ struct DebugPanelController
     DebugPanel** ptr;
 };
 
-struct InputManagerInstance
-{
-    void* pad1[6];
-    void* kb;
-    char pad2[0x3c];
-    bool isMenuOn;
-    char pad3[0x5];
-    bool isMenuControlsOn;
-    char pad4[0x2];
-    bool isPlayerControl1;
-    bool isPlayerControl2;
-};
-
-static_assert(__builtin_offsetof(InputManagerInstance, isMenuOn) == 0x74, "");
-static_assert(__builtin_offsetof(InputManagerInstance, isMenuControlsOn) == 0x7a, "");
-static_assert(__builtin_offsetof(InputManagerInstance, isPlayerControl1) == 0x7d, "");
-static_assert(__builtin_offsetof(InputManagerInstance, isPlayerControl2) == 0x7e, "");
-
 DebugPanelController** DebugPageControllerPtr = nullptr;
 int64_t MenuIndex = 0;
 BOOL MenuOpen = false;
-InputManagerInstance** pInputManagerInstance = nullptr;
 
 namespace input
 {
@@ -122,6 +103,27 @@ namespace input
     }
     namespace InputManager
     {
+        struct Instance
+        {
+            void* pad1[6];
+            void* kb;
+            char pad2[0x3c];
+            bool isMenuOn;
+            char pad3[0x5];
+            bool isMenuControlsOn;
+            char pad4[0x2];
+            bool isPlayerControl1;
+            bool isPlayerControl2;
+        };
+
+        static_assert(__builtin_offsetof(Instance, kb) == 0x30, "");
+        static_assert(__builtin_offsetof(Instance, isMenuOn) == 0x74, "");
+        static_assert(__builtin_offsetof(Instance, isMenuControlsOn) == 0x7a, "");
+        static_assert(__builtin_offsetof(Instance, isPlayerControl1) == 0x7d, "");
+        static_assert(__builtin_offsetof(Instance, isPlayerControl2) == 0x7e, "");
+
+        Instance** pInstance = nullptr;
+
         uiTYPEDEF_FUNCTION_PTR(void*, getKeyboard, void* pInputManagerInstance);
         uiTYPEDEF_FUNCTION_PTR(void*, getGamepad, void* pInputManagerInstance, int gamepadIdx);
         uiTYPEDEF_FUNCTION_PTR(void*, readDigital, void* pInputManagerInstance, int key);
@@ -228,7 +230,7 @@ static void DebugRenderUpdateInput(void* event_)
         MenuStatus = true;
     }
     DebugRenderUpdateIndex();
-    InputManagerInstance* p = pInputManagerInstance[0];
+    input::InputManager::Instance* p = input::InputManager::pInstance[0];
     if (p)
     {
         p->isPlayerControl1 = p->isPlayerControl2 = !XGetAsyncKeyStateDown(button1);
@@ -337,7 +339,7 @@ static void ApplyPatches()
         }
         if (inputModule)
         {
-            pInputManagerInstance = (InputManagerInstance**)GetProcAddress(inputModule, "?sm_pInstance@InputManager@input@@0PEAV12@EA");
+            input::InputManager::pInstance = (input::InputManager::Instance**)GetProcAddress(inputModule, "?sm_pInstance@InputManager@input@@0PEAV12@EA");
             input::Gamepad::buttonPressed.addr = (uintptr_t)GetProcAddress(inputModule, "?buttonPressed@Gamepad@input@@QEBA_NH@Z");
             input::InputManager::getGamepad.addr = (uintptr_t)GetProcAddress(inputModule, "?getGamepad@InputManager@input@@QEAAPEAVGamepad@2@H@Z");
             input::Keyboard::keyPressed.addr = (uintptr_t)GetProcAddress(inputModule, "?keyPressed@Keyboard@input@@QEBA_NH@Z");
