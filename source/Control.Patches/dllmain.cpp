@@ -254,6 +254,11 @@ static void DebugRenderUpdateInput(void* event_)
     CurrentController->SentMenuEvent(event_);
 }
 
+static bool DebugCameraCheckButton(void* pInputInstance, int DigitalEnum, bool param_3)
+{
+    return XGetAsyncKeyState(XINPUT_GAMEPAD_LEFT_THUMB | XINPUT_GAMEPAD_Y);
+}
+
 uiTYPEDEF_FUNCTION_PTR(void, GameClient_UpdateWindowInput_Original, void* this_, void* event_);
 
 static void GameClient_UpdateWindowInputHook(void* this_, void* event_)
@@ -362,6 +367,15 @@ static void ApplyPatches()
                 }
                 RenderLoop_Original.addr = ReadLEA32(RenderLoop, L"RenderLoop_Original", 0, 1, 5);
                 MAKE32CALL(RenderLoop, int3, RenderLoopHook, 5);
+            }
+        }
+        const uintptr_t DebugCameraKeyCheckAddr = FindAndPrintPatternW(L"48 8b 08 41 8d 50 2c ff 15 ? ? ? ?", L"DebugCameraKeyCheck", 7);
+        if (DebugCameraKeyCheckAddr)
+        {
+            const uintptr_t int3 = FindInt3Jmp();
+            if (int3)
+            {
+                MAKE32CALL(DebugCameraKeyCheckAddr, int3, DebugCameraCheckButton, 6);
             }
         }
     }
