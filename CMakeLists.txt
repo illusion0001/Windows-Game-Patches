@@ -36,6 +36,7 @@ add_subdirectory(source/LegoHorizonAdventures.NoTAA)
 add_subdirectory(source/NierAutomata.DebugFeatures)
 add_subdirectory(source/NierReplicant.Fix)
 add_subdirectory(source/PlanetOfLana.NoTAA)
+add_subdirectory(source/QuantumBreak.Patches)
 # TODO: Figure out linking or ditch scriptHook
 # add_subdirectory(source/RDR3.Patches)
 add_subdirectory(source/RE4.Sharpness)
