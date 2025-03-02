@@ -276,7 +276,8 @@
 ### NieR Automata
 </summary>
 
-  - Flag Menu
+  - Flag Menu (Press Home on keyboard or R3 + L1 on controller)
+    - Backspace or Circle to back out of a menu
 
 #### Installation
 - **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
