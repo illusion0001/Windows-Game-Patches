@@ -297,6 +297,11 @@ static void ApplyPatches()
 {
     if (bDisableStartupLogo)
     {
+        const uintptr_t LoadStartupVideoBufferAddr = FindAndPrintPatternW(L"48 8d 8c 24 ? ? ? ? e8 ? ? ? ? ff 15 ? ? ? ?", L"LoadStartupVideoBufferCall", 8);
+        if (LoadStartupVideoBufferAddr)
+        {
+            Memory::MakeNops(LoadStartupVideoBufferAddr, 5);
+        }
     }
     if (bEnableDevMenu)
     {
