@@ -20,12 +20,12 @@ static void ReadConfig()
 {
     inipp::Ini<wchar_t> ini;
     // Initialize config
-    std::wstring config_path = L"" PROJECT_NAME ".ini";
+    static const wchar_t config_path[] = L"" PROJECT_NAME ".ini";
     std::wifstream iniFile(config_path);
     if (!iniFile)
     {
         // no ini, lets generate one.
-        std::wstring ini_defaults = L"[Settings]\n"
+        static const wchar_t ini_defaults[] = L"[Settings]\n"
             wstr(bDisableStartupLogo)" = true\n"
             wstr(bEnableDevMenu)" = false\n"
             wstr(bDisablePauseGameOnFocusLoss)" = false\n";
