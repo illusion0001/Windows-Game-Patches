@@ -60,6 +60,32 @@
   - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
   - `BrightMemoryInfinite.NoTAA.asi`
 </details>
+
+<details><summary>
+
+### Control
+</summary>
+
+  - Skip Startup Logos
+  - Dev Menu Restore
+  - Debug Camera (Press L3 and Triangle when `bEnableDevMenu` is enabled)
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - **Only tested with Steam version**
+- Extract the following contents of the release zip into the root game folder.
+  - Rename original `bink2w64.dll` to `bink2w64Hooked.dll` for ASI Loader.
+  - Extract `dinput8.dll` from zip `!ASI_Loader_x64` and rename to `bink2w64.dll` and copy to game folder.
+  - Extract `Control.Patches.asi` to game folder.
+  - Run game once to generate ini and close it.
+  - Enable config for desried patches.
+
+#### Special Thanks
+- Original [Control Dev Menu](https://www.nexusmods.com/control/mods/28) mod for references in Debug Panel.
+
+</details>
+
 <details><summary>
 
 ### Crysis Warhead
@@ -244,6 +270,25 @@
   - Copy `dinput8.dll` from folder `!ASI_Loader_x64` to game folder.
   - `GotG.NoTAA.asi`
 </details>
+
+<details><summary>
+
+### NieR Automata
+</summary>
+
+  - Flag Menu
+
+#### Installation
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game root folder.
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
+  - `NierAutomata.DebugFeatures.asi`
+
+#### Speical Thanks
+  - Emoose [LodMod](https://github.com/emoose/NieRAutomata-LodMod) for debug flag enums!
+
+</details>
+
 <details><summary>
 
 ### NieR Replicant ver.1.22474487139
@@ -271,6 +316,30 @@
   - `PlanetOfLana.NoTAA.asi`
   - `d3d11.ini`
 </details>
+
+<details><summary>
+
+### Quantum Break
+</summary>
+
+  - Skip Startup Logos
+  - Dev Menu Restore
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - **Only tested with Steam version**
+- Rename original `bink2w64.dll` in game `dx11` folder to `bink2w64Hooked.dll` for ASI Loader.
+- Extract `dinput8.dll` from zip `!ASI_Loader_x64` and rename to `bink2w64.dll` and copy to game `dx11` folder.
+- Extract `QuantumBreak.Patches.asi` to game `dx11` folder.
+- Run game once to generate ini and close it.
+- Enable config for desried patches.
+
+#### Special Thanks
+- Original [Control Dev Menu](https://www.nexusmods.com/control/mods/28) mod for references in Debug Panel.
+
+</details>
+
 <details><summary>
 
 ### Red Dead Redemption 2
