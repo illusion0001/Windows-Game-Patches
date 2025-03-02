@@ -67,7 +67,7 @@
 </summary>
 
   - Skip Startup Logos
-  - Dev Menu Restore
+  - Dev Menu Restore (HDR Version is supported) ~~its a new compile version as a mod, are they allowed to do that?~~
   - Debug Camera (Press L3 and Triangle when `bEnableDevMenu` is enabled)
 
 #### Installation
