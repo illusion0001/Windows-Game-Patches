@@ -88,6 +88,14 @@ DebugPanelController** DebugPageControllerPtr = nullptr;
 int64_t MenuIndex = 0;
 BOOL MenuOpen = false;
 
+namespace input
+{
+    uiTYPEDEF_FUNCTION_PTR(bool, isMenuOn, void);
+    uiTYPEDEF_FUNCTION_PTR(bool, isDebugOn, void);
+    uiTYPEDEF_FUNCTION_PTR(void, setMenu, BOOL);
+    uiTYPEDEF_FUNCTION_PTR(void, setDebug, BOOL);
+}
+
 // https://github.com/NightFyre/Palworld-Internal/blob/8ad3dede62430ee864d726dcc630dc50f941bb5b/src/Game.cpp#L34
 static bool XGetAsyncKeyState(WORD combinationButtons)
 {
@@ -160,6 +168,25 @@ static void DebugRenderUpdateInput(void* event_)
         MenuStatus = true;
     }
     DebugRenderUpdateIndex();
+    if (MenuStatus)
+    {
+        static bool set = false;
+        static BOOL oldMenu = false, oldDebug = false;
+        if (!set)
+        {
+            oldMenu = input::isMenuOn.ptr();
+            oldDebug = input::isDebugOn.ptr();
+            input::setMenu.ptr(MenuOpen);
+            input::setDebug.ptr(MenuOpen);
+            set = true;
+        }
+        else if (set)
+        {
+            input::setMenu.ptr(oldMenu);
+            input::setDebug.ptr(oldDebug);
+            set = false;
+        }
+    }
     if (MenuOpen && DebugPageControllerPtr[0])
     {
         DebugPanel* CurrentController = DebugPageControllerPtr[0]->ptr[MenuIndex];
@@ -215,6 +242,57 @@ static void RenderLoopHook(void* param_1, void* param_2, void* param_3)
 
 uiTYPEDEF_FUNCTION_PTR(void, GameInfoConstructor_Original, void* param_1);
 
+namespace r
+{
+    namespace PluginManager
+    {
+        struct ExportedFunction
+        {
+            uint64_t FuncOrd;
+            const char* FuncName;
+            uint64_t unk1;
+            const char* FuncRet;
+            uintptr_t FuncPtr;
+            uint64_t unk2;
+            uint64_t unk3;
+            uint64_t unk4;
+        };
+        uiTYPEDEF_FUNCTION_PTR(void, exportFunction_Original, const void* f);
+        static void exportFunction_Hook(ExportedFunction* f)
+        {
+            printf_s("Export: %s %s @ 0x%llx\n", f->FuncRet ? f->FuncRet : "?", f->FuncName, f->FuncPtr);
+            switch (SID(f->FuncName))
+            {
+                case SID("input::setMenu"):
+                {
+                    input::setMenu.addr = f->FuncPtr;
+                    break;
+                }
+                case SID("input::setDebug"):
+                {
+                    input::setDebug.addr = f->FuncPtr;
+                    break;
+                }
+                case SID("input::isMenuOn"):
+                {
+                    input::isMenuOn.addr = f->FuncPtr;
+                    break;
+                }
+                case SID("input::isDebugOn"):
+                {
+                    input::isDebugOn.addr = f->FuncPtr;
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            exportFunction_Original.ptr(f);
+        }
+    }
+}
+
 static void ApplyPatches()
 {
     if (bDisableStartupLogo)
@@ -243,6 +321,21 @@ static void ApplyPatches()
                 }
                 RenderLoop_Original.addr = ReadLEA32(RenderLoop, L"RenderLoop_Original", 0, 1, 5);
                 MAKE32CALL(RenderLoop, int3, RenderLoopHook, 5);
+            }
+        }
+        const HMODULE rmdlibModule = GetModuleHandle(L"rl_x64_f.dll");
+        if (rmdlibModule)
+        {
+            const uintptr_t funcptr = (uintptr_t)GetProcAddress(rmdlibModule, "?exportFunction@PluginManager@r@@SAXPEAUExportedFunction@2@@Z");
+            if (funcptr)
+            {
+                const uintptr_t pFunc = (uintptr_t)Memory::u64_Scan(baseModule, funcptr);
+                if (pFunc)
+                {
+                    const uintptr_t newF = (uintptr_t)r::PluginManager::exportFunction_Hook;
+                    r::PluginManager::exportFunction_Original.addr = funcptr;
+                    Memory::PatchBytes(pFunc, &newF, sizeof(uintptr_t));
+                }
             }
         }
     }
