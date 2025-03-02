@@ -14,6 +14,7 @@ HMODULE baseModule{};
 // INI Variables
 bool bDisableStartupLogo{};
 bool bEnableDevMenu{};
+bool bDisablePauseGameOnFocusLoss{};
 
 static void ReadConfig()
 {
@@ -26,20 +27,29 @@ static void ReadConfig()
         // no ini, lets generate one.
         std::wstring ini_defaults = L"[Settings]\n"
             wstr(bDisableStartupLogo)" = true\n"
-            wstr(bEnableDevMenu)" = true\n";
+            wstr(bEnableDevMenu)" = false\n"
+            wstr(bDisablePauseGameOnFocusLoss)" = false\n";
         std::wofstream iniFile(config_path);
         iniFile << ini_defaults;
         bDisableStartupLogo = true;
-        bEnableDevMenu = true;
+        bEnableDevMenu = false;
+        bDisablePauseGameOnFocusLoss = false;
     }
     else
     {
         ini.parse(iniFile);
         inipp::get_value(ini.sections[L"Settings"], wstr(bDisableStartupLogo), bDisableStartupLogo);
         inipp::get_value(ini.sections[L"Settings"], wstr(bEnableDevMenu), bEnableDevMenu);
+        inipp::get_value(ini.sections[L"Settings"], wstr(bDisablePauseGameOnFocusLoss), bDisablePauseGameOnFocusLoss);
     }
     LOG(wstr(bDisableStartupLogo) " = %d\n", bDisableStartupLogo);
     LOG(wstr(bEnableDevMenu) " = %d\n", bEnableDevMenu);
+    LOG(wstr(bDisablePauseGameOnFocusLoss) " = %d\n", bDisablePauseGameOnFocusLoss);
+    if (bEnableDevMenu)
+    {
+        // force enable so game don't pause when user changes window with it open
+        bDisablePauseGameOnFocusLoss = true;
+    }
 }
 
 class DebugPanel
@@ -301,6 +311,14 @@ static void ApplyPatches()
         if (LoadStartupVideoBufferAddr)
         {
             Memory::MakeNops(LoadStartupVideoBufferAddr, 5);
+        }
+    }
+    if (bDisablePauseGameOnFocusLoss)
+    {
+        const uintptr_t SendMenuPauseEventCall = FindAndPrintPatternW(L"48 8b 0d ? ? ? ? e8 ? ? ? ? b0 01 48 8b 5c 24 ?", L"SendMenuPauseEventCall", 7);
+        if (SendMenuPauseEventCall)
+        {
+            Memory::MakeNops(SendMenuPauseEventCall, 5);
         }
     }
     if (bEnableDevMenu)
