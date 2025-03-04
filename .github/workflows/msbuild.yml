@@ -17,10 +17,11 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      BUILD_PRESET: vs2022
+      BUILD_PRESET: Win64
+      BUILD_PRESET_X86: Win32
       CONFIGURATION: RelWithDebInfo
       INSTALL_CONFIGURATION: ${{ github.workspace }}/out/install
-      DLL_OUT: x64_lib
+      DLL_OUT: lib
     permissions:
       contents: write
     steps:
@@ -41,6 +42,7 @@ jobs:
           echo "zip_file_pdb=${{ github.workspace }}\$cmdOutput-$_ver-pdb.7z" >> "$Env:GITHUB_ENV"
           echo "folder=$cmdOutput" >> "$Env:GITHUB_ENV"
           echo "BUILD_CONFIGURATION=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET }}" >> "$Env:GITHUB_ENV"
+          echo "BUILD_CONFIGURATION_X86=${{ github.workspace }}/out/build/${{ env.BUILD_PRESET_X86 }}" >> "$Env:GITHUB_ENV"
           $push = "false"
           $pr = "true"
           $is_pr = "${{ github.event_name }}" -ieq "pull_request"
@@ -62,11 +64,17 @@ jobs:
           $myFile = "${{github.workspace}}\CMakePresets.json"
           (Get-Content $myFile ).Replace('"installDir": "${sourceDir}/out/install",', '"installDir": "${sourceDir}/out/install/${{ env.DLL_OUT }}",') | Set-Content $myFile
           cat $myFile
-      - name: Setup CMake Project (${{ env.CONFIGURATION }})
+      - name: Setup CMake Project (${{ env.CONFIGURATION }}-x86)
+        run: cmake --preset ${{ env.BUILD_PRESET_X86 }}
+      - name: Build CMake Project (${{ env.CONFIGURATION }}-x86)
+        run: cmake --build ${{ env.BUILD_CONFIGURATION_X86 }} --config ${{ env.CONFIGURATION }} -- /verbosity:normal
+      - name: Install CMake Project (${{ env.CONFIGURATION }}-x86)
+        run: cmake --install ${{ env.BUILD_CONFIGURATION_X86 }} --config ${{ env.CONFIGURATION }}
+      - name: Setup CMake Project (${{ env.CONFIGURATION }}-x64)
         run: cmake --preset ${{ env.BUILD_PRESET }}
-      - name: Build CMake Project (${{ env.CONFIGURATION }})
+      - name: Build CMake Project (${{ env.CONFIGURATION }}-x64)
         run: cmake --build ${{ env.BUILD_CONFIGURATION }} --config ${{ env.CONFIGURATION }} -- /verbosity:normal
-      - name: Install CMake Project (${{ env.CONFIGURATION }})
+      - name: Install CMake Project (${{ env.CONFIGURATION }}-x64)
         run: cmake --install ${{ env.BUILD_CONFIGURATION }} --config ${{ env.CONFIGURATION }}
       - name: Bundle loaders and data files
         working-directory: ${{ env.INSTALL_CONFIGURATION }}
@@ -79,16 +87,18 @@ jobs:
           $ASIDownloadLink = "https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest/download"
           # curl -fLJO https://github.com/illusion0001/ScriptHook-Mirrors/releases/download/mirrors/$ScriptHookZip
           curl -fLJO $ASIDownloadLink/$ASI_x64
-          # curl -fLJO $ASIDownloadLink/$ASI_win32
+          curl -fLJO $ASIDownloadLink/$ASI_win32
           # 7z x $ScriptHookZip
+          7z x $ASI_win32 -o"Win32/!ASI_Loader_x86"
           7z x $ASI_x64 -o"x64/!ASI_Loader_x64"
           # Copy-Item bin/ScriptHookRDR2.dll ./x64/RDR3.Patches/
           # Copy config files
           Copy-Item -Recurse -Force ${{ github.workspace }}/data/*/ ./
           Copy-Item -Recurse -Force x64/* ${{ env.DLL_OUT }}
+          Copy-Item -Recurse -Force Win32/* ${{ env.DLL_OUT }}
       - name: Clean output folder
         run: |
-          Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.lib
+          Remove-Item -Path ${{ env.INSTALL_CONFIGURATION }} -Recurse -Include *.lib,*.gitkeep
           $Folders = Get-ChildItem -Path ${{ env.INSTALL_CONFIGURATION }}\${{ env.DLL_OUT }} -Directory
           foreach ($Folder in $Folders)
           {

@@ -7,18 +7,23 @@ list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 17) # CXX17 for `filesystem`
 
-project(Windows-Game-Patches CXX)
+if (WANT_X86)
+project(Windows-Game-Patches-i386 CXX)
+else()
+project(Windows-Game-Patches-amd64 CXX)
+endif()
 
 include_directories(
     "${CMAKE_SOURCE_DIR}/include"
     "${CMAKE_SOURCE_DIR}/external/inipp"
 )
 
+if (WANT_X86)
+add_subdirectory(source/BF3.Patches)
+else()
 add_subdirectory(source/ACMirage.NoTAA)
 add_subdirectory(source/ACUnity.Patches)
 add_subdirectory(source/APT2.Patches)
-# TODO: 32 bit project
-# add_subdirectory(source/BF3.Patches)
 add_subdirectory(source/BFV.NoTAA)
 add_subdirectory(source/BrightMemoryInfinite.NoTAA)
 add_subdirectory(source/Control.Patches)
@@ -46,3 +51,4 @@ add_subdirectory(source/SpiderMan.MilesMorales.Patches)
 add_subdirectory(source/T1X.DebugFeatures)
 add_subdirectory(source/Uncharted4TLL.NoTAA)
 add_subdirectory(source/WoLong.Fix)
+endif()
