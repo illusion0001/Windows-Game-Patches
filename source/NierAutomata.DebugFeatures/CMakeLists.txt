@@ -23,12 +23,3 @@ file(GLOB SOURCES "*.cpp"
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 include(win32_install)
-
-install(
-    FILES $<TARGET_PDB_FILE:${PROJECT_NAME}>
-    DESTINATION ${PROJECT_NAME} OPTIONAL
-)
-
-install(TARGETS ${PROJECT_NAME}
-    DESTINATION ${PROJECT_NAME}
-)
