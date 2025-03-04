@@ -13,12 +13,3 @@ set_target_properties(
         SUFFIX ".dll"
 )
 
-install(
-    FILES $<TARGET_PDB_FILE:${PROJECT_NAME}>
-    DESTINATION ${PROJECT_NAME} OPTIONAL
-)
-
-install(
-    TARGETS ${PROJECT_NAME}
-    DESTINATION ${PROJECT_NAME}
-)
