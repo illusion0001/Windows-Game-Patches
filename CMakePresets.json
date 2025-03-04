@@ -2,9 +2,8 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "vs2022",
-            "description": "Target Windows with the Visual Studio development environment.",
-            "hidden": false,
+            "name": "base",
+            "hidden": true,
             "generator": "Visual Studio 17 2022",
             "toolset": "ClangCL",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -17,15 +16,38 @@
                 "YAML_CPP_INSTALL": "OFF",
                 "YAML_CPP_FORMAT_SOURCE": "OFF"
             },
-            "vendor": {
-                "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "intelliSenseMode": "windows-clang-x64"
-                }
-            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
+            }
+        },
+        {
+            "name": "Win32",
+            "inherits": "base",
+            "description": "Target Windows x86 with the Visual Studio 2022 development environment.",
+            "cacheVariables": {
+                "CMAKE_GENERATOR_PLATFORM": "Win32",
+                "WANT_X86": "ON"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "intelliSenseMode": "windows-clang-x86"
+                }
+            }
+        },
+        {
+            "name": "Win64",
+            "inherits": "base",
+            "description": "Target Windows x64 with the Visual Studio 2022 development environment.",
+            "cacheVariables": {
+                "CMAKE_GENERATOR_PLATFORM": "x64",
+                "WANT_X86": "OFF"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "intelliSenseMode": "windows-clang-x64"
+                }
             }
         }
     ]
