@@ -180,6 +180,30 @@
 </details>
 <details><summary>
   
+### Grand Theft Auto V Enhanced
+</summary>
+
+  - Skip Startup Videos Logo (Always enabled)
+  - Unlock FPS (Max 300 FPS)
+    - Uses work by [NTA](https://github.com/citizenfx/fivem/blob/4e9aa42c700f88735a2b9c2f51738568daf597e4/code/components/gta-core-five/src/GameAudioState.cpp#L434) and [Gogsi/GTAV.AudioFixes](https://github.com/Gogsi/GTAV.AudioFixes/blob/e0588ec4667898ceec5a5bbcf628fcb8c46ba09d/script.cpp#L42)
+    - Please see notice in settings file for more information
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Turn off BattleEye anti cheat in Rockstar Launcher settings
+    - ![](https://github.com/user-attachments/assets/4c11df02-6f55-45bd-92ed-4269a7ce966d)
+  - Extract the following contents of the release zip into the game folder.
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `dsound.dll` and copy to game folder.
+  - Copy  `GTA5_Enhanced.Patches.asi` to game folder.
+
+### Credits
+- Uses work by [NTA](https://github.com/citizenfx/fivem/blob/4e9aa42c700f88735a2b9c2f51738568daf597e4/code/components/gta-core-five/src/GameAudioState.cpp#L434) and [Gogsi/GTAV.AudioFixes](https://github.com/Gogsi/GTAV.AudioFixes/blob/e0588ec4667898ceec5a5bbcf628fcb8c46ba09d/script.cpp#L42)
+- Please see notice in settings file for more information
+
+</details>
+<details><summary>
+
 ### God of War
 </summary>
 
