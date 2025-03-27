@@ -237,6 +237,42 @@
 </details>
 <details><summary>
 
+### Halo: The Master Chief Collection
+</summary>
+
+  - Split Screen
+  - Features:
+    - 2 Players Coop (Limited by UE4 client for now)
+    - 4 Players Multiplayer
+  - Notes:
+    - Extracted from [AlphaRing](https://github.com/WinterSquire/AlphaRing/tree/3ac75be8bb6429fa6051ca2e9978816212e1bbbb) module, thank you WinterSquire for their research on xuid users and gamepad!
+  - Usage:
+    - Once enabled `bEnableSplitScreenViaAccountLinkButton` and `bEnable4PlayersCoop`
+      - In MCC main menu, open roster and scroll to your account
+      - Press "account link" button, a new player will be added to your roster.
+      - To remove a player, press "account link" until it reaches 4, then it will be in delete mode.
+      - To readd a player, press "account link" button until all added players are removed, then press "account link" to readd players.
+  - Enable Main Menu:
+    - Halo 3 (from [AlphaRing](https://github.com/WinterSquire/AlphaRing/blob/3ac75be8bb6429fa6051ca2e9978816212e1bbbb/res/patch.xml#L12) data file)
+    - Halo 3 ODST
+    - Note for other games, support isn't included:
+      - Halo Reach Main Menu is not reliable and can crash often.
+      - Halo 4 Main Menu tags is not available.
+  - Enable original pause menu:
+    - Halo 3
+    - Halo 3 ODST
+    - Halo Reach
+    - Halo 4
+      - Halo 1 and 2 Pause menu is not possible/usable due to incomplete menu tags.
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+- TBW
+
+</details>
+<details><summary>
+
 ### HITMAN 3
 </summary>
 
