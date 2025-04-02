@@ -46,4 +46,5 @@ struct ConfigData
 
 static ConfigData ConfigSettings{
     .bEnableSplitScreenViaAccountLinkButton = true,
+    .bHalo1FreezeFix = true,
 };
