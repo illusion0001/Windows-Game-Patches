@@ -252,6 +252,8 @@ static constexpr StringId64 ToStringId64(const wchar_t* str)
     return base;
 }
 
+bool bWantHalo1Fix = false;
+
 static void PatchModules(const HMODULE hModule)
 {
     const wchar_t* moduleName = GetModuleName(hModule);
@@ -260,6 +262,7 @@ static void PatchModules(const HMODULE hModule)
     {
         case SID(L"halo1.dll"):
         {
+            bWantHalo1Fix = true;
             PatchHalo1(hModule);
             break;
         }
@@ -328,6 +331,17 @@ static bool get_xbox_user_id(void* this_, uint64_t* pXuid, wchar_t* pName, uint3
         return true;
     }
     return get_xbox_user_id_original.ptr(this_, pXuid, pName, pNameSize, pIndex);
+}
+
+uiTYPEDEF_FUNCTION_PTR(uintptr_t, CompareEventType_Original, void* param_1, const char* eventName);
+
+static uintptr_t CompareEventType(void* param_1, const char* eventName)
+{
+    if (bWantHalo1Fix)
+    {
+        return 1;
+    }
+    return CompareEventType_Original.ptr(param_1, eventName);
 }
 
 static void GenGUID()
@@ -434,6 +448,19 @@ static void DoPatches()
         if (pGetXboxUserIdAddr)
         {
             UploadNewVftable(pGetXboxUserIdAddr, get_xbox_user_id, &get_xbox_user_id_original.addr);
+        }
+    }
+    if (ConfigSettings.bHalo1FreezeFix)
+    {
+        const uintptr_t LoadScreenEventRequestAddr = FindAndPrintPatternW(L"48 8d 15 ? ? ? ? 48 8b cb e8 ? ? ? ? 48 85 c0 75 ? 44 8d 40 03", L"LoadScreenEventRequest", 10);
+        if (LoadScreenEventRequestAddr)
+        {
+            const uintptr_t int3 = FindInt3Jmp();
+            if (int3)
+            {
+                CompareEventType_Original.addr = ReadLEA32(LoadScreenEventRequestAddr, L"CompareEventType_Original", 0, 1, 5);
+                MAKE32CALL(LoadScreenEventRequestAddr, int3, CompareEventType, 5);
+            }
         }
     }
 }
