@@ -239,6 +239,19 @@ static void ModuleLoadHook(const moduleInfo* param_1, const void* param_2, const
     PatchModules(param_1->hModule,moduleName);
 }
 
+bool bWantHalo1Fix = false;
+
+uiTYPEDEF_FUNCTION_PTR(uintptr_t, CompareEventType_Original, void* param_1, const char* eventName);
+
+static uintptr_t CompareEventType(void* param_1, const char* eventName)
+{
+    if (bWantHalo1Fix || ConfigSettings.bDisableLoadScreen)
+    {
+        return 1;
+    }
+    return CompareEventType_Original.ptr(param_1, eventName);
+}
+
 static void DoPatches()
 {
     const uintptr_t DeviceMgrPtr = FindAndPrintPatternW(L"48 89 35 ? ? ? ? 48 8b 3d ? ? ? ? 48 85 ff", L"DeviceMgrPtr");
@@ -307,6 +320,19 @@ static void DoPatches()
         {
             ModuleLoad_Original.addr = ReadLEA32(ModuleLoadCallerAddr, L"ModuleLoad_Original", 0, 1, 5);
             MAKE32CALL(ModuleLoadCallerAddr, int3, ModuleLoadHook, 5);
+        }
+    }
+    if (ConfigSettings.bDisableLoadScreen)
+    {
+        const uintptr_t LoadScreenEventRequestAddr = FindAndPrintPatternW(L"48 8d 15 ? ? ? ? 48 8b cb e8 ? ? ? ? 48 85 c0 75 ? 44 8d 40 03", L"LoadScreenEventRequest", 10);
+        if (LoadScreenEventRequestAddr)
+        {
+            const uintptr_t int3 = FindInt3Jmp();
+            if (int3)
+            {
+                CompareEventType_Original.addr = ReadLEA32(LoadScreenEventRequestAddr, L"CompareEventType_Original", 0, 1, 5);
+                MAKE32CALL(LoadScreenEventRequestAddr, int3, CompareEventType, 5);
+            }
         }
     }
 }
