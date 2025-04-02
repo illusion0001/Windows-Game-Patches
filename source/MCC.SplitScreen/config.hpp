@@ -8,6 +8,7 @@ struct ConfigData
     bool bPlayer1UseKeyboard;
     bool bHalo1FreezeFix;
     bool bEnableHalo3MainMenu;
+    bool bDisableLoadScreen;
     struct SplitScreenPlayerConfig_
     {
         bool PlayerInvertY;
@@ -42,4 +43,6 @@ struct ConfigData
 static ConfigData ConfigSettings{
     .bEnableSplitScreenViaAccountLinkButton = true,
     .bEnable4PlayersCoop = true,
+    .bHalo1FreezeFix = true,
+    .bDisableLoadScreen = true,
 };
