@@ -173,6 +173,9 @@ static void HookStartupFunc()
     // Go from our thunk
     const uint8_t* pWerSetFlags = (uint8_t*)WerSetFlags;
     printf_s("WerSetFlags: 0x%p\n", pWerSetFlags);
+    // Wine has this export
+    const HMODULE kbase = GetModuleHandle(L"kernelbase.dll");
+    const uintptr_t kbase_WerSetFlags = (uintptr_t)GetProcAddress(kbase, "WerSetFlags");
     if (pWerSetFlags[0] == 0xff && pWerSetFlags[1] == 0x25)
     {
         // To kernel32 thunk
@@ -191,16 +194,22 @@ static void HookStartupFunc()
                 }
             }
         }
+        // Wine module
+        else if (kbase_WerSetFlags)
+        {
+            WerSetFlags_Followed_Original.addr = kbase_WerSetFlags;
+            Memory::DetourFunction64((uintptr_t)pWerSetFlags2[0], (uintptr_t)&WerSetFlags_Hook, 14);
+        }
         else
         {
-            wchar_t msg[128]{};
+            wchar_t msg[256]{};
             _snwprintf_s(msg, _countof(msg), _TRUNCATE, L""
                          "First instruction of WerSetFlags is not a long branch!\n"
                          "Patching game will not be possible (Code is still encrypted by DRM)\n"
                          "Address 0x%p\n"
                          "Byte 0x%x 0x%x 0x%x",
-                         pWerSetFlags,
-                         pWerSetFlags[0], pWerSetFlags[1], pWerSetFlags[2]);
+                         (uintptr_t)pWerSetFlags2[0],
+                         pWerSetFlags2[0][0], pWerSetFlags2[0][1], pWerSetFlags2[0][2]);
             iMSGW(msg, _PROJECT_NAME " Startup Error");
         }
     }
