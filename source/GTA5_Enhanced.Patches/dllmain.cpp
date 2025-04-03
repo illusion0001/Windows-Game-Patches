@@ -193,7 +193,7 @@ static void HookStartupFunc()
         }
         else
         {
-            wchar_t msg[128]{};
+            wchar_t msg[256]{};
             _snwprintf_s(msg, _countof(msg), _TRUNCATE, L""
                          "First instruction of WerSetFlags is not a long branch!\n"
                          "Patching game will not be possible (Code is still encrypted by DRM)\n"
