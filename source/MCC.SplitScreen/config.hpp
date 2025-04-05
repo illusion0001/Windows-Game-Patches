@@ -5,10 +5,16 @@
 
 struct ConfigData
 {
+    bool bEnableSplitScreenViaAccountLinkButton;
+    bool bEnable4PlayersCoop;
     bool bPlayer1UseKeyboard;
     bool bHalo1FreezeFix;
     bool bEnableHalo3MainMenu;
     bool bDisableLoadScreen;
+    bool bEnablePauseMenuHalo3;
+    bool bEnablePauseMenuHalo3ODST;
+    bool bEnablePauseMenuHaloReach;
+    bool bEnablePauseMenuHalo4;
     struct SplitScreenPlayerConfig_
     {
         bool PlayerInvertY;
