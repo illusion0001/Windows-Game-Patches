@@ -192,7 +192,7 @@ static void HookStartupFunc()
             }
         }
         // Wine module, uses long jump thunk
-        else if (pWerSetFlags2[0][0] == 0xff && pWerSetFlags2[0][0] == 0x25)
+        else if (pWerSetFlags2[0][0] == 0xff && pWerSetFlags2[0][1] == 0x25)
         {
             const uintptr_t* pWINE = (uintptr_t*)ReadLEA32((uintptr_t)pWerSetFlags2[0], L"WINE_WerSetFlags_Followed_Original", 0, 2, 6);
             WerSetFlags_Followed_Original.addr = *pWINE;
