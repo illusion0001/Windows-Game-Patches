@@ -42,5 +42,6 @@ struct ConfigData
 
 static ConfigData ConfigSettings{
     .bHalo1FreezeFix = true,
-    .bDisableLoadScreen = true
+    .bDisableLoadScreen = true,
+    .SplitScreenPlayerConfig[0].PlayerInvertY=true,
 };
