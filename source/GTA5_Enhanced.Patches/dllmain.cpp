@@ -206,8 +206,8 @@ static void HookStartupFunc()
                          "Patching game will not be possible (Code is still encrypted by DRM)\n"
                          "Address 0x%p\n"
                          "Byte 0x%x 0x%x 0x%x",
-                         pWerSetFlags,
-                         pWerSetFlags[0], pWerSetFlags[1], pWerSetFlags[2]);
+                         (uintptr_t)pWerSetFlags2[0],
+                         pWerSetFlags2[0][0], pWerSetFlags2[0][1], pWerSetFlags2[0][2]);
             iMSGW(msg, _PROJECT_NAME " Startup Error");
         }
     }
