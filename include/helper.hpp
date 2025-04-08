@@ -33,6 +33,7 @@ void WritePatchAddressFloat32(uint64_t Patch_Address, const float* Patch_Bytes, 
 void WritePatchAddressFloat64(uint64_t Patch_Address, const double* Patch_Bytes, const wchar_t* Patch_Name, uint64_t Patch_Offset);
 wchar_t* GetRunningPath(wchar_t* output);
 wchar_t* GetModuleName(wchar_t* output);
+const wchar_t* GetModuleName(const HMODULE hModule);
 uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
 uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset = 0);
 uintptr_t FindInt3Jmp(const HMODULE Module);

@@ -206,6 +206,18 @@ wchar_t* GetModuleName(wchar_t* output)
     return output;
 }
 
+const wchar_t* GetModuleName(const HMODULE hModule)
+{
+    static wchar_t* pModuleName = 0;
+    static wchar_t ModuleName[MAX_PATH];
+    ZeroMemory(ModuleName, _countof(ModuleName));
+    // Attempt to get current exe
+    GetModuleFileName(hModule ? hModule : GetModuleHandle(0), ModuleName, _countof(ModuleName));
+    pModuleName = PathFindFileName(ModuleName);
+    LOG("Obtained module name: %s\n", pModuleName);
+    return pModuleName;
+}
+
 wchar_t* ConvertToWideChar(const char* input)
 {
     int length = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
