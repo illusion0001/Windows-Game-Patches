@@ -173,6 +173,9 @@ static void HookStartupFunc()
     // Go from our thunk
     const uint8_t* pWerSetFlags = (uint8_t*)WerSetFlags;
     printf_s("WerSetFlags: 0x%p\n", pWerSetFlags);
+    // Wine has this export
+    const HMODULE kbase = GetModuleHandle(L"kernelbase.dll");
+    const uintptr_t kbase_WerSetFlags = (uintptr_t)GetProcAddress(kbase, "WerSetFlags");
     if (pWerSetFlags[0] == 0xff && pWerSetFlags[1] == 0x25)
     {
         // To kernel32 thunk
@@ -191,11 +194,10 @@ static void HookStartupFunc()
                 }
             }
         }
-        // Wine module, uses long jump thunk
-        else if (pWerSetFlags2[0][0] == 0xff && pWerSetFlags2[0][1] == 0x25)
+        // Wine module
+        else if (kbase_WerSetFlags)
         {
-            const uintptr_t* pWINE = (uintptr_t*)ReadLEA32((uintptr_t)pWerSetFlags2[0], L"WINE_WerSetFlags_Followed_Original", 0, 2, 6);
-            WerSetFlags_Followed_Original.addr = *pWINE;
+            WerSetFlags_Followed_Original.addr = kbase_WerSetFlags;
             Memory::DetourFunction64((uintptr_t)pWerSetFlags2[0], (uintptr_t)&WerSetFlags_Hook, 14);
         }
         else
