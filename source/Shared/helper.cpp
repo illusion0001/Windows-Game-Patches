@@ -76,8 +76,33 @@ void ShowPatchInfo(size_t Patch_Size, uint64_t Patch_Addr, const wchar_t* Patch_
 
 void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern)
 {
-    LOG(L"%s Pattern Scan Failed. Please adjust your scan patterns and try again\n", Patch_Name);
-    LOG(L"Pattern %s\n", Patch_Pattern);
+    LOG(L"\"%s\" Pattern Scan Failed. Please adjust your scan patterns and try again\n", Patch_Name);
+    LOG(L"Pattern \"%s\"\n", Patch_Pattern);
+#ifndef _DEBUG
+    wchar_t msg[8 * 1024]{};
+    _snwprintf_s(msg, _countof(msg), _TRUNCATE, L""
+                 "Pattern scan for \"%s\" failed.\n"
+                 "Has game been updated?\n"
+                 "Pattern: \"%s\"\n\n"
+                 "Do you want to continue? (Not recommended)", Patch_Name, Patch_Pattern);
+    // `MB_DEFBUTTON2` to select `"No"` on Open
+    switch (MessageBox(0, msg, _PROJECT_NAME, (MB_DEFBUTTON2 | MB_YESNO | MB_ICONERROR)))
+    {
+        case IDNO:
+        {
+            ExitProcess(0);
+            break;
+        }
+        case IDYES:
+        {
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+#endif
 }
 
 uintptr_t WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
