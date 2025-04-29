@@ -74,10 +74,14 @@ void ShowPatchInfo(size_t Patch_Size, uint64_t Patch_Addr, const wchar_t* Patch_
         LOG(L"Patch Function Target: 0x%016llx\n", Patch_Function_Target);
 }
 
-void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern)
+void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern, const bool FailedQuiet)
 {
     LOG(L"\"%s\" Pattern Scan Failed. Please adjust your scan patterns and try again\n", Patch_Name);
     LOG(L"Pattern \"%s\"\n", Patch_Pattern);
+    if (FailedQuiet)
+    {
+        return;
+    }
 #ifndef _DEBUG
     wchar_t msg[8 * 1024]{};
     _snwprintf_s(msg, _countof(msg), _TRUNCATE, L""
@@ -105,7 +109,7 @@ void LogPatchFailed(const wchar_t* Patch_Name, const wchar_t* Patch_Pattern)
 #endif
 }
 
-uintptr_t WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset)
+uintptr_t WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* Patch_Bytes, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset, const bool FailedQuiet)
 {
     uint8_t* Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
     uintptr_t Patch_Address = 0;
@@ -118,13 +122,13 @@ uintptr_t WritePatchPattern(const wchar_t* Patch_Pattern, const unsigned char* P
     }
     else
     {
-        LogPatchFailed(Patch_Name, Patch_Pattern);
+        LogPatchFailed(Patch_Name, Patch_Pattern, FailedQuiet);
         return 0;
     }
     return 0;
 }
 
-void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset, void* Function_Target, uint64_t* Return_Address)
+void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, const wchar_t* Patch_Name, uint64_t Patch_Offset, void* Function_Target, uint64_t* Return_Address, const bool FailedQuiet)
 {
     uint8_t* Address_Result = nullptr;
     Address_Result = Memory::PatternScanW(baseModule, Patch_Pattern);
@@ -151,7 +155,7 @@ void WritePatchPattern_Hook(const wchar_t* Patch_Pattern, size_t Patch_Size, con
     }
     else
     {
-        LogPatchFailed(Patch_Name, Patch_Pattern);
+        LogPatchFailed(Patch_Name, Patch_Pattern, FailedQuiet);
     }
 }
 
@@ -243,7 +247,7 @@ wchar_t* ConvertToWideChar(const char* input)
     return output;
 }
 
-uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset)
+uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset, const bool FailedQuiet)
 {
     size_t Address_Result = (size_t)Memory::PatternScanW(Module, Patch_Pattern);
     size_t Patch_Address = 0;
@@ -263,14 +267,14 @@ uintptr_t FindAndPrintPatternW(const HMODULE Module, const wchar_t* Patch_Patter
     }
     else
     {
-        LogPatchFailed(Pattern_Name, Patch_Pattern);
+        LogPatchFailed(Pattern_Name, Patch_Pattern, FailedQuiet);
     }
     return 0;
 }
 
-uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset)
+uintptr_t FindAndPrintPatternW(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset, const bool FailedQuiet)
 {
-    return FindAndPrintPatternW(baseModule, Patch_Pattern, Pattern_Name, offset);
+    return FindAndPrintPatternW(baseModule, Patch_Pattern, Pattern_Name, offset, FailedQuiet);
 }
 
 #define INT3PATTERN_OFFSET 1
@@ -349,7 +353,7 @@ void Make64Hook(void* source_target, void* target_jmp, uint32_t source_size, con
     LOG(L"Created jump %s (0x%016llx) to %s (0x%016llx)\n", source_name, (uintptr_t)source_target, target_jmp_name, (uintptr_t)target_jmp);
 }
 
-uintptr_t ReadLEA32(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset, size_t lea_size, size_t lea_opcode_size)
+uintptr_t ReadLEA32(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, size_t offset, size_t lea_size, size_t lea_opcode_size, const bool FailedQuiet)
 {
     uintptr_t Address_Result = (uintptr_t)Memory::PatternScanW(baseModule, Patch_Pattern);
     uintptr_t Patch_Address = 0;
@@ -374,7 +378,7 @@ uintptr_t ReadLEA32(const wchar_t* Patch_Pattern, const wchar_t* Pattern_Name, s
     }
     else
     {
-        LogPatchFailed(Pattern_Name, Patch_Pattern);
+        LogPatchFailed(Pattern_Name, Patch_Pattern, FailedQuiet);
     }
     return 0;
 }
