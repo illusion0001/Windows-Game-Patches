@@ -257,6 +257,20 @@ WINEDLLOVERRIDES="dsound=n,b" %command% -nobattleye
 </details>
 <details><summary>
 
+### Indiana Jones and the Great Circle
+</summary>
+
+  - Disable TAA
+
+#### Installation
+
+- **Note:** ***Please make sure any executable hex edits are removed/reverted first***.
+  - Extract the following contents of the release zip into the game folder. (`The Great Circle\`).
+  - Rename `dinput8.dll` from folder `!ASI_Loader_x64` to `winmm.dll` and copy to game folder.
+  - `TheGreatCircle.NoTAA.asi`
+</details>
+<details><summary>
+
 ### Lies of P Demo
 </summary>
 
